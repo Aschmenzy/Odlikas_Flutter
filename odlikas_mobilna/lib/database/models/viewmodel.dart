@@ -23,14 +23,14 @@ class HomePageViewModel extends ChangeNotifier {
   List<EvaluationElement>? get evaluationElements => _evaluationElements;
   String? get finalGrade => _finalGrade;
 
-  Future<void> fetchStudentProfile(String email, String password) async {
+  Future fetchStudentProfile(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       final data = await _apiService.fetchStudentProfile(email, password);
       _studentProfile = data;
-      print(_studentProfile);
+      return _studentProfile;
     } catch (e) {
       // Handle error (e.g., show a snackbar or log the error)
       print("Error fetching student profile: $e");
