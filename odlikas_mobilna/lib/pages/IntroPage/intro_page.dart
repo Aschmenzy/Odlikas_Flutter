@@ -23,7 +23,7 @@ class _IntroPageState extends State<IntroPage> {
           children: [
             Image.asset(
               'assets/images/globe.png',
-              width: MediaQuery.of(context).size.width * 0.85,
+              width: MediaQuery.of(context).size.width * 1,
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.08),
             Text(
@@ -31,7 +31,7 @@ class _IntroPageState extends State<IntroPage> {
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 36,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w800,
                 height: 1.1,
               ),
             ),
@@ -44,7 +44,7 @@ class _IntroPageState extends State<IntroPage> {
                 "Aliquam sed leo in metus placerat scelerisque.",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                  fontSize: 14,
+                  fontSize: MediaQuery.of(context).size.width * 0.035,
                   fontWeight: FontWeight.w800,
                   color: AppColors.tertiary,
                 ),
@@ -53,7 +53,7 @@ class _IntroPageState extends State<IntroPage> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.04),
             MyButton(
               fontSize: 24,
-              buttonText: "PRIJAVI SE",
+              buttonText: "NASTAVI",
               ontap: () {
                 Navigator.replace(
                   context,
