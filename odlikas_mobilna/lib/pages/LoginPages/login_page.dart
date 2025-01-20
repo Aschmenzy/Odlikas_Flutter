@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/student_profile.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/preferences_page.dart';
@@ -14,6 +15,9 @@ import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 Future<StudentProfile?> handleLogin(
     BuildContext context, String email, String password) async {
   final _homeViewModel = HomePageViewModel(ApiService());
+
+  //open local storage to have the user email
+  final box = await Hive.openBox('User');
 
   try {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -87,12 +91,12 @@ Future<StudentProfile?> handleLogin(
           },
         );
         profile = null;
-        break; // Exit the loop after showing the dialog
+        break;
       }
     }
 
     if (profile != null) {
-      // Save in the same format as your fromJson expects
+      // Save in the same format fromJson expects
       Map<String, dynamic> profileData = {
         'studentProfile': {
           'studentSchool': profile.studentSchool,
@@ -104,7 +108,8 @@ Future<StudentProfile?> handleLogin(
           'classMaster': profile.classMaster,
         }
       };
-
+      await box.put('email', email);
+      await box.put('password', password);
       await docRef.set(profileData);
       Navigator.replace(
         context,

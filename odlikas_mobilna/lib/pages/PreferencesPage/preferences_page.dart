@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
+import 'Widgets/numberSelector.dart';
 
 class PreferencesPage extends StatefulWidget {
   const PreferencesPage({super.key});
@@ -11,55 +14,94 @@ class PreferencesPage extends StatefulWidget {
   State<PreferencesPage> createState() => _PreferencesPageState();
 }
 
-class _PreferencesPageState extends State<PreferencesPage> {
-  int selectedDaysPerWeek = 1;
-  int selectedHoursPerDay = 1;
+//acces to the local storage
 
-  Widget _buildNumberSelector({
-    required List<int> numbers,
-    required int selectedValue,
-    required Function(int) onSelect,
-  }) {
-    return Container(
-      height: 50,
-      child: Row(
-        children: numbers.asMap().entries.map((entry) {
-          final index = entry.key;
-          final number = entry.value;
-          final isSelected = number <= selectedValue;
-          final isFirst = index == 0;
-          final isLast = index == numbers.length - 1;
+Future<void> savePreferences(BuildContext context, int selectedDaysPerWeek,
+    int selectedHoursPerDay) async {
+  try {
+    // Open the box first
+    final box = await Hive.openBox('User');
+    var email = box.get("email"); // Now use this box instance
 
-          return GestureDetector(
-            onTap: () {
-              onSelect(number);
-            },
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              width: MediaQuery.of(context).size.width * 0.128,
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.blue : Colors.grey[200],
-                borderRadius: BorderRadius.horizontal(
-                  left: isFirst ? Radius.circular(15) : Radius.zero,
-                  right: isLast ? Radius.circular(15) : Radius.zero,
+    final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    final DocumentReference docRef =
+        firestore.collection('studentProfiles').doc(email);
+
+    await docRef.set({
+      'preferences': {
+        'daysLearning': selectedDaysPerWeek,
+        'hoursLearning': selectedHoursPerDay
+      }
+    }, SetOptions(merge: true));
+
+    //navigate to the home page
+    Navigator.replace(
+      context,
+      oldRoute: ModalRoute.of(context)!,
+      newRoute: MaterialPageRoute(builder: (context) => HomePage()),
+    );
+  } catch (e) {
+    print('Error saving learning metrics: $e');
+
+    // Add error dialog
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 48,
                 ),
-              ),
-              child: Center(
-                child: Text(
-                  number.toString(),
+                const SizedBox(height: 16),
+                const Text(
+                  'Error',
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                    fontSize: 26,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Failed to save preferences. Please try again.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 36),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
             ),
-          );
-        }).toList(),
-      ),
+          ),
+        );
+      },
     );
   }
+}
+
+class _PreferencesPageState extends State<PreferencesPage> {
+  int selectedDaysPerWeek = 1;
+  int selectedHoursPerDay = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +139,8 @@ class _PreferencesPageState extends State<PreferencesPage> {
               ),
             ),
             SizedBox(height: 10),
-            _buildNumberSelector(
+            buildNumberSelector(
+              context: context,
               numbers: [1, 2, 3, 4, 5, 6, 7],
               selectedValue: selectedDaysPerWeek,
               onSelect: (value) {
@@ -115,7 +158,8 @@ class _PreferencesPageState extends State<PreferencesPage> {
               ),
             ),
             SizedBox(height: 10),
-            _buildNumberSelector(
+            buildNumberSelector(
+              context: context,
               numbers: [1, 2, 3, 4],
               selectedValue: selectedHoursPerDay,
               onSelect: (value) {
@@ -129,11 +173,8 @@ class _PreferencesPageState extends State<PreferencesPage> {
               fontSize: 24,
               buttonText: "NASTAVI",
               ontap: () {
-                Navigator.replace(
-                  context,
-                  oldRoute: ModalRoute.of(context)!,
-                  newRoute: MaterialPageRoute(builder: (context) => HomePage()),
-                );
+                savePreferences(
+                    context, selectedDaysPerWeek, selectedHoursPerDay);
               },
               height: MediaQuery.of(context).size.width * 0.175,
               width: MediaQuery.of(context).size.width * 1,
