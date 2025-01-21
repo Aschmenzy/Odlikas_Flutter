@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class JobsPage extends StatelessWidget {
+  const JobsPage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text('Home Page'),
+        child: Text('Jobs Page'),
       ),
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: 0,
+        currentIndex: 1,
       ),
     );
   }
