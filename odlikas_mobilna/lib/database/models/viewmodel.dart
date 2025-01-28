@@ -15,6 +15,7 @@ class HomePageViewModel extends ChangeNotifier {
   List<MonthlyGrades>? _subjectGrades;
   List<EvaluationElement>? _evaluationElements;
   String? _finalGrade;
+  String? _error;
 
   bool get isLoading => _isLoading;
   StudentProfile? get studentProfile => _studentProfile;
@@ -22,7 +23,25 @@ class HomePageViewModel extends ChangeNotifier {
   List<MonthlyGrades>? get subjectGrades => _subjectGrades;
   List<EvaluationElement>? get evaluationElements => _evaluationElements;
   String? get finalGrade => _finalGrade;
+  String? get error => _error;
 
+  Future fetchGrades(String email, String password) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _apiService.fetchGrades(email, password);
+      _grades = data;
+      return _grades;
+    } catch (e) {
+      print("Error fetching grades: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Your other existing methods remain the same
   Future fetchStudentProfile(String email, String password) async {
     _isLoading = true;
     notifyListeners();
@@ -32,23 +51,8 @@ class HomePageViewModel extends ChangeNotifier {
       _studentProfile = data;
       return _studentProfile;
     } catch (e) {
-      // Handle error (e.g., show a snackbar or log the error)
       print("Error fetching student profile: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> fetchGrades(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final data = await _apiService.fetchGrades(email, password);
-      _grades = data;
-    } catch (e) {
-      print("Error fetching grades: $e");
+      _error = e.toString();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -64,12 +68,13 @@ class HomePageViewModel extends ChangeNotifier {
       final data = await _apiService.fetchSpecificSubjectDetails(
           email, password, subjectId);
       _subjectGrades = data.monthlyGrades;
-      _evaluationElements = data.evaluationElements; // Set evaluation elements
-      _finalGrade = data.finalGrade; // Set final grade
+      _evaluationElements = data.evaluationElements;
+      _finalGrade = data.finalGrade;
     } catch (e) {
       print("Error fetching specific subject grades: $e");
-      _subjectGrades = null; // Clear on error
-      _evaluationElements = null; // Clear on error
+      _error = e.toString();
+      _subjectGrades = null;
+      _evaluationElements = null;
     } finally {
       _isLoading = false;
       notifyListeners();

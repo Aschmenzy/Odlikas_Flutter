@@ -41,6 +41,7 @@ dependencies:
   http: ^1.2.2
   hive_flutter: ^1.1.0
   ionicons: ^0.2.2
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
