@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ionicons/ionicons.dart';
+
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class SettingsTile extends StatelessWidget {
   final bool? isLast;
   final String label;
-  final IconData icon;
+  final String path;
 
   const SettingsTile(
-      {super.key, required this.label, required this.icon, this.isLast});
+      {super.key, required this.label, this.isLast, required this.path});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +17,9 @@ class SettingsTile extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              icon,
-              size: 36,
+            Image.asset(
+              path,
+              height: MediaQuery.of(context).size.width * 0.09,
             ),
             SizedBox(width: MediaQuery.of(context).size.width * 0.03),
             Text(label,

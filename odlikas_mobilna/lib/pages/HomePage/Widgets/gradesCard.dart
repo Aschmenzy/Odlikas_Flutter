@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'dart:math';
 import 'package:odlikas_mobilna/database/models/grades.dart';
+import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
 
 class GradesCard extends StatelessWidget {
   final List<Subject> subjects;
@@ -15,82 +16,90 @@ class GradesCard extends StatelessWidget {
     double averageGrade = calculateAverageGrade(subjects);
     Map<String, double> gradePercentages = calculateGradePercentages(subjects);
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SubjectsPage(),
+        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'OCJENE',
-            style: TextStyle(
-              height: 1.1,
-              color: AppColors.background,
-              fontSize: 24,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildGradeLabel(
-                      'Odličan',
-                      '${(gradePercentages['5.0'] ?? 0).toStringAsFixed(0)}%',
-                    ),
-                    _buildGradeLabel(
-                      'Vrlo dobar',
-                      '${(gradePercentages['4.0'] ?? 0).toStringAsFixed(0)}%',
-                    ),
-                    _buildGradeLabel(
-                      'Dobar',
-                      '${(gradePercentages['3.0'] ?? 0).toStringAsFixed(0)}%',
-                    ),
-                    _buildGradeLabel(
-                      'Dovoljan',
-                      '${(gradePercentages['2.0'] ?? 0).toStringAsFixed(0)}%',
-                    ),
-                    _buildGradeLabel('Nedovoljan',
-                        '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%'),
-                  ],
-                ),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'OCJENE',
+              style: TextStyle(
+                height: 1.1,
+                color: AppColors.background,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
               ),
-              Expanded(
-                child: SizedBox(
-                  height: 120,
-                  child: Stack(
-                    alignment: Alignment.center,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomPaint(
-                        size: const Size(120, 120),
-                        painter: GradesCardPainter(subjects,
-                            xOffset), // Pass the offset to the painter
+                      _buildGradeLabel(
+                        'Odličan',
+                        '${(gradePercentages['5.0'] ?? 0).toStringAsFixed(0)}%',
                       ),
-                      Transform.translate(
-                        offset: Offset(-((180 / xOffset) - 120 / 2), 0),
-                        child: Text(
-                          averageGrade.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                      _buildGradeLabel(
+                        'Vrlo dobar',
+                        '${(gradePercentages['4.0'] ?? 0).toStringAsFixed(0)}%',
                       ),
+                      _buildGradeLabel(
+                        'Dobar',
+                        '${(gradePercentages['3.0'] ?? 0).toStringAsFixed(0)}%',
+                      ),
+                      _buildGradeLabel(
+                        'Dovoljan',
+                        '${(gradePercentages['2.0'] ?? 0).toStringAsFixed(0)}%',
+                      ),
+                      _buildGradeLabel('Nedovoljan',
+                          '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%'),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Expanded(
+                  child: SizedBox(
+                    height: 120,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(120, 120),
+                          painter: GradesCardPainter(subjects,
+                              xOffset), // Pass the offset to the painter
+                        ),
+                        Transform.translate(
+                          offset: Offset(-((180 / xOffset) - 120 / 2), 0),
+                          child: Text(
+                            averageGrade.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

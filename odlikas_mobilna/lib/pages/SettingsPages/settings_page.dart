@@ -53,6 +53,7 @@ class SettingsPage extends StatelessWidget {
                   children: [
                     Text(
                       "antonio.kocijan@skole.hr",
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                           fontSize: MediaQuery.of(context).size.width * 0.045,
                           fontWeight: FontWeight.w400),
@@ -105,19 +106,23 @@ class SettingsPage extends StatelessWidget {
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
             SettingsTile(
-                label: "Obavjesti", icon: Ionicons.notifications_outline),
+              label: "Obavjesti",
+              path: "assets/images/notification.png",
+            ),
 
             SettingsTile(
-                label: "Dislekcijski tekst",
-                icon: Ionicons.notifications_outline),
+              label: "Dislekcijski tekst",
+              path: "assets/images/dyslexia.png",
+            ),
             SettingsTile(
-                label: "Obavjesti", icon: Ionicons.notifications_outline),
+              label: "Upisivanje rasporeda",
+              path: "assets/images/board.png",
+            ),
             SettingsTile(
-                label: "Obavjesti", icon: Ionicons.notifications_outline),
-            SettingsTile(
-                isLast: true,
-                label: "Obavjesti",
-                icon: Ionicons.notifications_outline),
+              isLast: true,
+              label: "Mijenjane učenja",
+              path: "assets/images/schedule.png",
+            ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.023),
 
@@ -132,12 +137,19 @@ class SettingsPage extends StatelessWidget {
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
 
             SettingsTile(
-                label: "Opis ODLIKAŠA", icon: Ionicons.help_circle_outline),
+              label: "Opis ODLIKAŠA",
+              path: "assets/images/board.png",
+            ),
 
             SettingsTile(
-                label: "Centar za podršku", icon: Ionicons.help_circle_outline),
+              label: "Centar za podršku",
+              path: "assets/images/board.png",
+            ),
 
-            SettingsTile(label: "Kritike", icon: Ionicons.thumbs_down),
+            SettingsTile(
+              label: "Kritike",
+              path: "assets/images/board.png",
+            ),
           ],
         ),
       )),
