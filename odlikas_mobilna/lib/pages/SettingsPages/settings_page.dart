@@ -3,9 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
+import 'package:odlikas_mobilna/pages/PreferencesPage/preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/connect_screen.dart';
+import 'package:odlikas_mobilna/pages/SettingsPages/profile_page.dart';
+import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -41,39 +44,45 @@ class SettingsPage extends StatelessWidget {
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
             //profile settings
-            Row(
-              children: [
-                Image(
-                    image: AssetImage("assets/images/profile.png"),
-                    width: MediaQuery.of(context).size.width * 0.16),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.03),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "antonio.kocijan@skole.hr",
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width * 0.045,
-                          fontWeight: FontWeight.w400),
-                    ),
-                    Text(
-                      'Pokaži profil',
-                      style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width * 0.04,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.tertiary),
-                    ),
-                  ],
-                ),
-                SizedBox(width: MediaQuery.of(context).size.width * 0.04),
-                Icon(
-                  Ionicons.chevron_forward_outline,
-                  color: AppColors.accent,
-                  size: MediaQuery.of(context).size.width * 0.06,
-                )
-              ],
+            GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              ),
+              child: Row(
+                children: [
+                  Image(
+                      image: AssetImage("assets/images/profile.png"),
+                      width: MediaQuery.of(context).size.width * 0.16),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "antonio.kocijan@skole.hr",
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                            fontSize: MediaQuery.of(context).size.width * 0.045,
+                            fontWeight: FontWeight.w400),
+                      ),
+                      Text(
+                        'Pokaži profil',
+                        style: GoogleFonts.inter(
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.tertiary),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: MediaQuery.of(context).size.width * 0.04),
+                  Icon(
+                    Ionicons.chevron_forward_outline,
+                    color: AppColors.accent,
+                    size: MediaQuery.of(context).size.width * 0.06,
+                  )
+                ],
+              ),
             ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.012),
@@ -115,13 +124,25 @@ class SettingsPage extends StatelessWidget {
               path: "assets/images/dyslexia.png",
             ),
             SettingsTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SchedulePage()),
+              ),
               label: "Upisivanje rasporeda",
               path: "assets/images/board.png",
             ),
             SettingsTile(
-              isLast: true,
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PreferencesPage()),
+              ),
               label: "Mijenjane učenja",
               path: "assets/images/schedule.png",
+            ),
+            SettingsTile(
+              isLast: true,
+              label: "Odredbe i uvjeti",
+              path: "assets/images/lawBook.png",
             ),
 
             SizedBox(height: MediaQuery.of(context).size.height * 0.023),
@@ -143,12 +164,12 @@ class SettingsPage extends StatelessWidget {
 
             SettingsTile(
               label: "Centar za podršku",
-              path: "assets/images/board.png",
+              path: "assets/images/help.png",
             ),
 
             SettingsTile(
               label: "Kritike",
-              path: "assets/images/board.png",
+              path: "assets/images/thumbs.png",
             ),
           ],
         ),

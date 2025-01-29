@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/SubjectsPage/Widgets/gradesTile.dart';
@@ -35,7 +36,12 @@ class _SubjectsPageState extends State<SubjectsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: viewModel.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Lottie.asset(
+              'assets/animations/loadingBird.json',
+              width: MediaQuery.of(context).size.width * 0.80,
+              height: 120,
+            ))
           : Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: CustomScrollView(

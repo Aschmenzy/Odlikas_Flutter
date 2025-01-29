@@ -7,6 +7,7 @@ import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,11 +70,20 @@ class _HomePageState extends State<HomePage> {
                           const SizedBox(width: 16),
                       itemBuilder: (context, index) {
                         return index == 0
-                            ? SizedBox(
-                                width: 325,
-                                child: GradesCard(
-                                    subjects: viewModel.grades?.subjects ?? []),
-                              )
+                            ? viewModel.isLoading
+                                ? Center(
+                                    child: Lottie.asset(
+                                    'assets/animations/loadingBird.json',
+                                    width: MediaQuery.of(context).size.width *
+                                        0.80,
+                                    height: 120,
+                                  ))
+                                : SizedBox(
+                                    width: 325,
+                                    child: GradesCard(
+                                        subjects:
+                                            viewModel.grades?.subjects ?? []),
+                                  )
                             : SizedBox(
                                 width: 300,
                                 child: Container(

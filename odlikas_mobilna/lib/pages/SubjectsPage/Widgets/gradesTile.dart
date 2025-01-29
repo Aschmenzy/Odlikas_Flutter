@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/pages/SettingsPages/settings_page.dart';
+import 'package:odlikas_mobilna/pages/SpecificSubjectPage/secific_subject_page.dart';
 
 class GradeTile extends StatelessWidget {
   final String subjectName;
@@ -26,7 +26,9 @@ class GradeTile extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const SettingsPage(),
+            builder: (context) => SubjectDetailsPage(
+              subjectId: subjectId,
+            ),
           ),
         );
       },
