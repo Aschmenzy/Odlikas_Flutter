@@ -110,6 +110,9 @@ Future<StudentProfile?> handleLogin(
       };
       await box.put('email', email);
       await box.put('password', password);
+      await box.put('studentName', profile?.studentName);
+      await box.put('studentSchool', profile?.studentSchool);
+      await box.put('studentProgram', profile?.studentProgram);
       await docRef.set(profileData, SetOptions(merge: true));
       Navigator.replace(
         context,

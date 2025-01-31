@@ -1,17 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
-import 'package:odlikas_mobilna/pages/PreferencesPage/preferences_page.dart';
+
+import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/connect_screen.dart';
-import 'package:odlikas_mobilna/pages/SettingsPages/profile_page.dart';
+import 'package:odlikas_mobilna/pages/ProfilePage/profile_page.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
+import 'package:odlikas_mobilna/pages/TermsAndConditionsPage/terms_and_conditions_page.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String? email;
+  String? studentSchool;
+  String? studentProgram;
+
+//getting user data from local storage
+  Future<void> _fetchProfile() async {
+    final box = await Hive.openBox('User');
+    setState(() {
+      // Assign values to class variables
+      email = box.get('email');
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfile();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +87,7 @@ class SettingsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "antonio.kocijan@skole.hr",
+                        "$email",
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
                             fontSize: MediaQuery.of(context).size.width * 0.045,
@@ -134,12 +161,18 @@ class SettingsPage extends StatelessWidget {
             SettingsTile(
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PreferencesPage()),
+                MaterialPageRoute(
+                    builder: (context) => UpdatePreferencesPage()),
               ),
               label: "Mijenjane učenja",
               path: "assets/images/schedule.png",
             ),
             SettingsTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TermsAndConditionsPage()),
+              ),
               isLast: true,
               label: "Odredbe i uvjeti",
               path: "assets/images/lawBook.png",
@@ -168,6 +201,7 @@ class SettingsPage extends StatelessWidget {
             ),
 
             SettingsTile(
+              isLast: true,
               label: "Kritike",
               path: "assets/images/thumbs.png",
             ),

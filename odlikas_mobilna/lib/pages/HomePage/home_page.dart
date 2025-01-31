@@ -39,66 +39,66 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              Text(
-                "Dobro došao \nAntonio",
-                style: GoogleFonts.inter(
-                  height: 1.1,
-                  fontSize: MediaQuery.of(context).size.width * 0.06,
-                  fontWeight: FontWeight.w700,
-                  color: const Color.fromARGB(255, 0, 0, 0),
-                ),
+      body: viewModel.isLoading
+          ? Center(
+              child: Lottie.asset(
+                'assets/animations/loadingBird.json',
+                width: MediaQuery.of(context).size.width * 0.80,
+                height: 120,
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+            )
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      "Dobro došao \nAntonio",
+                      style: GoogleFonts.inter(
+                        height: 1.1,
+                        fontSize: MediaQuery.of(context).size.width * 0.06,
+                        fontWeight: FontWeight.w700,
+                        color: const Color.fromARGB(255, 0, 0, 0),
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-              // Debug container to see the space
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return SizedBox(
-                    width: constraints.maxWidth,
-                    height: 220,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 2,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        return index == 0
-                            ? viewModel.isLoading
-                                ? Center(
-                                    child: Lottie.asset(
-                                    'assets/animations/loadingBird.json',
-                                    width: MediaQuery.of(context).size.width *
-                                        0.80,
-                                    height: 120,
-                                  ))
-                                : SizedBox(
-                                    width: 325,
-                                    child: GradesCard(
-                                        subjects:
-                                            viewModel.grades?.subjects ?? []),
-                                  )
-                            : SizedBox(
-                                width: 300,
-                                child: Container(
-                                  color: Colors.black,
-                                ), // Replace with your new widget
-                              );
+                    // Debug container to see the space
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SizedBox(
+                          width: constraints.maxWidth,
+                          height: 220,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: 2,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              return index == 0
+                                  ? SizedBox(
+                                      width: 325,
+                                      child: GradesCard(
+                                          subjects:
+                                              viewModel.grades?.subjects ?? []),
+                                    )
+                                  : SizedBox(
+                                      width: 300,
+                                      child: Container(
+                                        color: Colors.black,
+                                      ), // Replace with your new widget
+                                    );
+                            },
+                          ),
+                        );
                       },
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
     );
   }
