@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
@@ -25,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _description;
   String? _pdfBase64;
   bool _isUploading = false;
+  bool _isLoading = true;
 
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
@@ -50,6 +52,10 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (e) {
       print('Error fetching profile: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -208,6 +214,19 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: Lottie.asset(
+            'assets/animations/loadingBird.json',
+            width: MediaQuery.of(context).size.width * 0.80,
+            height: 120,
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
