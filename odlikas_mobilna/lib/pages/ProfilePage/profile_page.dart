@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/Widgets/descriptionModal.dart';
 
@@ -18,6 +23,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String? studentSchool;
   String? studentProgram;
   String? _description;
+  String? _pdfBase64;
+  bool _isUploading = false;
 
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
@@ -38,10 +45,11 @@ class _ProfilePageState extends State<ProfilePage> {
       if (docSnapshot.exists) {
         setState(() {
           _description = docSnapshot.data()?['description'];
+          _pdfBase64 = docSnapshot.data()?['cv'];
         });
       }
     } catch (e) {
-      print('Error fetching description: $e');
+      print('Error fetching profile: $e');
     }
   }
 
@@ -63,6 +71,108 @@ class _ProfilePageState extends State<ProfilePage> {
       }, SetOptions(merge: true));
     } catch (e) {
       print('Error saving description: $e');
+    }
+  }
+
+  Future<void> _uploadPDF() async {
+    try {
+      setState(() => _isUploading = true);
+
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+      );
+
+      if (result != null) {
+        final file = File(result.files.single.path!);
+
+        // Check file size (max 1MB)
+        final bytes = await file.readAsBytes();
+        if (bytes.length > 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('PDF mora biti manji od 1MB')),
+            );
+          }
+          return;
+        }
+
+        // Convert to base64
+        final base64PDF = base64Encode(bytes);
+
+        // Save to Firestore
+        final box = await Hive.openBox('User');
+        final email = box.get('email');
+
+        await FirebaseFirestore.instance
+            .collection('studentProfiles')
+            .doc(email)
+            .set({
+          'cv': base64PDF,
+        }, SetOptions(merge: true));
+
+        setState(() => _pdfBase64 = base64PDF);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Životopis uspješno prenesen')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Greška: $e')),
+        );
+      }
+    } finally {
+      setState(() => _isUploading = false);
+    }
+  }
+
+  void _viewPDF() async {
+    if (_pdfBase64 == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Prvo prenesite životopis')),
+      );
+      return;
+    }
+
+    try {
+      // Convert base64 back to PDF file
+      final bytes = base64Decode(_pdfBase64!);
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/cv.pdf');
+      await file.writeAsBytes(bytes);
+
+      // Show PDF viewer
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Scaffold(
+              backgroundColor: AppColors.background,
+              appBar: AppBar(
+                title: Text(
+                  'Vaš životopis',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.background,
+                  ),
+                ),
+                backgroundColor: AppColors.primary,
+              ),
+              body: SfPdfViewer.file(file),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Greška pri otvaranju PDF-a: $e')),
+        );
+      }
     }
   }
 
@@ -164,52 +274,79 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
               SizedBox(height: screenHeight * 0.03),
-              Container(
-                width: screenWidth * 0.6,
-                height: screenHeight * 0.28,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset("assets/images/upload.png",
-                        width: screenWidth * 0.3),
-                    SizedBox(height: screenHeight * 0.02),
-                    Text("Prenesi svoj životopis",
-                        style: GoogleFonts.inter(
-                          fontSize: screenWidth * 0.04,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.background,
-                        )),
-                    SizedBox(height: screenHeight * 0.002),
-                    Text(
-                      "Podržava samo pdf",
-                      style: GoogleFonts.inter(
-                        fontSize: screenWidth * 0.03,
-                        color: AppColors.background,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+
+              // PDF Upload Container
+              GestureDetector(
+                onTap: _isUploading ? null : _uploadPDF,
+                child: Container(
+                  width: screenWidth * 0.6,
+                  height: screenHeight * 0.28,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (_isUploading)
+                        CircularProgressIndicator(color: AppColors.background)
+                      else ...[
+                        Image.asset("assets/images/upload.png",
+                            width: screenWidth * 0.3),
+                        SizedBox(height: screenHeight * 0.02),
+                        _pdfBase64 != null
+                            ? Text(
+                                "Promijente životopis",
+                                style: GoogleFonts.inter(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.background,
+                                ),
+                              )
+                            : Text(
+                                "Prenesi svoj životopis",
+                                style: GoogleFonts.inter(
+                                  fontSize: screenWidth * 0.04,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.background,
+                                ),
+                              ),
+                        SizedBox(height: screenHeight * 0.002),
+                        Text(
+                          "Podržava samo pdf",
+                          style: GoogleFonts.inter(
+                            fontSize: screenWidth * 0.03,
+                            color: AppColors.background,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: screenHeight * 0.03),
-              Container(
-                width: screenWidth * 0.85,
-                height: screenHeight * 0.06,
-                decoration: BoxDecoration(
-                  color: AppColors.tertiary,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Center(
-                  child: Text(
-                    "Pogledaj životopis",
-                    style: GoogleFonts.inter(
-                      fontSize: screenWidth * 0.04,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.background,
+
+              // View PDF Container
+              GestureDetector(
+                onTap: _viewPDF,
+                child: Container(
+                  width: screenWidth * 0.85,
+                  height: screenHeight * 0.06,
+                  decoration: BoxDecoration(
+                    color: _pdfBase64 != null
+                        ? AppColors.primary
+                        : AppColors.tertiary,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Pogledaj životopis",
+                      style: GoogleFonts.inter(
+                        fontSize: screenWidth * 0.04,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.background,
+                      ),
                     ),
                   ),
                 ),
