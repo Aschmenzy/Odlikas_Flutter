@@ -55,8 +55,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      // Save the description to Firestore
-      //find the document by the email and set the description
       await FirebaseFirestore.instance
           .collection('studentProfiles')
           .doc(email)
@@ -76,13 +74,15 @@ class _ProfilePageState extends State<ProfilePage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
       context: context,
-      builder: (context) => DescriptionModal(
+      builder: (_) => DescriptionModal(
         initialValue: _description,
-        onSave: (value) {
-          setState(() {
-            _description = value;
-          });
-          _saveDescription(value);
+        onSave: (value) async {
+          await _saveDescription(value);
+          if (mounted) {
+            setState(() {
+              _description = value;
+            });
+          }
         },
       ),
     );

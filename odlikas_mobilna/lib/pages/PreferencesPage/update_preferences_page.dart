@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 import 'Widgets/numberSelector.dart';
 

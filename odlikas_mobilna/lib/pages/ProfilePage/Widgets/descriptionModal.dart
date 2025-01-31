@@ -1,11 +1,8 @@
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/utilities/custom_button.dart';
 
-class DescriptionModal extends StatelessWidget {
+class DescriptionModal extends StatefulWidget {
   final Function(String)? onSave;
   final String? initialValue;
 
@@ -16,10 +13,26 @@ class DescriptionModal extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController _controller =
-        TextEditingController(text: initialValue);
+  State<DescriptionModal> createState() => _DescriptionModalState();
+}
 
+class _DescriptionModalState extends State<DescriptionModal> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -64,16 +77,30 @@ class DescriptionModal extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            MyButton(
-                buttonText: "Spremi",
-                ontap: onSave?.call(_controller.text),
-                height: MediaQuery.of(context).size.height * 0.07,
-                width: MediaQuery.of(context).size.width,
-                decorationColor: AppColors.primary,
-                borderColor: AppColors.primary,
-                textColor: AppColors.background,
-                fontWeight: FontWeight.w700,
-                fontSize: 16)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  widget.onSave?.call(_controller.text);
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Spremi',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
