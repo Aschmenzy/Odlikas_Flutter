@@ -50,40 +50,32 @@ Future<StudentProfile?> handleLogin(
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.warning_amber_rounded,
-                      color: Colors.orange,
-                      size: 48,
-                    ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Neispravni podatci',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     Text(
-                      'Korisničko ime ili lozinka nisu ispravni. Molimo pokušajte ponovno.',
+                      'Izgleda da ste unijeli krive podatke',
                       textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                          fontSize: MediaQuery.of(context).size.width * 0.05,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.background),
                     ),
                     const SizedBox(height: 16),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        foregroundColor: Colors.white,
-                        minimumSize: const Size(double.infinity, 36),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
-                    ),
+                    MyButton(
+                        buttonText: "Pokušajte ponovno",
+                        ontap: () => Navigator.of(context).pop(),
+                        height: MediaQuery.of(context).size.height * 0.04,
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        decorationColor: AppColors.accent,
+                        borderColor: AppColors.accent,
+                        textColor: AppColors.background,
+                        fontWeight: FontWeight.w700,
+                        fontSize: MediaQuery.of(context).size.width * 0.035)
                   ],
                 ),
               ),
@@ -129,7 +121,7 @@ Future<StudentProfile?> handleLogin(
 
     // Show error dialog
     await showDialog(
-      context: context, // You'll need to pass the BuildContext to this function
+      context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Error'),
