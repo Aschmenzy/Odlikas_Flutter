@@ -25,7 +25,10 @@ class _ProfilePageState extends State<ProfilePage> {
   String? studentProgram;
   String? _description;
   String? _pdfBase64;
-  bool _isUploading = false;
+  String? _pfpBase64;
+  bool _isUploadingPDF = false;
+  bool _isUploadingPFP = false;
+
   bool _isLoading = true;
 
   Future<void> _fetchProfile() async {
@@ -48,6 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() {
           _description = docSnapshot.data()?['description'];
           _pdfBase64 = docSnapshot.data()?['cv'];
+          _pfpBase64 = docSnapshot.data()?['pfp'];
         });
       }
     } catch (e) {
@@ -82,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _uploadPDF() async {
     try {
-      setState(() => _isUploading = true);
+      setState(() => _isUploadingPDF = true);
 
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
@@ -132,7 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       }
     } finally {
-      setState(() => _isUploading = false);
+      setState(() => _isUploadingPDF = false);
     }
   }
 
@@ -179,6 +183,61 @@ class _ProfilePageState extends State<ProfilePage> {
           SnackBar(content: Text('Greška pri otvaranju PDF-a: $e')),
         );
       }
+    }
+  }
+
+  Future<void> _uploadPFP() async {
+    try {
+      setState(() => _isUploadingPFP = true);
+
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null) {
+        final file = File(result.files.single.path!);
+
+        // Check file size (max 1MB)
+        final bytes = await file.readAsBytes();
+        if (bytes.length > 1024 * 1024) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Slika mora biti manja od 1MB')),
+            );
+          }
+          return;
+        }
+
+        // Convert to base64
+        final pfpBase64 = base64Encode(bytes);
+
+        // Save to Firestore
+        final box = await Hive.openBox('User');
+        final email = box.get('email');
+
+        await FirebaseFirestore.instance
+            .collection('studentProfiles')
+            .doc(email)
+            .set({
+          'pfp': pfpBase64,
+        }, SetOptions(merge: true));
+
+        setState(() => _pfpBase64 = pfpBase64);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profilna slika uspješno prenesena')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Greška: $e')),
+        );
+      }
+    } finally {
+      setState(() => _isUploadingPFP = false);
     }
   }
 
@@ -259,11 +318,36 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
               SizedBox(height: screenHeight * 0.01),
-              Image.asset(
-                "assets/images/pfpAdd.png",
-                width: screenWidth * 0.22,
+
+              // Profile Picture upload
+              GestureDetector(
+                onTap: _uploadPFP,
+                child: Container(
+                  width: screenWidth * 0.22,
+                  height: screenWidth * 0.22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.background,
+                  ),
+                  child: _pfpBase64 != null
+                      ? ClipOval(
+                          child: Image.memory(
+                            base64Decode(_pfpBase64!),
+                            width: screenWidth * 0.22,
+                            height: screenWidth * 0.22,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          "assets/images/pfpAdd.png",
+                          width: screenWidth * 0.22,
+                        ),
+                ),
               ),
+
               SizedBox(height: screenHeight * 0.02),
+
+              // Student name
               if (studentName != null)
                 Text(
                   studentName!,
@@ -272,7 +356,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
+
               SizedBox(height: screenHeight * 0.005),
+
+              // Student School
               if (studentSchool != null)
                 Text(
                   studentSchool!,
@@ -282,7 +369,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
               SizedBox(height: screenHeight * 0.005),
+
+              // Student Program
               if (studentProgram != null)
                 Text(
                   studentProgram!,
@@ -295,8 +385,9 @@ class _ProfilePageState extends State<ProfilePage> {
               SizedBox(height: screenHeight * 0.03),
 
               // PDF Upload Container
+
               GestureDetector(
-                onTap: _isUploading ? null : _uploadPDF,
+                onTap: _isUploadingPDF ? null : _uploadPDF,
                 child: Container(
                   width: screenWidth * 0.6,
                   height: screenHeight * 0.28,
@@ -307,7 +398,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (_isUploading)
+                      if (_isUploadingPDF)
                         CircularProgressIndicator(color: AppColors.background)
                       else ...[
                         Image.asset("assets/images/upload.png",
