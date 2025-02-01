@@ -27,10 +27,18 @@ Future<Grades?> fetchGrades(BuildContext context) async {
 }
 
 class _HomePageState extends State<HomePage> {
+  String? studentName;
+
   @override
   void initState() {
     super.initState();
-    fetchGrades(context);
+    fetchGrades(context).then((_) async {
+      final box = await Hive.openBox('User');
+      var name = box.get('studentName');
+      setState(() {
+        studentName = name;
+      });
+    });
   }
 
   @override
@@ -55,7 +63,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     const SizedBox(height: 20),
                     Text(
-                      "Dobro došao \nAntonio",
+                      "Dobrodošao/la $studentName",
                       style: GoogleFonts.inter(
                         height: 1.1,
                         fontSize: MediaQuery.of(context).size.width * 0.06,

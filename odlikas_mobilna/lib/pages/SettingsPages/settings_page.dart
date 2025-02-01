@@ -8,7 +8,7 @@ import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
-import 'package:odlikas_mobilna/pages/SettingsPages/connect_screen.dart';
+import 'package:odlikas_mobilna/pages/ConnectToScreenPage/connect_screen.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/profile_page.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:odlikas_mobilna/pages/TermsAndConditionsPage/terms_and_conditions_page.dart';
@@ -24,6 +24,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String? email;
   String? studentSchool;
   String? studentProgram;
+  late bool isConnected = false;
 
 //getting user data from local storage
   Future<void> _fetchProfile() async {
@@ -31,6 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       // Assign values to class variables
       email = box.get('email');
+      isConnected = box.get('isConnected');
     });
   }
 
@@ -116,14 +118,20 @@ class _SettingsPageState extends State<SettingsPage> {
 
             //connect screen and phone
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ConnectScreen()),
-              ),
+              // da ako je connected da ne moze ici na connect screen
+              onTap: isConnected
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ConnectScreen()),
+                      );
+                    },
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 1,
+                width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.17,
-                child: ShareScreenCard(),
+                child: ShareScreenCard(isConnected: isConnected),
               ),
             ),
 
