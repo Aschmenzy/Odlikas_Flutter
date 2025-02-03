@@ -311,9 +311,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   Text(
                     "Profil",
                     style: GoogleFonts.inter(
-                      fontSize: screenWidth * 0.075,
-                      fontWeight: FontWeight.w700,
-                    ),
+                        fontSize: screenWidth * 0.075,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.secondary),
                   )
                 ],
               ),
@@ -352,9 +352,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 Text(
                   studentName!,
                   style: GoogleFonts.inter(
-                    fontSize: screenWidth * 0.05,
-                    fontWeight: FontWeight.w800,
-                  ),
+                      fontSize: screenWidth * 0.05,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.secondary),
                 ),
 
               SizedBox(height: screenHeight * 0.005),
@@ -467,9 +467,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   Text(
                     "Opis profila:",
                     style: GoogleFonts.inter(
-                      fontSize: screenWidth * 0.045,
-                      fontWeight: FontWeight.w700,
-                    ),
+                        fontSize: screenWidth * 0.045,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.secondary),
                   ),
                 ],
               ),

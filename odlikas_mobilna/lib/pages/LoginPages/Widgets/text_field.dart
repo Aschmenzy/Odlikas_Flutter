@@ -57,7 +57,7 @@ class _MyTextFieldState extends State<MyTextField> {
         ),
         labelText: widget.labelText,
         labelStyle: GoogleFonts.inter(
-          color: Colors.black,
+          color: AppColors.secondary,
           fontSize: 24.0,
           fontWeight: FontWeight.w800,
         ),

@@ -33,6 +33,7 @@ class _IntroPageState extends State<IntroPage> {
                 fontSize: 36,
                 fontWeight: FontWeight.w800,
                 height: 1.1,
+                color: AppColors.secondary,
               ),
             ),
             const SizedBox(height: 16),

@@ -1,6 +1,8 @@
 // ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/constants/constants.dart';
 
 Widget buildNumberSelector({
   required BuildContext context,
@@ -35,9 +37,9 @@ Widget buildNumberSelector({
             child: Center(
               child: Text(
                 number.toString(),
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
-                  fontSize: 26,
+                style: GoogleFonts.inter(
+                  color: isSelected ? Colors.white : AppColors.secondary,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),

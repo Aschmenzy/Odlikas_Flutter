@@ -25,10 +25,13 @@ class NonExclusiveJob extends StatelessWidget {
           children: [
             Text(jobData['recruter'],
                 style: GoogleFonts.inter(
-                    fontSize: screenWidth * 0.04, fontWeight: FontWeight.bold)),
+                    fontSize: screenWidth * 0.04,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.secondary)),
             Text(
               jobData['location'],
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+              style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w600, color: AppColors.secondary),
             ),
           ],
         ),
@@ -40,9 +43,9 @@ class NonExclusiveJob extends StatelessWidget {
         Text(
           jobData['title'],
           style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-            fontSize: screenWidth * 0.04,
-          ),
+              fontWeight: FontWeight.w600,
+              fontSize: screenWidth * 0.04,
+              color: AppColors.secondary),
         ),
         SizedBox(height: screenHeight * 0.001),
         Row(
@@ -51,12 +54,16 @@ class NonExclusiveJob extends StatelessWidget {
             Text(
               "Prosječna neto plaća ",
               style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600, fontSize: screenWidth * 0.03),
+                  fontWeight: FontWeight.w600,
+                  fontSize: screenWidth * 0.03,
+                  color: AppColors.secondary),
             ),
             Text(
               jobData['pay'],
               style: GoogleFonts.inter(
-                  fontWeight: FontWeight.bold, fontSize: screenWidth * 0.05),
+                  fontWeight: FontWeight.bold,
+                  fontSize: screenWidth * 0.05,
+                  color: AppColors.secondary),
             )
           ],
         ),

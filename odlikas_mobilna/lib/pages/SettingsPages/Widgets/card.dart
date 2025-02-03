@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class ShareScreenCard extends StatelessWidget {
@@ -29,7 +30,8 @@ class ShareScreenCard extends StatelessWidget {
                       children: [
                         Text(
                           'Povežite se',
-                          style: TextStyle(
+                          style: GoogleFonts.inter(
+                            color: AppColors.secondary,
                             fontSize: MediaQuery.of(context).size.width * 0.045,
                             fontWeight: FontWeight.w600,
                           ),
@@ -38,7 +40,7 @@ class ShareScreenCard extends StatelessWidget {
                             height: MediaQuery.of(context).size.height * 0.013),
                         Text(
                           'Povežite svoj ekran da \nzapočnete sa učenjem',
-                          style: TextStyle(
+                          style: GoogleFonts.inter(
                             fontSize: MediaQuery.of(context).size.width * 0.035,
                             color: AppColors.tertiary,
                           ),
@@ -79,6 +81,7 @@ class ShareScreenCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: MediaQuery.of(context).size.width * 0.045,
                             fontWeight: FontWeight.w600,
+                            color: AppColors.secondary,
                           ),
                         ),
                         SizedBox(

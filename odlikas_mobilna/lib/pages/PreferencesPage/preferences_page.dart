@@ -116,10 +116,10 @@ class _PreferencesPageState extends State<PreferencesPage> {
             Text(
               "Koliko vi voljeli učiti \ntjedno?",
               style: TextStyle(
-                fontSize: MediaQuery.of(context).size.width * 0.09,
-                fontWeight: FontWeight.w800,
-                height: 1.1,
-              ),
+                  fontSize: MediaQuery.of(context).size.width * 0.09,
+                  fontWeight: FontWeight.w800,
+                  height: 1.1,
+                  color: AppColors.secondary),
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.02),
             Text(
@@ -134,6 +134,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
             Text(
               "Dana u tjednu:",
               style: GoogleFonts.inter(
+                color: AppColors.secondary,
                 fontWeight: FontWeight.w800,
                 fontSize: MediaQuery.of(context).size.width * 0.05,
               ),

@@ -4,11 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/student_profile.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/preferences_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
-import 'package:odlikas_mobilna/utilities/text_field.dart';
+import 'package:odlikas_mobilna/pages/LoginPages/Widgets/text_field.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 
@@ -56,6 +57,12 @@ Future<StudentProfile?> handleLogin(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    Center(
+                      child: Lottie.asset(
+                        'assets/animations/error.json',
+                        height: MediaQuery.of(context).size.width * 0.3,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Izgleda da ste unijeli krive podatke',
@@ -177,6 +184,7 @@ class _LoginPageState extends State<LoginPage> {
                   fontSize: MediaQuery.of(context).size.width * 0.09,
                   fontWeight: FontWeight.w800,
                   height: 1.1,
+                  color: AppColors.secondary,
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.width * 0.04),

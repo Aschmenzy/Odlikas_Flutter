@@ -31,6 +31,7 @@ class SettingsTile extends StatelessWidget {
               SizedBox(width: MediaQuery.of(context).size.width * 0.03),
               Text(label,
                   style: GoogleFonts.inter(
+                      color: AppColors.secondary,
                       fontSize: MediaQuery.of(context).size.width * 0.05,
                       fontWeight: FontWeight.w600)),
             ],

@@ -63,13 +63,12 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     const SizedBox(height: 20),
                     Text(
-                      "Dobrodošao/la $studentName",
+                      "Dobrodošao/la \n$studentName",
                       style: GoogleFonts.inter(
-                        height: 1.1,
-                        fontSize: MediaQuery.of(context).size.width * 0.06,
-                        fontWeight: FontWeight.w700,
-                        color: const Color.fromARGB(255, 0, 0, 0),
-                      ),
+                          height: 1.1,
+                          fontSize: MediaQuery.of(context).size.width * 0.07,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.secondary),
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
