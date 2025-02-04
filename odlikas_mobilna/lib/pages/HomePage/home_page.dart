@@ -6,6 +6,7 @@ import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
+import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -44,7 +45,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomePageViewModel>();
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: viewModel.isLoading
@@ -77,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                       builder: (context, constraints) {
                         return SizedBox(
                           width: constraints.maxWidth,
-                          height: 220,
+                          height: screenHeight * 0.25,
                           child: ListView.separated(
                             scrollDirection: Axis.horizontal,
                             itemCount: 2,
@@ -86,22 +88,22 @@ class _HomePageState extends State<HomePage> {
                             itemBuilder: (context, index) {
                               return index == 0
                                   ? SizedBox(
-                                      width: 325,
+                                      width: screenWidth * 0.8,
                                       child: GradesCard(
                                           subjects:
                                               viewModel.grades?.subjects ?? []),
                                     )
                                   : SizedBox(
-                                      width: 300,
-                                      child: Container(
-                                        color: Colors.black,
-                                      ), // Replace with your new widget
+                                      width: screenWidth * 0.8,
+                                      child: Workingidcard(),
                                     );
                             },
                           ),
                         );
                       },
                     ),
+
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                   ],
                 ),
               ),

@@ -44,16 +44,16 @@ class EvaluationTable extends StatelessWidget {
                 ),
               ),
               children: [
-                _buildTableHeaderCell("IX"),
-                _buildTableHeaderCell("X"),
-                _buildTableHeaderCell("XI"),
-                _buildTableHeaderCell("XI"),
-                _buildTableHeaderCell("I"),
-                _buildTableHeaderCell("II"),
-                _buildTableHeaderCell("III"),
-                _buildTableHeaderCell("IV"),
-                _buildTableHeaderCell("V"),
-                _buildTableHeaderCell("VI"),
+                _buildTableHeaderCell("IX", context),
+                _buildTableHeaderCell("X", context),
+                _buildTableHeaderCell("XI", context),
+                _buildTableHeaderCell("XI", context),
+                _buildTableHeaderCell("I", context),
+                _buildTableHeaderCell("II", context),
+                _buildTableHeaderCell("III", context),
+                _buildTableHeaderCell("IV", context),
+                _buildTableHeaderCell("V", context),
+                _buildTableHeaderCell("VI", context),
               ],
             ),
           ],
@@ -74,9 +74,9 @@ class EvaluationTable extends StatelessWidget {
                   child: Text(
                     element.name,
                     style: GoogleFonts.inter(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
-                    ),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: AppColors.secondary),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -111,7 +111,7 @@ class EvaluationTable extends StatelessWidget {
     );
   }
 
-  Widget _buildTableHeaderCell(String text) {
+  Widget _buildTableHeaderCell(String text, BuildContext context) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
@@ -120,7 +120,7 @@ class EvaluationTable extends StatelessWidget {
         style: GoogleFonts.inter(
           fontWeight: FontWeight.w800,
           color: Colors.white,
-          fontSize: 16,
+          fontSize: MediaQuery.of(context).size.width * 0.04,
         ),
       ),
     );

@@ -115,7 +115,7 @@ class NotesTable extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: AppColors.secondary,
           ),
         ),
       ),

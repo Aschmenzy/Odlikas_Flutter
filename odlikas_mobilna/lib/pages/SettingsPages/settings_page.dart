@@ -67,7 +67,11 @@ class _SettingsPageState extends State<SettingsPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: Lottie.asset(" assets/animations/loadingBird.json"),
+              child: Lottie.asset(
+                "assets/animations/loadingBird.json",
+                width: MediaQuery.of(context).size.width * 0.80,
+                height: 120,
+              ),
             );
           }
 

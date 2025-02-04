@@ -53,9 +53,9 @@ class GradeTile extends StatelessWidget {
                     Text(
                       subjectName,
                       style: GoogleFonts.inter(
-                        fontSize: screenWidth * 0.045,
-                        fontWeight: FontWeight.w800,
-                      ),
+                          fontSize: screenWidth * 0.045,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.secondary),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),

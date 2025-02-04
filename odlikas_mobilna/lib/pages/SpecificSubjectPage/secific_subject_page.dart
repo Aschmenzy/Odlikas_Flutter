@@ -87,10 +87,10 @@ class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
                             Text(
                               selectedSubject.subjectName,
                               style: GoogleFonts.inter(
-                                fontSize:
-                                    MediaQuery.of(context).size.width * 0.07,
-                                fontWeight: FontWeight.bold,
-                              ),
+                                  fontSize:
+                                      MediaQuery.of(context).size.width * 0.07,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.secondary),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 10),

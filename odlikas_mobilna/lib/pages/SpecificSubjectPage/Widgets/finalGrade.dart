@@ -50,9 +50,9 @@ class ZakljucenoRow extends StatelessWidget {
                 Text(
                   'PROSJEK OCJENA: ',
                   style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: AppColors.secondary),
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -87,9 +87,9 @@ class ZakljucenoRow extends StatelessWidget {
                 Text(
                   'ZAKLJUČENO: ',
                   style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                  ),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: AppColors.secondary),
                 ),
                 const SizedBox(width: 4),
                 Text(

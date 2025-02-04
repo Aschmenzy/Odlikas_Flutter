@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -74,7 +75,8 @@ class _SubjectsPageState extends State<SubjectsPage> {
                                 child: Text(
                                   viewModel.studentProfile?.studentProgram ??
                                       "Loading...",
-                                  style: TextStyle(
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.secondary,
                                     fontSize: screenWidth * 0.05,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -86,7 +88,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
                               const SizedBox(height: 4),
                               Text(
                                 "Razrednik/ca: ${viewModel.studentProfile?.classMaster ?? ''}",
-                                style: TextStyle(
+                                style: GoogleFonts.inter(
                                   fontSize: screenWidth * 0.03,
                                   fontWeight: FontWeight.w700,
                                   color: const Color.fromRGBO(113, 113, 113, 1),
