@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
+import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
 import 'package:odlikas_mobilna/database/models/specific_subject.dart';
 import 'package:odlikas_mobilna/database/models/student_profile.dart';
 
@@ -16,6 +17,7 @@ class HomePageViewModel extends ChangeNotifier {
   List<EvaluationElement>? _evaluationElements;
   String? _finalGrade;
   String? _error;
+  ScheduleSubject? _scheduleSubject;
 
   bool get isLoading => _isLoading;
   StudentProfile? get studentProfile => _studentProfile;
@@ -24,6 +26,7 @@ class HomePageViewModel extends ChangeNotifier {
   List<EvaluationElement>? get evaluationElements => _evaluationElements;
   String? get finalGrade => _finalGrade;
   String? get error => _error;
+  ScheduleSubject? get scheduleSubject => _scheduleSubject;
 
   Future fetchGrades(String email, String password) async {
     _isLoading = true;
@@ -41,7 +44,6 @@ class HomePageViewModel extends ChangeNotifier {
     }
   }
 
-  // Your other existing methods remain the same
   Future fetchStudentProfile(String email, String password) async {
     _isLoading = true;
     notifyListeners();
@@ -79,5 +81,39 @@ class HomePageViewModel extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> fetchScheduleSubjects(String email, String password) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _apiService.fetchScheduleSubjects(email, password);
+      _scheduleSubject = data;
+    } catch (e) {
+      print("Error fetching schedule subjects: $e");
+      _error = e.toString();
+      _scheduleSubject = null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<String> getSubjectsForDay(String day) {
+    return _scheduleSubject?.schedule
+            .firstWhere((schedule) => schedule.day == day,
+                orElse: () => DaySchedule(day: day, subjects: []))
+            .subjects ??
+        [];
+  }
+
+  List<String> get allDays {
+    return _scheduleSubject?.schedule.map((s) => s.day).toList() ?? [];
+  }
+
+  bool isDayEmpty(String day) {
+    final subjects = getSubjectsForDay(day);
+    return subjects.isEmpty;
   }
 }

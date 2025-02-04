@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:odlikas_mobilna/database/models/grades.dart';
+import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
 import 'package:odlikas_mobilna/database/models/specific_subject.dart';
 import 'package:odlikas_mobilna/database/models/student_profile.dart';
 import 'package:odlikas_mobilna/database/models/tests.dart';
@@ -23,7 +24,7 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       print(data);
-      return StudentProfile.fromJson(data); //convert to StudentProfile
+      return StudentProfile.fromJson(data); // Convert to StudentProfile
     } else {
       throw Exception('Failed to fetch student profile');
     }
@@ -96,6 +97,23 @@ class ApiService {
       return Tests.fromJson(data);
     } else {
       throw Exception('Failed to fetch specific subject details');
+    }
+  }
+
+  Future<ScheduleSubject> fetchScheduleSubjects(
+      String email, String password) async {
+    var url = Uri.parse('$baseUrl/api/Scraper/ScrapeScheduleTable');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'Email': email, 'Password': password}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return ScheduleSubject.fromJson(data);
+    } else {
+      throw Exception('Failed to fetch schedule subjects');
     }
   }
 }
