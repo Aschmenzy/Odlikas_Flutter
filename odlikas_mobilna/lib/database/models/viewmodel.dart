@@ -83,6 +83,11 @@ class HomePageViewModel extends ChangeNotifier {
     }
   }
 
+  void updateSchedule(ScheduleSubject schedule) {
+    _scheduleSubject = schedule;
+    notifyListeners();
+  }
+
   Future<void> fetchScheduleSubjects(String email, String password) async {
     _isLoading = true;
     notifyListeners();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:odlikas_mobilna/pages/QueryPage/query_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 import 'dart:convert';
 
@@ -194,7 +195,10 @@ class JobDetailsPage extends StatelessWidget {
                   SizedBox(height: screenHeight * 0.03),
                   MyButton(
                       buttonText: "POŠALJI UPIT",
-                      ontap: () {},
+                      ontap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => QueryPage()));
+                      },
                       height: screenHeight * 0.07,
                       width: screenWidth,
                       decorationColor: AppColors.primary,
