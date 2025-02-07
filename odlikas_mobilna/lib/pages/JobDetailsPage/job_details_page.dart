@@ -197,7 +197,9 @@ class JobDetailsPage extends StatelessWidget {
                       buttonText: "POŠALJI UPIT",
                       ontap: () {
                         Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => QueryPage()));
+                            builder: (context) => QueryPage(
+                                  jobId: jobId,
+                                )));
                       },
                       height: screenHeight * 0.07,
                       width: screenWidth,

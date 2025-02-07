@@ -1,9 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/daySelector.dart';
+import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/subjectTitle.dart';
+import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/timeSelector.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -71,11 +77,13 @@ class _SchedulePageState extends State<SchedulePage> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.orange,
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 36,
+          ),
+          color: AppColors.accent,
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Raspored sati'),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -99,7 +107,14 @@ class _SchedulePageState extends State<SchedulePage> {
               listenable: _homeViewModel,
               builder: (context, child) {
                 if (_homeViewModel.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child: Center(
+                    child: Lottie.asset(
+                      'assets/animations/loadingBird.json',
+                      width: MediaQuery.of(context).size.width * 0.80,
+                      height: 120,
+                    ),
+                  ));
                 }
 
                 if (_homeViewModel.error != null) {
@@ -124,8 +139,10 @@ class _SchedulePageState extends State<SchedulePage> {
                     }
 
                     return SubjectTile(
-                      periodNumber: index + 1,
+                      periodNumber: index,
                       subject: subject,
+                      isFirst: index == 0,
+                      isLast: index == 8,
                     );
                   },
                 );
@@ -143,193 +160,27 @@ class ScheduleHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Padding(
       padding: EdgeInsets.all(16.0),
-      child: Text(
-        'Kliknite ✎ da promijenite raspored',
-        style: TextStyle(color: Colors.grey),
-      ),
-    );
-  }
-}
-
-class TimeSelector extends StatelessWidget {
-  final bool isMorning;
-  final ValueChanged<bool> onChanged;
-
-  const TimeSelector({
-    super.key,
-    required this.isMorning,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
+      child: Column(
         children: [
-          _TimeButton(
-            title: 'UJUTRO',
-            isSelected: isMorning,
-            onTap: () => onChanged(true),
+          Text("Raspored sati",
+              style: GoogleFonts.inter(
+                  color: AppColors.secondary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: screenWidth * 0.06)),
+          SizedBox(height: screenHeight * 0.01),
+          Text(
+            'Kliknite ✎ da promijenite raspored',
+            style: GoogleFonts.inter(
+                color: AppColors.tertiary,
+                fontWeight: FontWeight.w700,
+                fontSize: screenWidth * 0.04),
           ),
-          _TimeButton(
-            title: 'POPODNE',
-            isSelected: !isMorning,
-            onTap: () => onChanged(false),
-          ),
+          SizedBox(height: screenHeight * 0.02),
         ],
-      ),
-    );
-  }
-}
-
-class _TimeButton extends StatelessWidget {
-  final String title;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _TimeButton({
-    required this.title,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.blue : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class DaySelector extends StatelessWidget {
-  final String selectedDay;
-  final ValueChanged<String> onDaySelected;
-  final List<String> days = const ['PON', 'UTO', 'SRI', 'ČET', 'PET'];
-
-  const DaySelector({
-    super.key,
-    required this.selectedDay,
-    required this.onDaySelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: days
-            .map((day) => _DayButton(
-                  day: day,
-                  isSelected: selectedDay == day,
-                  onTap: () => onDaySelected(day),
-                ))
-            .toList(),
-      ),
-    );
-  }
-}
-
-class _DayButton extends StatelessWidget {
-  final String day;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _DayButton({
-    required this.day,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.blue : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            day.substring(0, 3),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SubjectTile extends StatelessWidget {
-  final int periodNumber;
-  final String subject;
-
-  const SubjectTile({
-    super.key,
-    required this.periodNumber,
-    required this.subject,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Colors.grey, width: 0.5),
-        ),
-      ),
-      child: ListTile(
-        leading: Container(
-          width: 60,
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          alignment: Alignment.center,
-          decoration: const BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.only(
-              topRight: Radius.circular(4),
-              bottomRight: Radius.circular(4),
-            ),
-          ),
-          child: Text(
-            '$periodNumber.sat',
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        title: Text(subject),
-        trailing: Icon(subject.isEmpty ? Icons.add : Icons.remove),
       ),
     );
   }

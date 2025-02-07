@@ -12,7 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class QueryPage extends StatefulWidget {
-  const QueryPage({super.key});
+  final String jobId;
+  const QueryPage({super.key, required this.jobId});
 
   @override
   State<QueryPage> createState() => _QueryPageState();
@@ -21,6 +22,10 @@ class QueryPage extends StatefulWidget {
 class _QueryPageState extends State<QueryPage> {
   String? _pdfBase64;
   bool _isLoading = true;
+  TextEditingController motivationLetter = TextEditingController();
+  TextEditingController questions = TextEditingController();
+  late String dquestions;
+
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
@@ -87,6 +92,61 @@ class _QueryPageState extends State<QueryPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Greška pri otvaranju PDF-a: $e')),
         );
+      }
+    }
+  }
+
+  Future<void> _handleSubmit() async {
+    // Validate CV
+    if (_pdfBase64 == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Prvo prenesite životopis')),
+      );
+      return;
+    }
+
+    // Validate motivation letter
+    if (motivationLetter.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Molimo unesite motivacijsko pismo')),
+      );
+      return;
+    }
+
+    try {
+      setState(() => _isLoading = true);
+
+      final box = await Hive.openBox('User');
+      final userEmail = box.get('email');
+
+      // Create a subcollection for this job's queries
+      await FirebaseFirestore.instance
+          .collection('Jobs')
+          .doc(widget.jobId)
+          .collection('jobQueries_$userEmail')
+          .add({
+        'cv': _pdfBase64,
+        'motivationLetter': motivationLetter.text,
+        'questions': questions.text,
+        'userEmail': userEmail,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Upit uspješno poslan')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Greška pri slanju upita: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }
@@ -211,6 +271,7 @@ class _QueryPageState extends State<QueryPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: TextField(
+                      controller: motivationLetter,
                       maxLines: null,
                       decoration: InputDecoration(
                         border: InputBorder.none,
@@ -253,6 +314,7 @@ class _QueryPageState extends State<QueryPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: TextField(
+                      controller: questions,
                       maxLines: null,
                       decoration: InputDecoration(
                         border: InputBorder.none,
@@ -276,7 +338,9 @@ class _QueryPageState extends State<QueryPage> {
                 //Submit button
                 MyButton(
                     buttonText: "POŠALJI UPIT",
-                    ontap: () {},
+                    ontap: () {
+                      _handleSubmit();
+                    },
                     height: screenHeight * 0.08,
                     width: double.infinity,
                     decorationColor: AppColors.primary,
