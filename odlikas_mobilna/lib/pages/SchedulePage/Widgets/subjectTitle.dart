@@ -5,8 +5,11 @@ import 'package:odlikas_mobilna/constants/constants.dart';
 class SubjectTile extends StatelessWidget {
   final int periodNumber;
   final String subject;
-  final bool isFirst; //
+  final bool isFirst;
   final bool isLast;
+  final bool isEditMode;
+  final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   const SubjectTile({
     super.key,
@@ -14,6 +17,9 @@ class SubjectTile extends StatelessWidget {
     required this.subject,
     required this.isFirst,
     required this.isLast,
+    required this.isEditMode,
+    required this.onAdd,
+    required this.onRemove,
   });
 
   @override
@@ -52,6 +58,15 @@ class SubjectTile extends StatelessWidget {
           fontSize: screenWidth * 0.04,
         ),
       ),
+      trailing: isEditMode
+          ? IconButton(
+              icon: Icon(
+                subject.isEmpty ? Icons.add : Icons.remove,
+                color: subject.isEmpty ? AppColors.accent : Colors.red,
+              ),
+              onPressed: subject.isEmpty ? onAdd : onRemove,
+            )
+          : null,
     );
   }
 }

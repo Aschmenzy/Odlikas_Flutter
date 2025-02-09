@@ -30,6 +30,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = Hive.box('User');
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => HomePageViewModel(ApiService())),
@@ -39,7 +41,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: const IntroPage(),
+        home: box.isEmpty ? const IntroPage() : const HomePage(),
         routes: {
           '/home': (context) => const HomePage(),
           '/jobs': (context) => const JobsPage(),
