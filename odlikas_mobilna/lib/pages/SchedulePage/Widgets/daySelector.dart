@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class DaySelector extends StatelessWidget {
@@ -46,21 +47,25 @@ class _DayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(
+            vertical: 18,
+          ),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(15),
           ),
           child: Text(
             day.substring(0, 3),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: GoogleFonts.inter(
               color: isSelected ? Colors.white : AppColors.secondary,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
+              fontSize: screenWidth * 0.045,
             ),
           ),
         ),

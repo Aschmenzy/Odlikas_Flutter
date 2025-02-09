@@ -19,37 +19,38 @@ class SubjectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Container(
-      child: ListTile(
-        leading: Container(
-          width: screenWidth * 0.25,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.only(
-              topLeft: isFirst ? Radius.circular(15) : Radius.zero,
-              bottomLeft: isLast ? Radius.circular(15) : Radius.zero,
-            ),
+    return ListTile(
+      leading: Container(
+        width: screenWidth * 0.25,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.only(
+            topLeft: isFirst ? Radius.circular(15) : Radius.zero,
+            bottomLeft: isLast ? Radius.circular(15) : Radius.zero,
           ),
-          child: Text(
-            '$periodNumber.sat',
-            style: GoogleFonts.inter(
-              color: AppColors.background,
-              fontWeight: FontWeight.w700,
-              fontSize: screenWidth * 0.05,
-            ),
+          border: Border.all(
+            color: AppColors.background,
+            width: 0.5,
           ),
         ),
-        title: Text(
-          subject,
-          overflow: TextOverflow.ellipsis,
+        child: Text(
+          '$periodNumber.sat',
           style: GoogleFonts.inter(
-            color: AppColors.secondary,
-            fontWeight: FontWeight.w600,
-            fontSize: screenWidth * 0.04,
+            color: AppColors.background,
+            fontWeight: FontWeight.w700,
+            fontSize: screenWidth * 0.05,
           ),
         ),
-        trailing: Icon(subject.isEmpty ? Icons.add : Icons.remove),
+      ),
+      title: Text(
+        subject,
+        overflow: TextOverflow.ellipsis,
+        style: GoogleFonts.inter(
+          color: AppColors.secondary,
+          fontWeight: FontWeight.w600,
+          fontSize: screenWidth * 0.04,
+        ),
       ),
     );
   }

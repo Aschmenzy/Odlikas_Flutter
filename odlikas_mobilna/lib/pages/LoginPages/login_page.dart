@@ -224,8 +224,8 @@ class _LoginPageState extends State<LoginPage> {
                 fontSize: 24,
                 buttonText: "PRIJAVI SE",
                 ontap: () {
-                  handleLogin(
-                      context, emailController.text, passwordController.text);
+                  handleLogin(context, emailController.text.toLowerCase(),
+                      passwordController.text);
                 },
                 height: MediaQuery.of(context).size.width * 0.175,
                 width: MediaQuery.of(context).size.width * 1,

@@ -6,6 +6,8 @@ import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
+import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradivoCard.dart';
+import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
@@ -65,7 +67,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     const SizedBox(height: 20),
                     Text(
-                      "Dobrodošao/la \n$studentName",
+                      "Dobrodošao/la, \n$studentName",
                       style: GoogleFonts.inter(
                           height: 1.1,
                           fontSize: MediaQuery.of(context).size.width * 0.07,
@@ -103,7 +105,20 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
 
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [ScheduleCard(), GradivoCard()],
+                    ),
+
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+
+                    Container(
+                      color: AppColors.accent,
+                      width: screenWidth,
+                      height: screenHeight * 0.15,
+                    ),
                   ],
                 ),
               ),

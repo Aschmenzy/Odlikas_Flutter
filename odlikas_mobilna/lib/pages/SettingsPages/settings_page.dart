@@ -157,12 +157,13 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                           ],
                         ),
-                        SizedBox(width: screenWidth * 0.04),
+                        Spacer(),
                         Icon(
                           Ionicons.chevron_forward_outline,
                           color: AppColors.accent,
                           size: screenWidth * 0.06,
-                        )
+                        ),
+                        SizedBox(width: screenWidth * 0.01),
                       ],
                     ),
                   ),

@@ -49,6 +49,7 @@ dependencies:
   path_provider: ^2.1.5
   syncfusion_flutter_pdfviewer: ^28.2.3
   flutter_launcher_icons: ^0.14.3
+  url_launcher: ^6.3.1
 
 flutter_launcher_icons:
   android: "launcher_icon"
@@ -80,6 +81,7 @@ flutter:
     - .env
     - assets/images/
     - assets/animations/
+    - assets/icon/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

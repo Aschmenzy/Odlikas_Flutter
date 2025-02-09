@@ -52,21 +52,28 @@ class GradesCard extends StatelessWidget {
                       _buildGradeLabel(
                         'Odličan',
                         '${(gradePercentages['5.0'] ?? 0).toStringAsFixed(0)}%',
+                        context,
                       ),
                       _buildGradeLabel(
                         'Vrlo dobar',
                         '${(gradePercentages['4.0'] ?? 0).toStringAsFixed(0)}%',
+                        context,
                       ),
                       _buildGradeLabel(
                         'Dobar',
                         '${(gradePercentages['3.0'] ?? 0).toStringAsFixed(0)}%',
+                        context,
                       ),
                       _buildGradeLabel(
                         'Dovoljan',
                         '${(gradePercentages['2.0'] ?? 0).toStringAsFixed(0)}%',
+                        context,
                       ),
-                      _buildGradeLabel('Nedovoljan',
-                          '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%'),
+                      _buildGradeLabel(
+                        'Nedovoljan',
+                        '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%',
+                        context,
+                      ),
                     ],
                   ),
                 ),
@@ -104,7 +111,8 @@ class GradesCard extends StatelessWidget {
     );
   }
 
-  Widget _buildGradeLabel(String label, String percentage) {
+  Widget _buildGradeLabel(
+      String label, String percentage, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -112,12 +120,16 @@ class GradesCard extends StatelessWidget {
           Text(
             '$label - ',
             style: GoogleFonts.inter(
-                fontSize: 16, color: Colors.white, fontWeight: FontWeight.w800),
+                fontSize: MediaQuery.of(context).size.width * 0.045,
+                color: Colors.white,
+                fontWeight: FontWeight.w700),
           ),
           Text(
             percentage,
             style: GoogleFonts.inter(
-                fontSize: 16, color: Colors.white, fontWeight: FontWeight.w800),
+                fontSize: MediaQuery.of(context).size.width * 0.045,
+                color: Colors.white,
+                fontWeight: FontWeight.w700),
           ),
         ],
       ),

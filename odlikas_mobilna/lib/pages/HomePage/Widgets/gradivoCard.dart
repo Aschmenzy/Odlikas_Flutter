@@ -1,0 +1,80 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class GradivoCard extends StatelessWidget {
+  const GradivoCard({Key? key}) : super(key: key);
+
+  Future<void> _launchURL() async {
+    final Uri url = Uri.parse('https://gradivo.hr');
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return GestureDetector(
+      onTap: _launchURL,
+      child: Card(
+          color: AppColors.background,
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: SizedBox(
+            width: screenWidth * 0.4,
+            height: screenHeight * 0.15,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  height: screenHeight * 0.08,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15.0),
+                      topRight: Radius.circular(15.0),
+                    ),
+                    color: AppColors.accent,
+                  ),
+                  child: Center(
+                      child: Text(
+                          "Jedine pripreme \nza maturu \nkoje ti trebaju!",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.inter(
+                              height: 1.2,
+                              fontSize: screenWidth * 0.038,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.background))),
+                ),
+                Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.background,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(15.0),
+                        bottomRight: Radius.circular(15.0),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/icon/gradivo.png',
+                          fit: BoxFit.contain,
+                          width: screenWidth * 0.35,
+                        ),
+                        SizedBox(height: screenHeight * 0.015),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          )),
+    );
+  }
+}
