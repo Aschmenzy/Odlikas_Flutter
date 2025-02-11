@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:odlikas_mobilna/constants/constants.dart';
 
 class PomodoroContainer extends StatefulWidget {
   final String currentPhase;
@@ -10,7 +9,6 @@ class PomodoroContainer extends StatefulWidget {
   final ValueNotifier<int> secondsNotifier;
   final VoidCallback stopTimer;
   final VoidCallback forwardTimer;
-  final Function(String) onPhaseChanged;
 
   const PomodoroContainer({
     Key? key,
@@ -21,7 +19,6 @@ class PomodoroContainer extends StatefulWidget {
     required this.startTimer,
     required this.stopTimer,
     required this.forwardTimer,
-    required this.onPhaseChanged,
   }) : super(key: key);
 
   @override
@@ -35,10 +32,10 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
     return "$minutes:$seconds";
   }
 
-  Color _getPhaseColor(String phase) {
-    switch (phase) {
+  Color _getPhaseColor() {
+    switch (widget.currentPhase) {
       case "Pomodoro":
-        return AppColors.accent;
+        return const Color.fromRGBO(236, 146, 31, 1);
       case "Kratka pauza":
         return const Color.fromRGBO(23, 148, 210, 1);
       default:
@@ -49,141 +46,136 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.width < 360;
 
     return Container(
-      width: screenSize.width * 0.95,
-      padding: EdgeInsets.symmetric(
-        vertical: screenSize.height * 0.02,
-        horizontal: screenSize.width * 0.03,
-      ),
+      width: screenSize.width * 0.9,
+      height: screenSize.height * 0.4,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: _getPhaseColor(widget.currentPhase),
+        borderRadius: BorderRadius.circular(5),
+        color: _getPhaseColor(),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Phase selector tabs
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildPhaseTab("Pomodoro", isSmallScreen, context),
-                _buildPhaseTab("Kratka pauza", isSmallScreen, context),
-                _buildPhaseTab("Duga pauza", isSmallScreen, context),
-              ],
-            ),
-          ),
+          SizedBox(height: screenSize.height * 0.015),
+          // Phase Tabs
 
-          // Timer display
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.04),
-            child: ValueListenableBuilder<int>(
-              valueListenable: widget.secondsNotifier,
-              builder: (context, secondsLeft, child) {
-                final duration = Duration(seconds: secondsLeft);
-                return Text(
-                  formatDuration(duration),
-                  style: GoogleFonts.inter(
-                    fontSize: isSmallScreen ? 72 : 96,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                );
-              },
+          _buildMobilePhaseSelector(),
+
+          // Timer Display
+          Expanded(
+            child: Center(
+              child: ValueListenableBuilder<int>(
+                valueListenable: widget.secondsNotifier,
+                builder: (context, secondsLeft, child) {
+                  final duration = Duration(seconds: secondsLeft);
+                  return Text(
+                    formatDuration(duration),
+                    style: GoogleFonts.inter(
+                      fontSize: screenSize.width * 0.22,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  );
+                },
+              ),
             ),
           ),
 
           // Controls
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Start/Stop button
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: ElevatedButton(
-                    onPressed:
-                        widget.isRunning ? widget.stopTimer : widget.startTimer,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: _getPhaseColor(widget.currentPhase),
-                      padding: EdgeInsets.symmetric(
-                        vertical: isSmallScreen ? 12 : 16,
-                      ),
-                      textStyle: TextStyle(
-                        fontSize: isSmallScreen ? 16 : 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(widget.isRunning ? "ZAUSTAVI" : "ZAPOČNI"),
-                  ),
-                ),
-              ),
-
-              // Forward button
-              IconButton(
-                onPressed: widget.forwardTimer,
-                icon: Icon(
-                  widget.isRunning
-                      ? Icons.skip_next
-                      : Icons.rotate_right_outlined,
-                  size: isSmallScreen ? 36 : 48,
-                  color: AppColors.background,
-                ),
-                padding: const EdgeInsets.all(12),
-              ),
-            ],
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 24,
+            ),
+            child: _buildControls(context),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildPhaseTab(
-      String phase, bool isSmallScreen, BuildContext context) {
-    final bool isSelected = widget.currentPhase == phase;
+  Widget _buildMobilePhaseSelector() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildPhaseTab("Pomodoro"),
+          _buildPhaseTab("Kratka pauza"),
+          _buildPhaseTab("Duga pauza"),
+        ],
+      ),
+    );
+  }
 
-    return GestureDetector(
-      onTap: () {
-        if (!isSelected && !widget.isRunning) {
-          // Only allow phase change when timer is not running
-          widget.onPhaseChanged(phase);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Card(
-          elevation: isSelected ? 4 : 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-          ),
-          color: isSelected ? _getPhaseColor(phase) : Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: isSmallScreen ? 12 : 16,
-              vertical: 8,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              color: isSelected ? _getPhaseColor(phase) : Colors.transparent,
+  Widget _buildPhaseTab(String phase) {
+    final bool isActive = widget.currentPhase == phase;
+    final Color backgroundColor =
+        isActive ? _getPhaseColor() : Colors.transparent;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: backgroundColor,
+      ),
+      child: Text(
+        phase,
+        style: GoogleFonts.inter(
+          fontSize: MediaQuery.of(context).size.width * 0.04,
+          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+          color: isActive ? Colors.white : Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControls(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: screenSize.width * 0.15,
+        ),
+
+        // Start/Stop Button
+        Expanded(
+          child: ElevatedButton(
+            onPressed: widget.isRunning ? widget.stopTimer : widget.startTimer,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: _getPhaseColor(),
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 20,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              elevation: widget.isRunning ? 0 : 5,
             ),
             child: Text(
-              phase,
+              widget.isRunning ? "ZAUSTAVI" : "ZAPOČNI",
               style: GoogleFonts.inter(
-                fontSize: isSmallScreen ? 12 : 14,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? AppColors.background : AppColors.background,
-              ),
+                  fontWeight: FontWeight.w700,
+                  fontSize: screenSize.width * 0.05),
             ),
           ),
         ),
-      ),
+
+        // Forward/Skip Button
+        IconButton(
+          onPressed: widget.forwardTimer,
+          icon: Icon(
+            widget.isRunning ? Icons.skip_next : Icons.rotate_right_outlined,
+          ),
+          iconSize: screenSize.width * 0.15,
+          color: Colors.white,
+        ),
+      ],
     );
   }
 }

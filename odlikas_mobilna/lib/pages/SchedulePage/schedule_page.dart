@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -77,17 +79,21 @@ class _SchedulePageState extends State<SchedulePage> {
       // Create a copy of the current subjects list
       List<String> updatedSubjects = List.from(selectedSchedule.subjects);
 
+      // Adjust the period number to account for 0th period
+      final adjustedPeriodNumber = periodNumber - 1;
+
       if (isRemoving) {
         // For removing, we just remove the subject at the given index
-        if (periodNumber - 1 < updatedSubjects.length) {
-          updatedSubjects.removeAt(periodNumber - 1);
+        if (adjustedPeriodNumber >= 0 &&
+            adjustedPeriodNumber < updatedSubjects.length) {
+          updatedSubjects.removeAt(adjustedPeriodNumber);
         }
       } else {
         // For adding, we might need to pad the list with empty strings
-        while (updatedSubjects.length < periodNumber) {
+        while (updatedSubjects.length < adjustedPeriodNumber + 1) {
           updatedSubjects.add('');
         }
-        updatedSubjects[periodNumber - 1] = subject;
+        updatedSubjects[adjustedPeriodNumber] = subject;
       }
 
       // Create the updated day schedule
@@ -199,7 +205,10 @@ class _SchedulePageState extends State<SchedulePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(_isEditMode ? Icons.check : Icons.edit),
+            icon: Icon(
+              _isEditMode ? Icons.check : Icons.edit,
+              size: 36,
+            ),
             color: AppColors.accent,
             onPressed: () => setState(() => _isEditMode = !_isEditMode),
           ),
@@ -247,18 +256,18 @@ class _SchedulePageState extends State<SchedulePage> {
                   itemCount: 9,
                   itemBuilder: (context, index) {
                     String subject = '';
-                    if (index < subjects.length) {
-                      subject = subjects[index];
+                    if (index - 1 < subjects.length && index - 1 >= 0) {
+                      subject = subjects[index - 1];
                     }
 
                     return SubjectTile(
-                      periodNumber: index + 1,
+                      periodNumber: index,
                       subject: subject,
                       isFirst: index == 0,
                       isLast: index == 8,
                       isEditMode: _isEditMode,
-                      onAdd: () => _showSubjectDialog(index + 1),
-                      onRemove: () => _updateSubject(index + 1, '', true),
+                      onAdd: () => _showSubjectDialog(index),
+                      onRemove: () => _updateSubject(index, '', true),
                     );
                   },
                 );

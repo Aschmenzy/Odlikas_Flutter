@@ -62,7 +62,8 @@ class SubjectTile extends StatelessWidget {
           ? IconButton(
               icon: Icon(
                 subject.isEmpty ? Icons.add : Icons.remove,
-                color: subject.isEmpty ? AppColors.accent : Colors.red,
+                color: AppColors.secondary,
+                size: screenWidth * 0.08,
               ),
               onPressed: subject.isEmpty ? onAdd : onRemove,
             )
