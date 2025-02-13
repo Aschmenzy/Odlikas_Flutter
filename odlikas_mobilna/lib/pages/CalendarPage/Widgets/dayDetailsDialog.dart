@@ -35,15 +35,19 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
       future: widget.fetchEvents(widget.date),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: Lottie.aseet('assets/animations/loadingBird.json'),
+          return Center(
+            child: Lottie.asset(
+              'assets/animations/error.json',
+              height: MediaQuery.of(context).size.width * 0.3,
+            ),
           );
         }
 
         final events = snapshot.data ?? [];
 
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           contentPadding: EdgeInsets.zero,
           content: ConstrainedBox(
             constraints: BoxConstraints(

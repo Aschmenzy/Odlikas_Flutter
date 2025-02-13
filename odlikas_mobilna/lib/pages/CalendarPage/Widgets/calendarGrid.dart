@@ -40,7 +40,7 @@ class CalendarGrid extends StatelessWidget {
           crossAxisCount: 7,
           childAspectRatio: 0.7,
         ),
-        itemCount: 42,
+        itemCount: 36,
         itemBuilder: (context, index) {
           DateTime day = _calculateDayForCell(index);
           return DayCell(
