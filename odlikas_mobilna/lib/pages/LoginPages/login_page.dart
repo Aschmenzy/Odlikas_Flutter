@@ -160,114 +160,167 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final emailController = TextEditingController();
+  bool isLoading = false;
+
+  Future<void> _handleLoginWithLoading() async {
+    if (isLoading) return; // Prevent multiple login attempts
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await handleLogin(
+        context,
+        emailController.text.toLowerCase(),
+        passwordController.text,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 20.0,
-            right: 20.0,
-            top: 50,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Prijavi se i postani \nODLIKAŠ",
-                style: GoogleFonts.inter(
-                  fontSize: MediaQuery.of(context).size.width * 0.09,
-                  fontWeight: FontWeight.w800,
-                  height: 1.1,
-                  color: AppColors.secondary,
-                ),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: 20.0,
+                right: 20.0,
+                top: 50,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              SizedBox(height: MediaQuery.of(context).size.width * 0.04),
-              Text(
-                "Bez stresa i bez brige",
-                style: GoogleFonts.inter(
-                  fontSize: MediaQuery.of(context).size.width * 0.05,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.tertiary,
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.asset(
-                    'assets/images/login.png',
-                    height: MediaQuery.of(context).size.width * 0.65,
-                  ),
-                ],
-              ),
-              SizedBox(height: MediaQuery.of(context).size.width * 0.01),
-              MyTextField(
-                controller: emailController,
-                labelText: "Tvoje korisničko ime",
-                obscureText: false,
-                hintText: "ime.prezime@skole.hr",
-              ),
-              SizedBox(height: MediaQuery.of(context).size.width * 0.09),
-              MyTextField(
-                controller: passwordController,
-                labelText: "Tvoja lozinka",
-                obscureText: true,
-                enabled: true,
-              ),
-              SizedBox(height: MediaQuery.of(context).size.width * 0.11),
-              MyButton(
-                fontSize: 24,
-                buttonText: "PRIJAVI SE",
-                ontap: () {
-                  handleLogin(context, emailController.text.toLowerCase(),
-                      passwordController.text);
-                },
-                height: MediaQuery.of(context).size.width * 0.175,
-                width: MediaQuery.of(context).size.width * 1,
-                decorationColor: AppColors.primary,
-                borderColor: AppColors.primary,
-                textColor: AppColors.background,
-                fontWeight: FontWeight.w800,
-              ),
-              SizedBox(height: MediaQuery.of(context).size.width * 0.05),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.inter(
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
-                      ),
-                      children: [
-                        TextSpan(
-                            text:
-                                'Kliknućem tipke PRIJAVI SE slažete se sa \n    ODLIKAŠEVIM',
-                            style: GoogleFonts.inter(
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.035,
-                              color: AppColors.tertiary,
-                              fontWeight: FontWeight.w800,
-                            )),
-                        TextSpan(
-                          text: ' odredbama i uvjetima',
-                          style: TextStyle(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ],
+                  Text(
+                    "Prijavi se i postani \nODLIKAŠ",
+                    style: GoogleFonts.inter(
+                      fontSize: MediaQuery.of(context).size.width * 0.09,
+                      fontWeight: FontWeight.w800,
+                      height: 1.1,
+                      color: AppColors.secondary,
                     ),
                   ),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.04),
+                  Text(
+                    "Bez stresa i bez brige",
+                    style: GoogleFonts.inter(
+                      fontSize: MediaQuery.of(context).size.width * 0.05,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.tertiary,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/login.png',
+                        height: MediaQuery.of(context).size.width * 0.65,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.01),
+                  MyTextField(
+                    controller: emailController,
+                    labelText: "Tvoje korisničko ime",
+                    obscureText: false,
+                    hintText: "ime.prezime@skole.hr",
+                    enabled: !isLoading,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.09),
+                  MyTextField(
+                    controller: passwordController,
+                    labelText: "Tvoja lozinka",
+                    obscureText: true,
+                    enabled: !isLoading,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.11),
+                  MyButton(
+                    fontSize: 24,
+                    buttonText: "PRIJAVI SE",
+                    ontap: isLoading ? null : _handleLoginWithLoading,
+                    height: MediaQuery.of(context).size.width * 0.175,
+                    width: MediaQuery.of(context).size.width * 1,
+                    decorationColor:
+                        isLoading ? AppColors.tertiary : AppColors.primary,
+                    borderColor:
+                        isLoading ? AppColors.tertiary : AppColors.primary,
+                    textColor: AppColors.background,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.05),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.inter(
+                            fontSize: MediaQuery.of(context).size.width * 0.04,
+                          ),
+                          children: [
+                            TextSpan(
+                              text:
+                                  'Kliknućem tipke PRIJAVI SE slažete se sa \n    ODLIKAŠEVIM',
+                              style: GoogleFonts.inter(
+                                fontSize:
+                                    MediaQuery.of(context).size.width * 0.035,
+                                color: AppColors.tertiary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' odredbama i uvjetima',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
                 ],
-              )
-            ],
+              ),
+            ),
           ),
-        ),
+          if (isLoading)
+            Container(
+              color: Colors.black54,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Lottie.asset(
+                      'assets/animations/loadingBird.json',
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      height: MediaQuery.of(context).size.width * 0.3,
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Prijava u tijeku...',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: MediaQuery.of(context).size.width * 0.045,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

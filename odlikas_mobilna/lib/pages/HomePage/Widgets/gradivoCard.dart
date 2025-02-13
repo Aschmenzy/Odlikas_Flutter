@@ -7,7 +7,8 @@ class GradivoCard extends StatelessWidget {
   const GradivoCard({Key? key}) : super(key: key);
 
   Future<void> _launchURL() async {
-    final Uri url = Uri.parse('https://gradivo.hr');
+    final Uri url = Uri.parse(
+        'https://gradivo.hr?utm_source=odlikas&utm_medium=banner&utm_campaign=odlikas25');
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
@@ -32,24 +33,50 @@ class GradivoCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  height: screenHeight * 0.08,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(15.0),
-                      topRight: Radius.circular(15.0),
+                    height: screenHeight * 0.08,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(15.0),
+                        topRight: Radius.circular(15.0),
+                      ),
+                      color: AppColors.gradivo,
                     ),
-                    color: AppColors.accent,
-                  ),
-                  child: Center(
-                      child: Text(
-                          "Jedine pripreme \nza maturu \nkoje ti trebaju!",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.inter(
-                              height: 1.2,
-                              fontSize: screenWidth * 0.038,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.background))),
-                ),
+                    child: Center(
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Jedine ",
+                              style: GoogleFonts.inter(
+                                height: 1.2,
+                                fontSize: screenWidth * 0.038,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.background,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "pripreme za maturu ",
+                              style: GoogleFonts.inter(
+                                height: 1.2,
+                                fontSize: screenWidth * 0.038,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.gradivoAccent,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "koje ti trebaju!",
+                              style: GoogleFonts.inter(
+                                height: 1.2,
+                                fontSize: screenWidth * 0.038,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.background,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
                 Center(
                   child: Container(
                     decoration: BoxDecoration(

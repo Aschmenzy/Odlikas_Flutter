@@ -5,6 +5,7 @@ import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:odlikas_mobilna/pages/CalendarPage/calendar_page.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradivoCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
@@ -31,6 +32,8 @@ Future<Grades?> fetchGrades(BuildContext context) async {
 
 class _HomePageState extends State<HomePage> {
   String? studentName;
+  String? studentEmail;
+  String? studentPassword;
 
   @override
   void initState() {
@@ -38,8 +41,12 @@ class _HomePageState extends State<HomePage> {
     fetchGrades(context).then((_) async {
       final box = await Hive.openBox('User');
       var name = box.get('studentName');
+      var email = box.get('email');
+      var password = box.get('password');
       setState(() {
         studentName = name;
+        studentPassword = password;
+        studentEmail = email;
       });
     });
   }
@@ -114,16 +121,26 @@ class _HomePageState extends State<HomePage> {
 
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-                    Container(
-                      color: AppColors.accent,
-                      width: screenWidth,
-                      height: screenHeight * 0.15,
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CalendarPage(
+                                  email: studentEmail ?? '',
+                                  password: studentPassword ?? '',
+                                )),
+                      ),
+                      child: Container(
+                        color: AppColors.accent,
+                        width: screenWidth,
+                        height: screenHeight * 0.15,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 0),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 0),
     );
   }
 }

@@ -7,6 +7,9 @@ import 'package:ionicons/ionicons.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
+import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
+import 'package:odlikas_mobilna/pages/CritiquePage/critique_page.dart';
+import 'package:odlikas_mobilna/pages/HelpCenterPage/help_center_page.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
@@ -242,14 +245,26 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SizedBox(height: screenHeight * 0.01),
                   SettingsTile(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AboutPage()),
+                    ),
                     label: "Opis ODLIKAŠA",
                     path: "assets/images/board.png",
                   ),
                   SettingsTile(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HelpCenterPage()),
+                    ),
                     label: "Centar za podršku",
                     path: "assets/images/help.png",
                   ),
                   SettingsTile(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CritiquePage()),
+                    ),
                     isLast: true,
                     label: "Kritike",
                     path: "assets/images/thumbs.png",

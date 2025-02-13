@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
-import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/firestore_pomodoro_service.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/Widgets/pomodoroContainer.dart';
@@ -208,7 +207,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
           ],
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
     );
   }
 

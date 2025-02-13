@@ -7,6 +7,8 @@ class Workingidcard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Material(
       elevation: 2,
       borderRadius: BorderRadius.circular(15),
@@ -31,7 +33,7 @@ class Workingidcard extends StatelessWidget {
                         Text(
                           'Učenička iskaznica',
                           style: GoogleFonts.inter(
-                            fontSize: 20,
+                            fontSize: screenWidth * 0.05,
                             fontWeight: FontWeight.normal,
                             color: AppColors.secondary,
                           ),
@@ -39,7 +41,7 @@ class Workingidcard extends StatelessWidget {
                         Text(
                           'posredovanje pri zapošljvanju učenika',
                           style: GoogleFonts.inter(
-                            fontSize: 11,
+                            fontSize: screenWidth * 0.025,
                             fontWeight: FontWeight.normal,
                             color: AppColors.secondary,
                           ),
@@ -48,7 +50,7 @@ class Workingidcard extends StatelessWidget {
                     ),
                   ),
                   Image.asset("assets/images/workingIdImage.png",
-                      width: 50, height: 50),
+                      width: screenWidth * 0.01, height: screenHeight * 0.02),
                 ],
               ),
 
@@ -61,7 +63,7 @@ class Workingidcard extends StatelessWidget {
                     width: 120,
                     height: 140,
                     decoration: BoxDecoration(
-                      color: Colors.orange,
+                      color: AppColors.accent,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child:
@@ -71,10 +73,12 @@ class Workingidcard extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInfoRow('Broj iskaznice:', '123456'),
-                      _buildInfoRow('Ime i prezime:', 'ANTONIO KOCIJAN'),
-                      _buildInfoRow('OIB:', '12345678...'),
-                      _buildInfoRow('Adresa:', 'NIKOLA TESLE 13F\n23000 ZADAR'),
+                      _buildInfoRow('Broj iskaznice:', '123456', context),
+                      _buildInfoRow(
+                          'Ime i prezime:', 'ANTONIO KOCIJAN', context),
+                      _buildInfoRow('OIB:', '12345678...', context),
+                      _buildInfoRow(
+                          'Adresa:', 'NIKOLA TESLE 13F\n23000 ZADAR', context),
                     ],
                   )
                 ],
@@ -86,21 +90,23 @@ class Workingidcard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoRow(String label, String value, BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: GoogleFonts.inter(
-            fontSize: 12,
+            fontSize: screenWidth * 0.025,
             color: AppColors.secondary,
           ),
         ),
         Text(
           value,
           style: GoogleFonts.inter(
-            fontSize: 10,
+            fontSize: screenWidth * 0.03,
             color: AppColors.secondary,
             fontWeight: FontWeight.bold,
           ),

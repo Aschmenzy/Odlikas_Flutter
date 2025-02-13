@@ -50,7 +50,7 @@ class JobDetailsPage extends StatelessWidget {
                           Container(
                             width: screenWidth * 0.35,
                             height: screenHeight * 0.15,
-                            margin: EdgeInsets.only(bottom: 16),
+                            margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(15),
                             ),
@@ -82,18 +82,30 @@ class JobDetailsPage extends StatelessWidget {
                         height: screenHeight * 0.075,
                         width: screenWidth * 0.075,
                       ),
-                      SizedBox(width: screenWidth * 0.02),
-                      Text(
-                        'Traži se ',
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            color: AppColors.secondary),
+                      SizedBox(width: screenWidth * 0.04),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Traži se ',
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    color: AppColors.secondary),
+                              ),
+                              TextSpan(
+                                text: "${jobData['title']}",
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondary),
+                              ),
+                            ],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
                       ),
-                      Text("${jobData['title']}",
-                          style: GoogleFonts.inter(
-                              fontSize: screenWidth * 0.05,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.secondary)),
                     ],
                   ),
                   Row(
@@ -104,20 +116,30 @@ class JobDetailsPage extends StatelessWidget {
                         height: screenHeight * 0.075,
                         width: screenWidth * 0.075,
                       ),
-                      SizedBox(width: screenWidth * 0.02),
-                      Text(
-                        "Prijava do: ",
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            color: AppColors.secondary),
+                      SizedBox(width: screenWidth * 0.04),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Prijava do: ",
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    color: AppColors.secondary),
+                              ),
+                              TextSpan(
+                                text: "${jobData['until']}",
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondary),
+                              ),
+                            ],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
-                      Text(
-                        "${jobData['until']}",
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.secondary),
-                      )
                     ],
                   ),
                   Row(
@@ -128,20 +150,30 @@ class JobDetailsPage extends StatelessWidget {
                         height: screenHeight * 0.075,
                         width: screenWidth * 0.075,
                       ),
-                      SizedBox(width: screenWidth * 0.02),
-                      Text(
-                        "Lokacija rada: ",
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            color: AppColors.secondary),
+                      SizedBox(width: screenWidth * 0.04),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Lokacija rada: ",
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    color: AppColors.secondary),
+                              ),
+                              TextSpan(
+                                text: "${jobData['location']}",
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondary),
+                              ),
+                            ],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
                       ),
-                      Text(
-                        "${jobData['location']}",
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.secondary),
-                      )
                     ],
                   ),
                   Row(
@@ -152,31 +184,45 @@ class JobDetailsPage extends StatelessWidget {
                         height: screenHeight * 0.075,
                         width: screenWidth * 0.075,
                       ),
-                      SizedBox(width: screenWidth * 0.02),
-                      Text(
-                        'Prosjećna neto plaća ',
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            color: AppColors.secondary),
+                      SizedBox(width: screenWidth * 0.04),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Prosjećna neto plaća ',
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    color: AppColors.secondary),
+                              ),
+                              TextSpan(
+                                text: "${jobData['pay']}",
+                                style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.05,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.secondary),
+                              ),
+                            ],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
                       ),
-                      Text(
-                        "${jobData['pay']}",
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.05,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.secondary),
-                      )
                     ],
                   ),
-                  Text("Opis posla:",
-                      style: GoogleFonts.inter(
-                          fontSize: screenWidth * 0.05,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.secondary)),
+                  Text(
+                    "Opis posla:",
+                    style: GoogleFonts.inter(
+                        fontSize: screenWidth * 0.05,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.secondary),
+                  ),
                   SizedBox(height: screenHeight * 0.03),
                   Container(
                     width: screenWidth,
-                    height: screenHeight * 0.3,
+                    constraints: BoxConstraints(
+                      minHeight: screenHeight * 0.3,
+                    ),
                     decoration: BoxDecoration(
                         color: AppColors.background,
                         borderRadius: BorderRadius.circular(15),
@@ -184,11 +230,13 @@ class JobDetailsPage extends StatelessWidget {
                             Border.all(color: AppColors.tertiary, width: 0.6)),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        "${jobData['description']}",
-                        style: GoogleFonts.inter(
-                            fontSize: screenWidth * 0.04,
-                            color: AppColors.secondary),
+                      child: SingleChildScrollView(
+                        child: Text(
+                          "${jobData['description']}",
+                          style: GoogleFonts.inter(
+                              fontSize: screenWidth * 0.04,
+                              color: AppColors.secondary),
+                        ),
                       ),
                     ),
                   ),

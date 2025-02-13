@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -21,7 +22,7 @@ class CustomBottomNavBar extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
+            color: Colors.grey,
             blurRadius: 10,
           ),
         ],
@@ -35,10 +36,11 @@ class CustomBottomNavBar extends StatelessWidget {
             child: SizedBox(
               height: 35,
               child: TextField(
-                style: TextStyle(height: 1, fontSize: 14),
+                style: GoogleFonts.inter(height: 1, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
-                  hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                  hintStyle:
+                      GoogleFonts.inter(color: Colors.grey, fontSize: 14),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
