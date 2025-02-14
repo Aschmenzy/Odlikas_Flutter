@@ -64,8 +64,10 @@ class _MyTextFieldState extends State<MyTextField> {
         hintText: _showHint ? widget.hintText : null,
         hintStyle: GoogleFonts.inter(
           color: AppColors.tertiary,
-          fontSize: MediaQuery.of(context).size.width * 0.04,
+          fontSize: MediaQuery.of(context).size.width * 0.045,
           fontWeight: FontWeight.w600,
+          decoration: TextDecoration.underline,
+          decorationColor: AppColors.tertiary,
         ),
         floatingLabelBehavior: FloatingLabelBehavior.always,
         contentPadding: EdgeInsets.only(left: 30, top: 20, bottom: 20),

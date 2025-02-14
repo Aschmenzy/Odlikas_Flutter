@@ -8,12 +8,12 @@ import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
+import 'package:odlikas_mobilna/pages/ConnectToScreenPage/in_between_page.dart';
 import 'package:odlikas_mobilna/pages/CritiquePage/critique_page.dart';
 import 'package:odlikas_mobilna/pages/HelpCenterPage/help_center_page.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
-import 'package:odlikas_mobilna/pages/ConnectToScreenPage/connect_screen.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/profile_page.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:odlikas_mobilna/pages/TermsAndConditionsPage/terms_and_conditions_page.dart';
@@ -178,7 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ConnectScreen()),
+                                  builder: (context) => InBetweenPage()),
                             );
                           },
                     child: SizedBox(

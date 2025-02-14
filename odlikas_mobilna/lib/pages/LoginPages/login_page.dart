@@ -163,7 +163,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   Future<void> _handleLoginWithLoading() async {
-    if (isLoading) return; // Prevent multiple login attempts
+    if (isLoading) return;
 
     setState(() {
       isLoading = true;
@@ -206,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     "Prijavi se i postani \nODLIKAŠ",
                     style: GoogleFonts.inter(
-                      fontSize: MediaQuery.of(context).size.width * 0.09,
+                      fontSize: MediaQuery.of(context).size.width * 0.08,
                       fontWeight: FontWeight.w800,
                       height: 1.1,
                       color: AppColors.secondary,

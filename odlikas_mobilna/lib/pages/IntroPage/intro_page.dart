@@ -40,9 +40,10 @@ class _IntroPageState extends State<IntroPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-                "Quisque luctus justo sed fermentum rhoncus. "
-                "Aliquam sed leo in metus placerat scelerisque.",
+                "Vaš osobni asistent za uspješno učenje. "
+                "Pratite svoj e-dnevnik, primajte obavijesti o nadolazećim "
+                "ispitima,  koristite Pomodoro timer za učinkovito učenje i "
+                "organizirajte svoj raspored s kalendarom ispita.",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: MediaQuery.of(context).size.width * 0.035,

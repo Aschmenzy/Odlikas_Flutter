@@ -7,7 +7,7 @@ import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/calendarGrid.dart';
-import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayDetailsDialog,dart';
+import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayDetailsDialog.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/monthHeader.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/weeklyHeader.dart';
 import 'package:provider/provider.dart';
@@ -218,13 +218,11 @@ class _CalendarPageState extends State<CalendarPage> {
 
     showDialog(
       context: context,
-      builder: (context) => SizedBox(
-        child: DayDetailsDialog(
-          date: date,
-          tests: tests,
-          fetchEvents: _fetchEvents,
-          saveEvent: saveEvent,
-        ),
+      builder: (context) => DayDetailsDialog(
+        date: date,
+        tests: tests,
+        fetchEvents: _fetchEvents,
+        saveEvent: saveEvent,
       ),
     );
   }

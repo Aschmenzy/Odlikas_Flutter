@@ -37,7 +37,7 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
             child: Lottie.asset(
-              'assets/animations/error.json',
+              'assets/animations/loadingBird.json',
               height: MediaQuery.of(context).size.width * 0.3,
             ),
           );
@@ -51,11 +51,11 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
           contentPadding: EdgeInsets.zero,
           content: ConstrainedBox(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.5,
+              maxHeight: MediaQuery.of(context).size.height * 0.55,
             ),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              width: MediaQuery.of(context).size.width * 0.6,
+              width: MediaQuery.of(context).size.width * 0.9,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

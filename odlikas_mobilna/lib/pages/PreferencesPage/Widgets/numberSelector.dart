@@ -28,7 +28,7 @@ Widget buildNumberSelector({
             duration: Duration(milliseconds: 200),
             width: MediaQuery.of(context).size.width * 0.128,
             decoration: BoxDecoration(
-              color: isSelected ? Colors.blue : Colors.grey[200],
+              color: isSelected ? AppColors.primary : Colors.grey[200],
               borderRadius: BorderRadius.horizontal(
                 left: isFirst ? Radius.circular(15) : Radius.zero,
                 right: isLast ? Radius.circular(15) : Radius.zero,

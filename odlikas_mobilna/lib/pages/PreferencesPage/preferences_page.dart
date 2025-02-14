@@ -200,7 +200,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
               decorationColor: Colors.transparent,
               borderColor: Colors.transparent,
               textColor: AppColors.accent,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ],
         ),
