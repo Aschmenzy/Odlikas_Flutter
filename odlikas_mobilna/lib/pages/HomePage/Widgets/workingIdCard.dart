@@ -3,7 +3,18 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class Workingidcard extends StatelessWidget {
-  const Workingidcard({super.key});
+  final String? name;
+  final String? oib;
+  final String? address;
+  final String? postalCode;
+  final String? city;
+  const Workingidcard(
+      {super.key,
+      required this.name,
+      this.oib,
+      this.address,
+      this.postalCode,
+      this.city});
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +60,6 @@ class Workingidcard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Image.asset("assets/images/workingIdImage.png",
-                      width: screenWidth * 0.01, height: screenHeight * 0.02),
                 ],
               ),
 
@@ -60,8 +69,8 @@ class Workingidcard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 120,
-                    height: 140,
+                    width: screenWidth * 0.3,
+                    height: screenHeight * 0.16,
                     decoration: BoxDecoration(
                       color: AppColors.accent,
                       borderRadius: BorderRadius.circular(8),
@@ -74,11 +83,12 @@ class Workingidcard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildInfoRow('Broj iskaznice:', '123456', context),
+                      _buildInfoRow('Ime i prezime:', name, context),
+                      _buildInfoRow('OIB:', oib, context),
                       _buildInfoRow(
-                          'Ime i prezime:', 'ANTONIO KOCIJAN', context),
-                      _buildInfoRow('OIB:', '12345678...', context),
-                      _buildInfoRow(
-                          'Adresa:', 'NIKOLA TESLE 13F\n23000 ZADAR', context),
+                          'Adresa:',
+                          '${address ?? ''}\n${postalCode ?? ''} ${city ?? ''}',
+                          context),
                     ],
                   )
                 ],
@@ -90,7 +100,7 @@ class Workingidcard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, BuildContext context) {
+  Widget _buildInfoRow(String label, String? value, BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return Column(
@@ -104,7 +114,7 @@ class Workingidcard extends StatelessWidget {
           ),
         ),
         Text(
-          value,
+          value ?? '',
           style: GoogleFonts.inter(
             fontSize: screenWidth * 0.03,
             color: AppColors.secondary,

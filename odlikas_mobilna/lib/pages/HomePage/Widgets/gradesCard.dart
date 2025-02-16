@@ -15,7 +15,8 @@ class GradesCard extends StatelessWidget {
     const double xOffset = 2.5;
     double averageGrade = calculateAverageGrade(subjects);
     Map<String, double> gradePercentages = calculateGradePercentages(subjects);
-
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -32,16 +33,16 @@ class GradesCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'OCJENE',
               style: TextStyle(
                 height: 1.1,
                 color: AppColors.background,
-                fontSize: 24,
+                fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.w900,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: screenHeight * 0.005),
             Row(
               children: [
                 Expanded(
@@ -114,20 +115,20 @@ class GradesCard extends StatelessWidget {
   Widget _buildGradeLabel(
       String label, String percentage, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: Row(
         children: [
           Text(
             '$label - ',
             style: GoogleFonts.inter(
-                fontSize: MediaQuery.of(context).size.width * 0.045,
+                fontSize: MediaQuery.of(context).size.height * 0.02,
                 color: Colors.white,
                 fontWeight: FontWeight.w700),
           ),
           Text(
             percentage,
             style: GoogleFonts.inter(
-                fontSize: MediaQuery.of(context).size.width * 0.045,
+                fontSize: MediaQuery.of(context).size.height * 0.02,
                 color: Colors.white,
                 fontWeight: FontWeight.w700),
           ),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,6 +11,7 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradivoCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
+import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdModal.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -34,6 +36,10 @@ class _HomePageState extends State<HomePage> {
   String? studentName;
   String? studentEmail;
   String? studentPassword;
+  String? studentOib;
+  String? studentAddress;
+  String? studentPostalCode;
+  String? studentCity;
 
   @override
   void initState() {
@@ -48,7 +54,101 @@ class _HomePageState extends State<HomePage> {
         studentPassword = password;
         studentEmail = email;
       });
+      await _getStudentIdCardData();
     });
+  }
+
+  void _showStudentIdModal(BuildContext context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      context: context,
+      builder: (context) => StudentIdModal(
+        onSubmit: (formData) async {
+          final box = await Hive.openBox('User');
+          final email = box.get('email');
+
+          if (email == null) {
+            print('Error: No email found in local storage');
+            return;
+          }
+
+          try {
+            await FirebaseFirestore.instance
+                .collection('studentProfiles')
+                .doc(email)
+                .set({
+              'workingId': {
+                'oib': formData['oib'],
+                'address': formData['address'],
+                'postalCode': formData['postalCode'],
+                'city': formData['city'],
+                'createdAt': FieldValue.serverTimestamp(),
+              },
+            }, SetOptions(merge: true));
+
+            // Refresh the data after saving
+            await _getStudentIdCardData();
+
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Podaci su uspješno spremljeni'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } catch (e) {
+            print('Error saving student ID data: $e');
+            // Show error message
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Greška pri spremanju podataka'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>?> _getStudentIdCardData() async {
+    final box = await Hive.openBox('User');
+    final email = box.get('email');
+
+    if (email == null) {
+      print('Error: No email found in local storage');
+      return null;
+    }
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('studentProfiles')
+          .doc(email)
+          .get();
+
+      if (doc.exists && doc.data()?['workingId'] != null) {
+        final workingIdData = doc.data()!['workingId'] as Map<String, dynamic>;
+
+        setState(() {
+          studentOib = workingIdData['oib'];
+          studentAddress = workingIdData['address'];
+          studentPostalCode = workingIdData['postalCode'];
+          studentCity = workingIdData['city'];
+        });
+
+        return workingIdData;
+      } else {
+        print('No working ID data found for this user');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching student ID data: $e');
+      return null;
+    }
   }
 
   @override
@@ -82,8 +182,6 @@ class _HomePageState extends State<HomePage> {
                           color: AppColors.secondary),
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-
-                    // Debug container to see the space
                     LayoutBuilder(
                       builder: (context, constraints) {
                         return SizedBox(
@@ -102,25 +200,30 @@ class _HomePageState extends State<HomePage> {
                                           subjects:
                                               viewModel.grades?.subjects ?? []),
                                     )
-                                  : SizedBox(
-                                      width: screenWidth * 0.8,
-                                      child: Workingidcard(),
+                                  : GestureDetector(
+                                      onTap: () => _showStudentIdModal(context),
+                                      child: SizedBox(
+                                        width: screenWidth * 0.8,
+                                        child: Workingidcard(
+                                          name: studentName,
+                                          oib: studentOib,
+                                          address: studentAddress,
+                                          postalCode: studentPostalCode,
+                                          city: studentCity,
+                                        ),
+                                      ),
                                     );
                             },
                           ),
                         );
                       },
                     ),
-
                     SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [ScheduleCard(), GradivoCard()],
                     ),
-
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
