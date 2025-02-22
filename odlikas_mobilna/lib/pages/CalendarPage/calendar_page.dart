@@ -296,6 +296,7 @@ class _CalendarPageState extends State<CalendarPage> {
                           endIndent: screenWidth * 0.05,
                         ),
                         CalendarGrid(
+                          focusedDate: _focusedDate,
                           screenWidth: screenWidth,
                           onDayTap: _showDayDetailsPopup,
                           firstDayOfMonth: _firstDayOfMonth,

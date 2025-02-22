@@ -43,96 +43,86 @@ class _SubjectsPageState extends State<SubjectsPage> {
               width: MediaQuery.of(context).size.width * 0.80,
               height: 120,
             ))
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 16.0,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            iconSize: 30,
-                            color: AppColors.accent,
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
+          : CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  floating:
+                      true, // Makes the app bar reappear immediately when scrolling up
+                  snap: true, // Snaps the app bar into view
+                  backgroundColor: Colors.white,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    iconSize: 32,
+                    color: AppColors.accent,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  centerTitle: true,
+                  title: SizedBox(
+                    width: screenWidth * 0.7,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          viewModel.studentProfile?.studentProgram ??
+                              "Loading...",
+                          style: GoogleFonts.inter(
+                            color: AppColors.secondary,
+                            fontSize: screenWidth * 0.055,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 16),
-
-                              //student program and class master
-                              SizedBox(
-                                width: screenWidth * 0.7,
-                                child: Text(
-                                  viewModel.studentProfile?.studentProgram ??
-                                      "Loading...",
-                                  style: GoogleFonts.inter(
-                                    color: AppColors.secondary,
-                                    fontSize: screenWidth * 0.05,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Razrednik/ca: ${viewModel.studentProfile?.classMaster ?? ''}",
-                                style: GoogleFonts.inter(
-                                  fontSize: screenWidth * 0.03,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color.fromRGBO(113, 113, 113, 1),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: screenWidth * 0.009),
-                            ],
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          "Razrednik/ca: ${viewModel.studentProfile?.classMaster ?? ''}",
+                          style: GoogleFonts.inter(
+                            fontSize: screenWidth * 0.03,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.tertiary,
                           ),
-                        ],
-                      ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: screenWidth * 0.009),
+                      ],
                     ),
                   ),
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.01,
-                      vertical: screenHeight * 0.01,
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.01 +
+                        30, // Added 30 to match your original padding
+                    vertical: screenHeight * 0.01,
+                  ),
+                  sliver: SliverGrid(
+                    // Rest of your SliverGrid code remains the same
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 1,
+                      crossAxisSpacing: screenWidth * 0.04,
+                      mainAxisSpacing: screenHeight * 0.015,
+                      childAspectRatio: screenHeight * 0.0052,
                     ),
-                    sliver: SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1,
-                        crossAxisSpacing: screenWidth * 0.04,
-                        mainAxisSpacing: screenHeight * 0.015,
-                        childAspectRatio: screenHeight * 0.0052,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final subject = viewModel.grades?.subjects[index];
-                          return subject != null
-                              ? GradeTile(
-                                  subjectName: subject.subjectName,
-                                  professor: subject.professor,
-                                  grade: subject.grade,
-                                  subjectId: subject.subjectId,
-                                )
-                              : const SizedBox.shrink();
-                        },
-                        childCount: viewModel.grades?.subjects.length ?? 0,
-                      ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final subject = viewModel.grades?.subjects[index];
+                        return subject != null
+                            ? GradeTile(
+                                subjectName: subject.subjectName,
+                                professor: subject.professor,
+                                grade: subject.grade,
+                                subjectId: subject.subjectId,
+                              )
+                            : const SizedBox.shrink();
+                      },
+                      childCount: viewModel.grades?.subjects.length ?? 0,
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 50)),
-                ],
-              ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 50)),
+              ],
             ),
     );
   }

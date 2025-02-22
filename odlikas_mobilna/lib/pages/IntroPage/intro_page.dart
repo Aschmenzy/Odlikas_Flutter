@@ -21,6 +21,7 @@ class _IntroPageState extends State<IntroPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.1),
             Image.asset(
               'assets/images/globe.png',
               width: MediaQuery.of(context).size.width * 1,
@@ -46,15 +47,15 @@ class _IntroPageState extends State<IntroPage> {
                 "organizirajte svoj raspored s kalendarom ispita.",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
-                  fontSize: MediaQuery.of(context).size.width * 0.035,
+                  fontSize: MediaQuery.of(context).size.width * 0.03,
                   fontWeight: FontWeight.w800,
                   color: AppColors.tertiary,
                 ),
               ),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+            Spacer(),
             MyButton(
-              fontSize: 24,
+              fontSize: MediaQuery.of(context).size.width * 0.05,
               buttonText: "NASTAVI",
               ontap: () {
                 Navigator.replace(
@@ -71,6 +72,7 @@ class _IntroPageState extends State<IntroPage> {
               textColor: AppColors.background,
               fontWeight: FontWeight.w800,
             ),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
           ],
         ),
       ),

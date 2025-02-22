@@ -48,12 +48,13 @@ class ShareScreenCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100,
                     height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/icon/odlikasPlusLogo.png',
+                      width: 100,
+                      height: 100,
                     ),
                   ),
                 ],
@@ -96,12 +97,13 @@ class ShareScreenCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100,
                     height: 100,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/icon/odlikasPlusLogo.png',
+                      width: 100,
+                      height: 100,
                     ),
                   ),
                 ],

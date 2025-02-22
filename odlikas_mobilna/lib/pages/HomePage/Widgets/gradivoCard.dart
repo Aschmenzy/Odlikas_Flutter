@@ -50,7 +50,7 @@ class GradivoCard extends StatelessWidget {
                               text: "Jedine ",
                               style: GoogleFonts.inter(
                                 height: 1.2,
-                                fontSize: screenWidth * 0.038,
+                                fontSize: screenWidth * 0.034,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.background,
                               ),
@@ -59,16 +59,16 @@ class GradivoCard extends StatelessWidget {
                               text: "pripreme za maturu ",
                               style: GoogleFonts.inter(
                                 height: 1.2,
-                                fontSize: screenWidth * 0.038,
+                                fontSize: screenWidth * 0.034,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.gradivoAccent,
                               ),
                             ),
                             TextSpan(
-                              text: "koje ti trebaju!",
+                              text: "\nkoje ti trebaju!",
                               style: GoogleFonts.inter(
                                 height: 1.2,
-                                fontSize: screenWidth * 0.038,
+                                fontSize: screenWidth * 0.034,
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.background,
                               ),

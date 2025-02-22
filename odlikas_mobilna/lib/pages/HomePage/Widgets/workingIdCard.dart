@@ -102,7 +102,7 @@ class Workingidcard extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String? value, BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

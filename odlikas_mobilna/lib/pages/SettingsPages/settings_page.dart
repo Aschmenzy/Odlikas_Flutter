@@ -250,7 +250,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       MaterialPageRoute(builder: (context) => AboutPage()),
                     ),
                     label: "Opis ODLIKAŠA",
-                    path: "assets/images/board.png",
+                    path: "assets/icon/odlikasIconLogo.png",
                   ),
                   SettingsTile(
                     onTap: () => Navigator.push(

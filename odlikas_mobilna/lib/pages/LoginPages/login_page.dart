@@ -238,14 +238,14 @@ class _LoginPageState extends State<LoginPage> {
                     hintText: "ime.prezime@skole.hr",
                     enabled: !isLoading,
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.width * 0.09),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.12),
                   MyTextField(
                     controller: passwordController,
                     labelText: "Tvoja lozinka",
                     obscureText: true,
                     enabled: !isLoading,
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.width * 0.11),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.08),
                   MyButton(
                     fontSize: 24,
                     buttonText: "PRIJAVI SE",
@@ -259,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
                     textColor: AppColors.background,
                     fontWeight: FontWeight.w800,
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.width * 0.05),
+                  SizedBox(height: MediaQuery.of(context).size.width * 0.08),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

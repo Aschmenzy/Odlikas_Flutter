@@ -123,14 +123,14 @@ class GradesCard extends StatelessWidget {
             style: GoogleFonts.inter(
                 fontSize: MediaQuery.of(context).size.height * 0.02,
                 color: Colors.white,
-                fontWeight: FontWeight.w700),
+                fontWeight: FontWeight.w600),
           ),
           Text(
             percentage,
             style: GoogleFonts.inter(
                 fontSize: MediaQuery.of(context).size.height * 0.02,
                 color: Colors.white,
-                fontWeight: FontWeight.w700),
+                fontWeight: FontWeight.w600),
           ),
         ],
       ),

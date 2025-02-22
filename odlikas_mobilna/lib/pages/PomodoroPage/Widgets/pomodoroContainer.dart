@@ -49,7 +49,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
 
     return Container(
       width: screenSize.width * 0.9,
-      height: screenSize.height * 0.4,
+      height: screenSize.height * 0.32,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
         color: _getPhaseColor(),
@@ -150,7 +150,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
               foregroundColor: _getPhaseColor(),
               padding: EdgeInsets.symmetric(
                 horizontal: 20,
-                vertical: 20,
+                vertical: 12,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
@@ -158,7 +158,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
               elevation: widget.isRunning ? 0 : 5,
             ),
             child: Text(
-              widget.isRunning ? "ZAUSTAVI" : "ZAPOČNI",
+              widget.isRunning ? "ZAUSTAVI" : "ZAPOČNITE",
               style: GoogleFonts.inter(
                   fontWeight: FontWeight.w700,
                   fontSize: screenSize.width * 0.05),
