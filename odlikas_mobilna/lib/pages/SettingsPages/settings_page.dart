@@ -11,6 +11,7 @@ import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
 import 'package:odlikas_mobilna/pages/ConnectToScreenPage/in_between_page.dart';
 import 'package:odlikas_mobilna/pages/CritiquePage/critique_page.dart';
 import 'package:odlikas_mobilna/pages/HelpCenterPage/help_center_page.dart';
+import 'package:odlikas_mobilna/pages/NotificationsPage/notifications_page.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
@@ -202,6 +203,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   SettingsTile(
                     label: "Obavjesti",
                     path: "assets/images/notification.png",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NotificationsPage()),
+                    ),
                   ),
                   SettingsTile(
                     label: "Dislekcijski tekst",
