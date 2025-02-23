@@ -38,21 +38,44 @@ class _SchedulePageState extends State<SchedulePage> {
       final email = box.get('email');
       final password = box.get('password');
 
-      // Get cached data from Firebase
+      // Get cached data from Firebase first
       final cachedSchedule = await FirebaseFirestore.instance
           .collection('studentProfiles')
           .doc(email)
           .get();
 
-      if (cachedSchedule.exists) {
-        final scheduleData = cachedSchedule.data()?['schedule'];
-        if (scheduleData != null) {
-          _homeViewModel.updateSchedule(ScheduleSubject.fromJson(scheduleData));
+      if (cachedSchedule.exists && cachedSchedule.data()?['schedule'] != null) {
+        // If we have data in Firebase, use that and don't fetch from API
+        var scheduleData = cachedSchedule.data()!['schedule'];
+
+        // Ensure each day's subjects array has 9 elements
+        if (scheduleData['schedule'] is List) {
+          for (var day in scheduleData['schedule']) {
+            if (day['subjects'] is List) {
+              var subjects = List<String>.from(day['subjects']);
+              while (subjects.length < 8) {
+                subjects.add('');
+              }
+              day['subjects'] = subjects;
+            }
+          }
         }
+
+        _homeViewModel.updateSchedule(ScheduleSubject.fromJson(scheduleData));
+        return;
       }
 
-      // Fetch fresh data from API
+      // Only fetch from API if we don't have data in Firebase
       await _homeViewModel.fetchScheduleSubjects(email, password);
+
+      // Ensure the schedule has 9 slots before saving to Firebase
+      if (_homeViewModel.scheduleSubject != null) {
+        for (var day in _homeViewModel.scheduleSubject!.schedule) {
+          while (day.subjects.length < 8) {
+            day.subjects.add('');
+          }
+        }
+      }
 
       // Save to Firebase
       await FirebaseFirestore.instance
@@ -67,47 +90,66 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
+  DaySchedule? _getSelectedDaySchedule(List<DaySchedule> schedule) {
+    String dayToFind = '$_selectedDay ${_isMorning ? "Morning" : "Afternoon"}';
+    try {
+      var daySchedule = schedule.firstWhere(
+        (day) => day.day == dayToFind,
+        orElse: () =>
+            DaySchedule(day: dayToFind, subjects: List<String>.filled(9, '')),
+      );
+
+      // Ensure we have 9 slots
+      while (daySchedule.subjects.length < 8) {
+        daySchedule.subjects.add('');
+      }
+
+      return daySchedule;
+    } catch (e) {
+      debugPrint('Error in _getSelectedDaySchedule: $e');
+      return DaySchedule(day: dayToFind, subjects: List<String>.filled(9, ''));
+    }
+  }
+
+  // In the ListView.builder, update the subject access:
+
   Future<void> _updateSubject(
       int periodNumber, String subject, bool isRemoving) async {
     try {
       final schedule = _homeViewModel.scheduleSubject;
       if (schedule == null) return;
 
-      final selectedSchedule = _getSelectedDaySchedule(schedule.schedule);
-      if (selectedSchedule == null) return;
+      final currentDayString =
+          '${_selectedDay} ${_isMorning ? "Morning" : "Afternoon"}';
+      var dayIndex =
+          schedule.schedule.indexWhere((day) => day.day == currentDayString);
 
-      // Create a copy of the current subjects list
-      List<String> updatedSubjects = List.from(selectedSchedule.subjects);
-
-      // Adjust the period number to account for 0th period
-      final adjustedPeriodNumber = periodNumber - 1;
-
-      if (isRemoving) {
-        // For removing, we just remove the subject at the given index
-        if (adjustedPeriodNumber >= 0 &&
-            adjustedPeriodNumber < updatedSubjects.length) {
-          updatedSubjects.removeAt(adjustedPeriodNumber);
+      // Get or create subjects list
+      List<String> subjects;
+      if (dayIndex != -1) {
+        subjects = List<String>.from(schedule.schedule[dayIndex].subjects);
+        while (subjects.length < 9) {
+          subjects.add('');
         }
       } else {
-        // For adding, we might need to pad the list with empty strings
-        while (updatedSubjects.length < adjustedPeriodNumber + 1) {
-          updatedSubjects.add('');
-        }
-        updatedSubjects[adjustedPeriodNumber] = subject;
+        subjects = List.filled(9, '');
       }
 
-      // Create the updated day schedule
+      // Update the subject at the given period number
+      if (isRemoving) {
+        subjects[periodNumber] = '';
+      } else {
+        subjects[periodNumber] = subject;
+      }
+
+      // Create updated schedule list
+      List<DaySchedule> updatedSchedule =
+          List<DaySchedule>.from(schedule.schedule);
+
       final updatedDaySchedule = DaySchedule(
-        day: '${_selectedDay} ${_isMorning ? "Morning" : "Afternoon"}',
-        subjects: updatedSubjects,
+        day: currentDayString,
+        subjects: subjects,
       );
-
-      // Create a copy of the full schedule
-      final updatedSchedule = List<DaySchedule>.from(schedule.schedule);
-
-      // Find and update the specific day
-      final dayIndex = updatedSchedule.indexWhere((day) =>
-          day.day == '${_selectedDay} ${_isMorning ? "Morning" : "Afternoon"}');
 
       if (dayIndex != -1) {
         updatedSchedule[dayIndex] = updatedDaySchedule;
@@ -115,25 +157,29 @@ class _SchedulePageState extends State<SchedulePage> {
         updatedSchedule.add(updatedDaySchedule);
       }
 
-      // Update local state
+      // Update view model
       _homeViewModel.updateSchedule(ScheduleSubject(schedule: updatedSchedule));
 
       // Update Firebase
       final box = await Hive.openBox('User');
       final email = box.get('email');
 
-      await FirebaseFirestore.instance
-          .collection('studentProfiles')
-          .doc(email)
-          .set({
-        'schedule': _homeViewModel.scheduleSubject?.toJson(),
-        'lastUpdated': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      if (email != null) {
+        await FirebaseFirestore.instance
+            .collection('studentProfiles')
+            .doc(email)
+            .set({
+          'schedule': _homeViewModel.scheduleSubject?.toJson(),
+          'lastUpdated': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
 
-      // Refresh the UI
       setState(() {});
     } catch (e) {
       debugPrint('Error updating subject: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update schedule: $e')),
+      );
     }
   }
 
@@ -180,14 +226,6 @@ class _SchedulePageState extends State<SchedulePage> {
           ),
         ],
       ),
-    );
-  }
-
-  DaySchedule? _getSelectedDaySchedule(List<DaySchedule> schedule) {
-    String dayToFind = '$_selectedDay ${_isMorning ? "Morning" : "Afternoon"}';
-    return schedule.firstWhere(
-      (day) => day.day == dayToFind,
-      orElse: () => DaySchedule(day: dayToFind, subjects: []),
     );
   }
 
@@ -250,21 +288,22 @@ class _SchedulePageState extends State<SchedulePage> {
 
                 final selectedSchedule =
                     _getSelectedDaySchedule(schedule.schedule);
-                final subjects = selectedSchedule?.subjects ?? [];
+                final subjects =
+                    selectedSchedule?.subjects ?? List.filled(9, '');
 
                 return ListView.builder(
-                  itemCount: 9,
+                  itemCount: 8,
                   itemBuilder: (context, index) {
                     String subject = '';
-                    if (index - 1 < subjects.length && index - 1 >= 0) {
-                      subject = subjects[index - 1];
+                    if (subjects != null && index < subjects.length) {
+                      subject = subjects[index];
                     }
 
                     return SubjectTile(
                       periodNumber: index,
                       subject: subject,
                       isFirst: index == 0,
-                      isLast: index == 8,
+                      isLast: index == 7,
                       isEditMode: _isEditMode,
                       onAdd: () => _showSubjectDialog(index),
                       onRemove: () => _updateSubject(index, '', true),
