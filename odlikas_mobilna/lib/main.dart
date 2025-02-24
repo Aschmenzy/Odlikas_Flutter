@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:odlikas_mobilna/pages/BannerPage/banner_page.dart';
 import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/pages/IntroPage/intro_page.dart';
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: box.isEmpty ? const IntroPage() : const HomePage(),
+        home: box.isEmpty ? const BannerPage() : const HomePage(),
         routes: {
           '/home': (context) => const HomePage(),
           '/jobs': (context) => const JobsPage(),

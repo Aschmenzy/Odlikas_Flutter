@@ -180,10 +180,13 @@ class _ScheduleCardState extends State<ScheduleCard> {
                           ),
                         ],
                       ),
-                      SizedBox(width: screenWidth * 0.02),
+                      SizedBox(
+                        height: screenHeight * 0.002,
+                      ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          SizedBox(width: screenWidth * 0.083),
                           Text(
                             currentSubject ?? "Nema nastave",
                             textAlign: TextAlign.center,

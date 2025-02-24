@@ -5,8 +5,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
+import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayDetailsDialog.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/calendar_page.dart';
+import 'package:odlikas_mobilna/pages/HomePage/Widgets/calendarWidget.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradivoCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
@@ -33,6 +36,7 @@ Future<Grades?> fetchGrades(BuildContext context) async {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Map<String, dynamic>> _holidays = [];
   String? studentName;
   String? studentEmail;
   String? studentPassword;
@@ -151,6 +155,142 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  DateTime _selectedDate = DateTime.now();
+  void _onDateSelected(DateTime date) {
+    setState(() {
+      _selectedDate = date;
+    });
+  }
+
+  bool _isHoliday(DateTime date) {
+    for (var holiday in _holidays) {
+      DateTime startDate = holiday['startDate'];
+      DateTime endDate = holiday['endDate'];
+
+      DateTime normalizedDate = DateTime(date.year, date.month, date.day);
+      DateTime normalizedStartDate =
+          DateTime(startDate.year, startDate.month, startDate.day);
+      DateTime normalizedEndDate =
+          DateTime(endDate.year, endDate.month, endDate.day);
+
+      if ((normalizedDate.isAtSameMomentAs(normalizedStartDate) ||
+              normalizedDate.isAtSameMomentAs(normalizedEndDate)) ||
+          (normalizedDate.isAfter(normalizedStartDate) &&
+              normalizedDate.isBefore(normalizedEndDate))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _isTest(DateTime date) {
+    final viewModel = context.read<TestViewmodel>();
+    if (viewModel.tests == null) return false;
+
+    for (var monthTests in viewModel.tests!.testsByMonth.values) {
+      for (var test in monthTests) {
+        if (test.testDate.isEmpty || !test.testDate.contains('.')) continue;
+
+        final dateParts = test.testDate.split('.');
+        if (dateParts.length < 2) continue;
+
+        final day = int.parse(dateParts[0]);
+        final month = int.parse(dateParts[1]);
+        final testDate = DateTime(date.year, month, day);
+
+        if (testDate.year == date.year &&
+            testDate.month == date.month &&
+            testDate.day == date.day) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<List<Map<String, String>>> _fetchEvents(DateTime date) async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('CalendarEvents')
+          .doc(studentEmail)
+          .collection('events')
+          .where('date', isEqualTo: date)
+          .get();
+
+      return snapshot.docs.map((doc) {
+        return {
+          'title': doc['title'] as String,
+          'description': doc['description'] as String,
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Error fetching events: $e');
+      return [];
+    }
+  }
+
+  Future<void> saveEvent({
+    required String title,
+    required String description,
+    required DateTime date,
+  }) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('CalendarEvents')
+          .doc(studentEmail)
+          .collection('events')
+          .add({
+        'title': title,
+        'description': description,
+        'date': date,
+      });
+
+      debugPrint('Event saved successfully');
+    } catch (e) {
+      debugPrint('Error saving event: $e');
+    }
+  }
+
+  void _showDayDetailsPopup(BuildContext context, DateTime date) {
+    final viewModel = context.read<TestViewmodel>();
+    List<Map<String, String>> tests = [];
+
+    // Prepare tests list
+    if (viewModel.tests != null) {
+      for (var monthTests in viewModel.tests!.testsByMonth.values) {
+        for (var test in monthTests) {
+          if (test.testDate.isNotEmpty && test.testDate.contains('.')) {
+            final dateParts = test.testDate.split('.');
+            if (dateParts.length >= 2) {
+              final day = int.parse(dateParts[0]);
+              final month = int.parse(dateParts[1]);
+              final testDate = DateTime(date.year, month, day);
+
+              if (testDate.year == date.year &&
+                  testDate.month == date.month &&
+                  testDate.day == date.day) {
+                tests.add({
+                  'name': test.testName,
+                  'description': test.testDescription
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => DayDetailsDialog(
+        date: date,
+        tests: tests,
+        fetchEvents: _fetchEvents,
+        saveEvent: saveEvent,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomePageViewModel>();
@@ -166,80 +306,87 @@ class _HomePageState extends State<HomePage> {
                 height: 120,
               ),
             )
-          : SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    Text(
-                      "Dobrodošao/la, \n$studentName",
-                      style: GoogleFonts.inter(
-                          height: 1.1,
-                          fontSize: MediaQuery.of(context).size.width * 0.07,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.secondary),
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                    LayoutBuilder(
-                      builder: (context, constraints) {
-                        return SizedBox(
-                          width: constraints.maxWidth,
-                          height: screenHeight * 0.25,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: 2,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(width: 16),
-                            itemBuilder: (context, index) {
-                              return index == 0
-                                  ? SizedBox(
-                                      width: screenWidth * 0.8,
-                                      child: GradesCard(
-                                          subjects:
-                                              viewModel.grades?.subjects ?? []),
-                                    )
-                                  : GestureDetector(
-                                      onTap: () => _showStudentIdModal(context),
-                                      child: SizedBox(
+          : SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        "Dobrodošao/la, \n$studentName",
+                        style: GoogleFonts.inter(
+                            height: 1.1,
+                            fontSize: MediaQuery.of(context).size.width * 0.07,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.secondary),
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.05),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SizedBox(
+                            width: constraints.maxWidth,
+                            height: screenHeight * 0.25,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 2,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(width: 16),
+                              itemBuilder: (context, index) {
+                                return index == 0
+                                    ? SizedBox(
                                         width: screenWidth * 0.8,
-                                        child: Workingidcard(
-                                          name: studentName,
-                                          oib: studentOib,
-                                          address: studentAddress,
-                                          postalCode: studentPostalCode,
-                                          city: studentCity,
+                                        child: GradesCard(
+                                            subjects:
+                                                viewModel.grades?.subjects ??
+                                                    []),
+                                      )
+                                    : GestureDetector(
+                                        onTap: () =>
+                                            _showStudentIdModal(context),
+                                        child: SizedBox(
+                                          width: screenWidth * 0.8,
+                                          child: Workingidcard(
+                                            name: studentName,
+                                            oib: studentOib,
+                                            address: studentAddress,
+                                            postalCode: studentPostalCode,
+                                            city: studentCity,
+                                          ),
                                         ),
-                                      ),
-                                    );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [ScheduleCard(), GradivoCard()],
-                    ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => CalendarPage(
-                                  email: studentEmail ?? '',
-                                  password: studentPassword ?? '',
-                                )),
+                                      );
+                              },
+                            ),
+                          );
+                        },
                       ),
-                      child: Container(
-                        color: AppColors.accent,
-                        width: screenWidth,
-                        height: screenHeight * 0.15,
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [ScheduleCard(), GradivoCard()],
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.05),
+                      GestureDetector(
+                          onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CalendarPage(
+                                          email: studentEmail ?? '',
+                                          password: studentPassword ?? '',
+                                        )),
+                              ),
+                          child: HorizontalCalendarWidget(
+                            onDayTap: _showDayDetailsPopup,
+                            isHoliday: _isHoliday,
+                            isTest: _isTest,
+                          )),
+                    ],
+                  ),
                 ),
               ),
             ),
