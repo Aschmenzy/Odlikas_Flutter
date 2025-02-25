@@ -10,7 +10,7 @@ import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
 import 'package:odlikas_mobilna/pages/ConnectToScreenPage/in_between_page.dart';
 import 'package:odlikas_mobilna/pages/CritiquePage/critique_page.dart';
-import 'package:odlikas_mobilna/pages/HelpCenterPage/help_center_page.dart';
+import 'package:odlikas_mobilna/pages/IntroPage/intro_page.dart';
 import 'package:odlikas_mobilna/pages/NotificationsPage/notifications_page.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
@@ -51,6 +51,13 @@ class _SettingsPageState extends State<SettingsPage> {
       print(e);
       throw e;
     }
+  }
+
+  void _signOut() async {
+    final box = await Hive.openBox('User');
+    await box.clear();
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => IntroPage()));
   }
 
   @override
@@ -261,19 +268,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   SettingsTile(
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HelpCenterPage()),
-                    ),
-                    label: "Centar za podršku",
-                    path: "assets/images/help.png",
-                  ),
-                  SettingsTile(
-                    onTap: () => Navigator.push(
-                      context,
                       MaterialPageRoute(builder: (context) => CritiquePage()),
                     ),
-                    isLast: true,
                     label: "Kritike",
                     path: "assets/images/thumbs.png",
+                  ),
+                  SettingsTile(
+                    isLast: true,
+                    label: "Odjavite se",
+                    path: "assets/images/logOut.png",
+                    onTap: _signOut,
                   ),
                 ],
               ),

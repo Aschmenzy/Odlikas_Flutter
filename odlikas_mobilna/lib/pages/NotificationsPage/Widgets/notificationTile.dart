@@ -1,62 +1,74 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class NotificationTile extends StatelessWidget {
-  final bool? isLast;
   final String label;
-  final String path;
+  final Widget iconWidget;
   final bool value;
   final Function(bool)? onChanged;
-  final Function()? onTap;
+  final bool isLast;
 
   const NotificationTile({
-    super.key,
+    Key? key,
     required this.label,
-    this.isLast,
-    required this.path,
-    this.onTap,
+    required this.iconWidget,
     required this.value,
-    this.onChanged,
-  });
+    required this.onChanged,
+    this.isLast = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Row(
+    final size = MediaQuery.of(context).size;
+    return Column(
+      children: [
+        SizedBox(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                path,
-                height: MediaQuery.of(context).size.width * 0.09,
-              ),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.03),
+              iconWidget,
+
+              SizedBox(width: 12),
+
+              // Label
               Expanded(
                 child: Text(
                   label,
                   style: GoogleFonts.inter(
-                    color: AppColors.secondary,
-                    fontSize: MediaQuery.of(context).size.width * 0.05,
+                    fontSize: size.width * 0.05,
                     fontWeight: FontWeight.w600,
+                    color: AppColors.secondary,
                   ),
                 ),
               ),
+
+              // Switch
+
               Switch(
                 value: value,
                 onChanged: onChanged,
+                activeColor: Colors.white,
+                activeTrackColor: AppColors.accent,
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Colors.grey[350],
+                trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
               ),
             ],
           ),
-          if (isLast != true) ...[
-            Divider(
-              color: AppColors.tertiary,
-              thickness: 0.5,
-            ),
-          ],
-        ],
-      ),
+        ),
+
+        // Divider (if not the last item)
+        if (!isLast)
+          Divider(
+            color: AppColors.tertiary,
+            thickness: 0.5, // Thinner divider
+            height: 8, // Reduced space around divider
+          ),
+      ],
     );
   }
 }

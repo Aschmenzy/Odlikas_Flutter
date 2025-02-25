@@ -96,30 +96,6 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
     }
   }
 
-  // Get the appropriate background color for a date card
-  Color _getCardColor(DateTime date) {
-    final isToday = _isToday(date);
-
-    if (widget.isTest(date)) {
-      return AppColors.accent;
-    } else if (widget.isHoliday(date)) {
-      // Highlight holidays with a light blue or other color
-      return Colors.lightBlue.shade100;
-    } else if (isToday) {
-      return Colors.grey.shade200;
-    }
-
-    return Colors.white;
-  }
-
-  Color _getTextColor(DateTime date) {
-    if (widget.isTest(date)) {
-      return Colors.white;
-    }
-
-    return AppColors.secondary;
-  }
-
   // Check if date is today
   bool _isToday(DateTime date) {
     final now = DateTime.now();
@@ -157,18 +133,18 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
   // Get month name
   String _getMonthName(DateTime date) {
     final monthNames = [
-      'SIJEČANJ',
-      'VELJAČA',
-      'OŽUJAK',
-      'TRAVANJ',
-      'SVIBANJ',
-      'LIPANJ',
-      'SRPANJ',
-      'KOLOVOZ',
-      'RUJAN',
-      'LISTOPAD',
-      'STUDENI',
-      'PROSINAC'
+      'Siječanj',
+      'Veljača',
+      'Ožujak',
+      'Travanj',
+      'Svibanj',
+      'Lipanj',
+      'Srpanj',
+      'Kolovoz',
+      'Rujan',
+      'Listopad',
+      'Studeni',
+      'Prosinac'
     ];
 
     return monthNames[date.month - 1];
@@ -176,18 +152,22 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Card(
-      color: AppColors.background,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Container(
+        height: 140,
+        width: double.infinity,
+        color: AppColors.background,
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
           children: [
-            // Header with month name
-            Container(
-              width: double.infinity,
+            // Header with Kalendar and month name
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -197,102 +177,120 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
                     child: Text(
                       'Kalendar',
                       style: GoogleFonts.inter(
-                        fontSize: 12,
+                        fontSize: size.width * 0.03,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.secondary,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
                   // Centered month name
                   Text(
                     _getMonthName(_datesInView[_currentPage]),
-                    textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
-                      fontSize: 16,
+                      fontSize: size.width * 0.045,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.secondary,
+                      color: Colors.black87,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
-            // Calendar cards
+            // Calendar cards with PageView
             SizedBox(
-              height: 100,
+              height: 80,
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: _onPageChanged,
                 itemCount: _datesInView.length,
                 itemBuilder: (context, pageIndex) {
                   final date = _datesInView[pageIndex];
-                  return _buildDateCard(date, true);
+                  final isSelected = pageIndex == _currentPage;
+                  final hasTest = widget.isTest(date);
+                  final testSubject = _getSubjectForDate(date);
+
+                  // Determine card color based on selection and test status
+                  Color cardColor;
+                  if (isSelected) {
+                    cardColor =
+                        hasTest ? AppColors.accent : Colors.grey.shade300;
+                  } else {
+                    cardColor =
+                        hasTest ? AppColors.accent : AppColors.background;
+                  }
+
+                  // Determine text color based on selection or test
+                  final textColor = (isSelected || hasTest)
+                      ? AppColors.background
+                      : AppColors.secondary;
+
+                  return GestureDetector(
+                    onTap: () => widget.onDayTap(context, date),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                          color: AppColors.tertiary,
+                          width: 0.75,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            date.day.toString(),
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (isSelected && testSubject.isNotEmpty)
+                            Expanded(
+                              child: Text(
+                                testSubject,
+                                style: GoogleFonts.inter(
+                                  fontSize: 10,
+                                  color: textColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+
+                          //show if there is a test
+                          if (hasTest && testSubject.isNotEmpty)
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      testSubject,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 10,
+                                        color: textColor,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
                 },
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateCard(DateTime date, bool isCenter) {
-    final hasTest = widget.isTest(date);
-    final backgroundColor = _getCardColor(date);
-    final textColor = _getTextColor(date);
-    final testSubject = _getSubjectForDate(date);
-
-    return GestureDetector(
-      onTap: () => widget.onDayTap(context, date),
-      child: Container(
-        width: double.infinity,
-        margin: EdgeInsets.symmetric(horizontal: 4.0),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isCenter ? AppColors.accent : AppColors.secondary,
-            width: isCenter ? 2 : 1,
-          ),
-        ),
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              date.day.toString(),
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-            ),
-            if (hasTest && testSubject.isNotEmpty)
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(
-                      width: 2,
-                      height: 16,
-                      color: Colors.white,
-                      margin: EdgeInsets.only(right: 6),
-                    ),
-                    Expanded(
-                      child: Text(
-                        testSubject,
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          color: textColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
           ],
         ),
       ),
