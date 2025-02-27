@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class SettingsTile extends StatelessWidget {
-  final bool? isLast;
+  final bool isLast;
   final String label;
   final String path;
-  final Function()? onTap;
 
-  const SettingsTile(
-      {super.key,
-      required this.label,
-      this.isLast,
-      required this.path,
-      this.onTap});
+  final Function()? onTap;
+  final bool switchValue;
+  final Function(bool)? onSwitchChanged;
+
+  SettingsTile({
+    super.key,
+    required this.label,
+    this.isLast = false,
+    required this.path,
+    this.onTap,
+    this.switchValue = false,
+    this.onSwitchChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -29,14 +36,17 @@ class SettingsTile extends StatelessWidget {
                 height: MediaQuery.of(context).size.width * 0.09,
               ),
               SizedBox(width: MediaQuery.of(context).size.width * 0.03),
-              Text(label,
-                  style: GoogleFonts.inter(
-                      color: AppColors.secondary,
-                      fontSize: MediaQuery.of(context).size.width * 0.05,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                label,
+                style: fontService.font(
+                  color: AppColors.secondary,
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
-          if (isLast != true) ...[
+          if (!isLast) ...[
             Divider(
               color: AppColors.tertiary,
               thickness: 0.5,

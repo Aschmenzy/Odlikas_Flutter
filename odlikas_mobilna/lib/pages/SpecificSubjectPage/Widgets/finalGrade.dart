@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class ZakljucenoRow extends StatelessWidget {
   const ZakljucenoRow({super.key, required this.viewModel});
@@ -29,6 +30,7 @@ class ZakljucenoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -49,7 +51,7 @@ class ZakljucenoRow extends StatelessWidget {
               children: [
                 Text(
                   'PROSJEK OCJENA: ',
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                       fontWeight: FontWeight.w800,
                       fontSize: 16,
                       color: AppColors.secondary),
@@ -57,7 +59,7 @@ class ZakljucenoRow extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   _calculateAverageGrade(viewModel).toStringAsFixed(1),
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                     color: AppColors.primary,
@@ -86,7 +88,7 @@ class ZakljucenoRow extends StatelessWidget {
               children: [
                 Text(
                   'ZAKLJUČENO: ',
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                       fontWeight: FontWeight.w800,
                       fontSize: 16,
                       color: AppColors.secondary),
@@ -94,7 +96,7 @@ class ZakljucenoRow extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   viewModel.finalGrade ?? '--',
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
                     color: AppColors.primary,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/pages/JobDetailsPage/job_details_page.dart';
+import 'package:provider/provider.dart';
 
 class ExclusiveJobs extends StatelessWidget {
   const ExclusiveJobs({
@@ -18,6 +19,7 @@ class ExclusiveJobs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -66,7 +68,7 @@ class ExclusiveJobs extends StatelessWidget {
                 children: [
                   Text(
                     "Tražimo ${jobData['title']}",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -76,7 +78,7 @@ class ExclusiveJobs extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     "na lokaciji ${jobData['location']}",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w900,
@@ -85,7 +87,7 @@ class ExclusiveJobs extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     jobData['description'] ?? 'No Description',
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
@@ -96,7 +98,7 @@ class ExclusiveJobs extends StatelessWidget {
                   const Spacer(),
                   Text(
                     jobData['catchPhrase'],
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       color: Colors.white,
                       fontSize: 16.5,
                       fontWeight: FontWeight.w900,

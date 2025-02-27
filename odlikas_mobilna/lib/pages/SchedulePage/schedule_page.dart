@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
@@ -12,6 +13,7 @@ import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/daySelector.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/subjectTitle.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/timeSelector.dart';
+import 'package:provider/provider.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -326,13 +328,14 @@ class ScheduleHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
     return Padding(
       padding: EdgeInsets.all(16.0),
       child: Column(
         children: [
           Text(
             "Raspored sati",
-            style: GoogleFonts.inter(
+            style: fontService.font(
               color: AppColors.secondary,
               fontWeight: FontWeight.w800,
               fontSize: screenWidth * 0.06,
@@ -341,7 +344,7 @@ class ScheduleHeader extends StatelessWidget {
           SizedBox(height: screenHeight * 0.01),
           Text(
             'Kliknite ✎ da promijenite raspored',
-            style: GoogleFonts.inter(
+            style: fontService.font(
               color: AppColors.tertiary,
               fontWeight: FontWeight.w700,
               fontSize: screenWidth * 0.04,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class EvaluationTable extends StatelessWidget {
   const EvaluationTable({super.key, required this.viewModel});
@@ -10,6 +11,7 @@ class EvaluationTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return Column(
       children: [
         // Months header table
@@ -73,7 +75,7 @@ class EvaluationTable extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text(
                     element.name,
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                         color: AppColors.secondary),
@@ -100,7 +102,8 @@ class EvaluationTable extends StatelessWidget {
                   children: [
                     TableRow(
                       children: element.gradesByMonth.map((grade) {
-                        return _buildTableCell(grade.isNotEmpty ? grade : "");
+                        return _buildTableCell(
+                            grade.isNotEmpty ? grade : "", context);
                       }).toList(),
                     ),
                   ],
@@ -112,12 +115,13 @@ class EvaluationTable extends StatelessWidget {
   }
 
   Widget _buildTableHeaderCell(String text, BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
       child: Text(
         text,
-        style: GoogleFonts.inter(
+        style: fontService.font(
           fontWeight: FontWeight.w800,
           color: Colors.white,
           fontSize: MediaQuery.of(context).size.width * 0.04,
@@ -126,14 +130,15 @@ class EvaluationTable extends StatelessWidget {
     );
   }
 
-  Widget _buildTableCell(String text) {
+  Widget _buildTableCell(String text, BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return Container(
       height: 45, // Fixed height to make cells more square
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         text.replaceAll('\n', ', '), // Replace newlines with commas
-        style: GoogleFonts.inter(
+        style: fontService.font(
           fontWeight: FontWeight.w800,
           color: Colors.black,
           fontSize: 14,

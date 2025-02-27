@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/NotificationsPage/Widgets/notificationTile.dart';
+import 'package:provider/provider.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({Key? key}) : super(key: key);
@@ -100,6 +101,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
 
     if (isLoading) {
       return Scaffold(
@@ -142,7 +144,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               Center(
                 child: Text(
                   "Obavijesti",
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                     fontSize: size.width * 0.08,
                     fontWeight: FontWeight.bold,
                     color: AppColors.secondary,

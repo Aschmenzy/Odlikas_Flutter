@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class SubjectTile extends StatelessWidget {
   final int periodNumber;
@@ -25,6 +26,7 @@ class SubjectTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final fontService = Provider.of<FontService>(context);
     return ListTile(
       leading: Container(
         width: screenWidth * 0.25,
@@ -42,7 +44,7 @@ class SubjectTile extends StatelessWidget {
         ),
         child: Text(
           '$periodNumber.sat',
-          style: GoogleFonts.inter(
+          style: fontService.font(
             color: AppColors.background,
             fontWeight: FontWeight.w700,
             fontSize: screenWidth * 0.05,
@@ -52,7 +54,7 @@ class SubjectTile extends StatelessWidget {
       title: Text(
         subject,
         overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.inter(
+        style: fontService.font(
           color: AppColors.secondary,
           fontWeight: FontWeight.w600,
           fontSize: screenWidth * 0.04,

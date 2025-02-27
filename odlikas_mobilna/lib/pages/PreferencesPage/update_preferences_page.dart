@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
+import 'package:provider/provider.dart';
 import 'Widgets/numberSelector.dart';
 
 class UpdatePreferencesPage extends StatefulWidget {
@@ -159,6 +161,7 @@ class UpdatePreferencesPage_PreferencesPageState
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: isLoading
@@ -177,7 +180,7 @@ class UpdatePreferencesPage_PreferencesPageState
                 children: [
                   Text(
                     "Koliko vi voljeli učiti \ntjedno?",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       fontSize: MediaQuery.of(context).size.width * 0.09,
                       fontWeight: FontWeight.w800,
                       height: 1.1,
@@ -186,7 +189,7 @@ class UpdatePreferencesPage_PreferencesPageState
                   SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                   Text(
                     "Može se kasnije promijeniti",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       fontSize: MediaQuery.of(context).size.width * 0.05,
                       fontWeight: FontWeight.w800,
                       color: AppColors.tertiary,
@@ -195,7 +198,7 @@ class UpdatePreferencesPage_PreferencesPageState
                   SizedBox(height: MediaQuery.of(context).size.height * 0.025),
                   Text(
                     "Dana u tjednu:",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontWeight: FontWeight.w800,
                         fontSize: MediaQuery.of(context).size.width * 0.05,
                         color: AppColors.secondary),
@@ -214,7 +217,7 @@ class UpdatePreferencesPage_PreferencesPageState
                   SizedBox(height: 20),
                   Text(
                     "Sati u danu:",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontWeight: FontWeight.w800,
                         fontSize: MediaQuery.of(context).size.width * 0.05,
                         color: AppColors.secondary),

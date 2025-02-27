@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/SpecificSubjectPage/secific_subject_page.dart';
+import 'package:provider/provider.dart';
 
 class GradeTile extends StatelessWidget {
   final String subjectName;
@@ -21,6 +23,7 @@ class GradeTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
 
     return GestureDetector(
       onTap: () {
@@ -52,7 +55,7 @@ class GradeTile extends StatelessWidget {
 
                     Text(
                       subjectName,
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                           fontSize: screenWidth * 0.045,
                           fontWeight: FontWeight.w800,
                           color: AppColors.secondary),
@@ -64,7 +67,7 @@ class GradeTile extends StatelessWidget {
 
                     Text(
                       professor,
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                         fontSize: screenWidth * 0.04,
                         color: const Color.fromRGBO(113, 113, 113, 1),
                         fontWeight: FontWeight.w700,

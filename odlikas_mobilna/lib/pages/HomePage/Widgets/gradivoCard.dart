@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class GradivoCard extends StatelessWidget {
@@ -18,6 +19,8 @@ class GradivoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
+
     return GestureDetector(
       onTap: _launchURL,
       child: Card(
@@ -48,7 +51,7 @@ class GradivoCard extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: "Jedine ",
-                              style: GoogleFonts.inter(
+                              style: fontService.font(
                                 height: 1.2,
                                 fontSize: screenWidth * 0.034,
                                 fontWeight: FontWeight.w800,
@@ -57,7 +60,7 @@ class GradivoCard extends StatelessWidget {
                             ),
                             TextSpan(
                               text: "pripreme za maturu ",
-                              style: GoogleFonts.inter(
+                              style: fontService.font(
                                 height: 1.2,
                                 fontSize: screenWidth * 0.034,
                                 fontWeight: FontWeight.w800,
@@ -66,7 +69,7 @@ class GradivoCard extends StatelessWidget {
                             ),
                             TextSpan(
                               text: "\nkoje ti trebaju!",
-                              style: GoogleFonts.inter(
+                              style: fontService.font(
                                 height: 1.2,
                                 fontSize: screenWidth * 0.034,
                                 fontWeight: FontWeight.w800,

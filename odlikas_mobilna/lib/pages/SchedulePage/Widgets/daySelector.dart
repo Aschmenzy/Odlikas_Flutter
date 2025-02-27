@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class DaySelector extends StatelessWidget {
   final String selectedDay;
@@ -48,6 +49,7 @@ class _DayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final fontService = Provider.of<FontService>(context);
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -62,7 +64,7 @@ class _DayButton extends StatelessWidget {
           child: Text(
             day.substring(0, 3),
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: fontService.font(
               color: isSelected ? Colors.white : AppColors.secondary,
               fontWeight: FontWeight.w700,
               fontSize: screenWidth * 0.045,

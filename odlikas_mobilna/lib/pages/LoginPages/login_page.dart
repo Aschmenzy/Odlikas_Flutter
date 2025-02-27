@@ -225,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Image.asset(
-                        'assets/images/login.png',
+                        'assets/images/loginPasswHidden.png',
                         height: MediaQuery.of(context).size.width * 0.65,
                       ),
                     ],

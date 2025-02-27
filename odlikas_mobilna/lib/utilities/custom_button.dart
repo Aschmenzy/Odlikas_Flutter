@@ -1,7 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
+import 'package:provider/provider.dart';
 
 class MyButton extends StatelessWidget {
   const MyButton(
@@ -31,6 +32,7 @@ class MyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return GestureDetector(
       onTap: ontap,
       child: Container(
@@ -48,7 +50,7 @@ class MyButton extends StatelessWidget {
             Container(child: icon),
             Text(
               buttonText,
-              style: GoogleFonts.inter(
+              style: fontService.font(
                   color: textColor, fontWeight: fontWeight, fontSize: fontSize),
             ),
           ],

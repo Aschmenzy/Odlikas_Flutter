@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class Workingidcard extends StatelessWidget {
   final String? name;
@@ -20,6 +21,8 @@ class Workingidcard extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
+
     return Material(
       elevation: 2,
       borderRadius: BorderRadius.circular(15),
@@ -43,7 +46,7 @@ class Workingidcard extends StatelessWidget {
                       children: [
                         Text(
                           'Učenička iskaznica',
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             fontSize: screenWidth * 0.05,
                             fontWeight: FontWeight.normal,
                             color: AppColors.secondary,
@@ -51,7 +54,7 @@ class Workingidcard extends StatelessWidget {
                         ),
                         Text(
                           'posredovanje pri zapošljvanju učenika',
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             fontSize: screenWidth * 0.025,
                             fontWeight: FontWeight.normal,
                             color: AppColors.secondary,
@@ -102,20 +105,21 @@ class Workingidcard extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String? value, BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final fontService = Provider.of<FontService>(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: GoogleFonts.inter(
+          style: fontService.font(
             fontSize: screenWidth * 0.025,
             color: AppColors.secondary,
           ),
         ),
         Text(
           value ?? '',
-          style: GoogleFonts.inter(
+          style: fontService.font(
             fontSize: screenWidth * 0.03,
             color: AppColors.secondary,
             fontWeight: FontWeight.bold,

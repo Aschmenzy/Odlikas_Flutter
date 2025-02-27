@@ -1,8 +1,9 @@
 // ignore_for_file: must_be_immutable
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class ShareScreenCard extends StatelessWidget {
   ShareScreenCard({super.key, required this.isConnected});
@@ -11,6 +12,8 @@ class ShareScreenCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
+
     return isConnected
         ? Card(
             color: AppColors.background,
@@ -30,7 +33,7 @@ class ShareScreenCard extends StatelessWidget {
                       children: [
                         Text(
                           'Povežite se',
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             color: AppColors.secondary,
                             fontSize: MediaQuery.of(context).size.width * 0.045,
                             fontWeight: FontWeight.w600,
@@ -40,9 +43,10 @@ class ShareScreenCard extends StatelessWidget {
                             height: MediaQuery.of(context).size.height * 0.013),
                         Text(
                           'Povežite svoj ekran da \nzapočnete sa učenjem',
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             fontSize: MediaQuery.of(context).size.width * 0.035,
                             color: AppColors.tertiary,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
@@ -79,7 +83,7 @@ class ShareScreenCard extends StatelessWidget {
                       children: [
                         Text(
                           'Povezani ste',
-                          style: TextStyle(
+                          style: fontService.font(
                             fontSize: MediaQuery.of(context).size.width * 0.045,
                             fontWeight: FontWeight.w600,
                             color: AppColors.secondary,
@@ -89,7 +93,7 @@ class ShareScreenCard extends StatelessWidget {
                             height: MediaQuery.of(context).size.height * 0.013),
                         Text(
                           'Povezani ste sa svojim ekranom',
-                          style: TextStyle(
+                          style: fontService.font(
                             fontSize: MediaQuery.of(context).size.width * 0.035,
                             color: AppColors.tertiary,
                           ),

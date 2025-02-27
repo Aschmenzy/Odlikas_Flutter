@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'dart:math';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
+import 'package:provider/provider.dart';
 
 class GradesCard extends StatelessWidget {
   final List<Subject> subjects;
@@ -17,6 +18,8 @@ class GradesCard extends StatelessWidget {
     Map<String, double> gradePercentages = calculateGradePercentages(subjects);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -35,7 +38,7 @@ class GradesCard extends StatelessWidget {
           children: [
             Text(
               'OCJENE',
-              style: TextStyle(
+              style: fontService.font(
                 height: 1.1,
                 color: AppColors.background,
                 fontSize: screenWidth * 0.06,
@@ -114,20 +117,22 @@ class GradesCard extends StatelessWidget {
 
   Widget _buildGradeLabel(
       String label, String percentage, BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1.5),
       child: Row(
         children: [
           Text(
             '$label - ',
-            style: GoogleFonts.inter(
+            style: fontService.font(
                 fontSize: MediaQuery.of(context).size.height * 0.02,
                 color: Colors.white,
                 fontWeight: FontWeight.w600),
           ),
           Text(
             percentage,
-            style: GoogleFonts.inter(
+            style: fontService.font(
                 fontSize: MediaQuery.of(context).size.height * 0.02,
                 color: Colors.white,
                 fontWeight: FontWeight.w600),

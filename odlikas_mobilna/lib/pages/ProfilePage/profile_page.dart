@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/Widgets/descriptionModal.dart';
@@ -273,6 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
 
     if (_isLoading) {
       return Scaffold(
@@ -307,10 +310,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       Navigator.of(context).pop();
                     },
                   ),
-                  SizedBox(width: screenWidth * 0.24),
+                  SizedBox(width: screenWidth * 0.25),
                   Text(
                     "Profil",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontSize: screenWidth * 0.075,
                         fontWeight: FontWeight.w700,
                         color: AppColors.secondary),
@@ -351,9 +354,9 @@ class _ProfilePageState extends State<ProfilePage> {
               if (studentName != null)
                 Text(
                   studentName!,
-                  style: GoogleFonts.inter(
-                      fontSize: screenWidth * 0.05,
-                      fontWeight: FontWeight.w800,
+                  style: fontService.font(
+                      fontSize: screenWidth * 0.06,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.secondary),
                 ),
 
@@ -363,7 +366,7 @@ class _ProfilePageState extends State<ProfilePage> {
               if (studentSchool != null)
                 Text(
                   studentSchool!,
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                     fontSize: screenWidth * 0.035,
                     color: AppColors.tertiary,
                     fontWeight: FontWeight.w600,
@@ -376,7 +379,7 @@ class _ProfilePageState extends State<ProfilePage> {
               if (studentProgram != null)
                 Text(
                   studentProgram!,
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                     fontSize: screenWidth * 0.035,
                     color: AppColors.tertiary,
                     fontWeight: FontWeight.w600,
@@ -407,15 +410,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         _pdfBase64 != null
                             ? Text(
                                 "Promijente životopis",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                   fontSize: screenWidth * 0.04,
-                                  fontWeight: FontWeight.w700,
                                   color: AppColors.background,
                                 ),
                               )
                             : Text(
                                 "Prenesi svoj životopis",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                   fontSize: screenWidth * 0.04,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.background,
@@ -424,7 +426,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         SizedBox(height: screenHeight * 0.002),
                         Text(
                           "Podržava samo pdf",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             fontSize: screenWidth * 0.03,
                             color: AppColors.background,
                             fontWeight: FontWeight.w600,
@@ -452,7 +454,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Center(
                     child: Text(
                       "Pogledaj životopis",
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                         fontSize: screenWidth * 0.04,
                         fontWeight: FontWeight.w700,
                         color: AppColors.background,
@@ -466,7 +468,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Text(
                     "Opis profila:",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontSize: screenWidth * 0.045,
                         fontWeight: FontWeight.w700,
                         color: AppColors.secondary),
@@ -494,7 +496,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           horizontal: 15, vertical: 10),
                       child: Text(
                         _description ?? 'Recite nam nešto o sebi...',
-                        style: GoogleFonts.inter(
+                        style: fontService.font(
                           color: AppColors.tertiary,
                           fontSize: screenWidth * 0.035,
                         ),

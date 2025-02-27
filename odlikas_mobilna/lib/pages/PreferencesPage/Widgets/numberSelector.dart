@@ -1,8 +1,9 @@
 // ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 Widget buildNumberSelector({
   required BuildContext context,
@@ -10,6 +11,7 @@ Widget buildNumberSelector({
   required int selectedValue,
   required Function(int) onSelect,
 }) {
+  final fontService = Provider.of<FontService>(context);
   return Container(
     height: 50,
     child: Row(
@@ -37,7 +39,7 @@ Widget buildNumberSelector({
             child: Center(
               child: Text(
                 number.toString(),
-                style: GoogleFonts.inter(
+                style: fontService.font(
                   color: isSelected ? Colors.white : AppColors.secondary,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

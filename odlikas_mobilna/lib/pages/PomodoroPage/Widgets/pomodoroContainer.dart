@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
+import 'package:provider/provider.dart';
 
 class PomodoroContainer extends StatefulWidget {
   final String currentPhase;
@@ -46,6 +47,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
 
     return Container(
       width: screenSize.width * 0.9,
@@ -71,7 +73,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
                   final duration = Duration(seconds: secondsLeft);
                   return Text(
                     formatDuration(duration),
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       fontSize: screenSize.width * 0.22,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -113,6 +115,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
     final bool isActive = widget.currentPhase == phase;
     final Color backgroundColor =
         isActive ? _getPhaseColor() : Colors.transparent;
+    final fontService = Provider.of<FontService>(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -122,7 +125,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
       ),
       child: Text(
         phase,
-        style: GoogleFonts.inter(
+        style: fontService.font(
           fontSize: MediaQuery.of(context).size.width * 0.04,
           fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
           color: isActive ? Colors.white : Colors.white,
@@ -133,6 +136,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
 
   Widget _buildControls(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -159,7 +163,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
             ),
             child: Text(
               widget.isRunning ? "ZAUSTAVI" : "ZAPOČNITE",
-              style: GoogleFonts.inter(
+              style: fontService.font(
                   fontWeight: FontWeight.w700,
                   fontSize: screenSize.width * 0.05),
             ),

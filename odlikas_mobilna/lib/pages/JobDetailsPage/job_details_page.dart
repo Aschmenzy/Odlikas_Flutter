@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/QueryPage/query_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 import 'dart:convert';
+
+import 'package:provider/provider.dart';
 
 class JobDetailsPage extends StatelessWidget {
   final String jobId;
@@ -19,6 +21,7 @@ class JobDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -64,7 +67,7 @@ class JobDetailsPage extends StatelessWidget {
                           ),
                         Text(
                           "${jobData['recruter']}",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                               fontSize: screenWidth * 0.08,
                               color: AppColors.secondary,
                               height: 0.6,
@@ -89,13 +92,13 @@ class JobDetailsPage extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: 'Traži se ',
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     color: AppColors.secondary),
                               ),
                               TextSpan(
                                 text: "${jobData['title']}",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.secondary),
@@ -123,13 +126,13 @@ class JobDetailsPage extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: "Prijava do: ",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     color: AppColors.secondary),
                               ),
                               TextSpan(
                                 text: "${jobData['until']}",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.secondary),
@@ -157,13 +160,13 @@ class JobDetailsPage extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: "Lokacija rada: ",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     color: AppColors.secondary),
                               ),
                               TextSpan(
                                 text: "${jobData['location']}",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.secondary),
@@ -191,13 +194,13 @@ class JobDetailsPage extends StatelessWidget {
                             children: [
                               TextSpan(
                                 text: 'Prosjećna neto plaća ',
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     color: AppColors.secondary),
                               ),
                               TextSpan(
                                 text: "${jobData['pay']}",
-                                style: GoogleFonts.inter(
+                                style: fontService.font(
                                     fontSize: screenWidth * 0.05,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.secondary),
@@ -212,7 +215,7 @@ class JobDetailsPage extends StatelessWidget {
                   ),
                   Text(
                     "Opis posla:",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontSize: screenWidth * 0.05,
                         fontWeight: FontWeight.bold,
                         color: AppColors.secondary),
@@ -233,7 +236,7 @@ class JobDetailsPage extends StatelessWidget {
                       child: SingleChildScrollView(
                         child: Text(
                           "${jobData['description']}",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                               fontSize: screenWidth * 0.04,
                               color: AppColors.secondary),
                         ),

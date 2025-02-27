@@ -3,17 +3,17 @@ import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:provider/provider.dart';
 
-class NotificationTile extends StatelessWidget {
+class DislexycTile extends StatelessWidget {
   final String label;
-  final Widget iconWidget;
+  final String path;
   final bool value;
   final Function(bool)? onChanged;
   final bool isLast;
 
-  const NotificationTile({
+  const DislexycTile({
     Key? key,
     required this.label,
-    required this.iconWidget,
+    required this.path,
     required this.value,
     required this.onChanged,
     this.isLast = false,
@@ -21,18 +21,19 @@ class NotificationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final fontService = Provider.of<FontService>(context);
+    final size = MediaQuery.of(context).size;
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
+          height: size.height * 0.035,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              iconWidget,
+              Image.asset(path,
+                  height: MediaQuery.of(context).size.width * 0.1),
 
-              SizedBox(width: 12),
+              SizedBox(width: 18),
 
               // Label
               Expanded(
@@ -61,13 +62,17 @@ class NotificationTile extends StatelessWidget {
           ),
         ),
 
+        SizedBox(height: size.height * 0.01),
+
         // Divider (if not the last item)
-        if (!isLast)
+        if (!isLast) ...[
           Divider(
             color: AppColors.tertiary,
             thickness: 0.5, // Thinner divider
             height: 8, // Reduced space around divider
           ),
+          SizedBox(height: size.height * 0.01),
+        ]
       ],
     );
   }

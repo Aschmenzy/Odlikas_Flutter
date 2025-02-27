@@ -3,11 +3,12 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/firestore_pomodoro_service.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/Widgets/pomodoroContainer.dart';
+import 'package:provider/provider.dart';
 
 class PomodoroPage extends StatefulWidget {
   const PomodoroPage({super.key});
@@ -213,6 +214,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
 
   Widget _buildHeader(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -227,7 +229,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
           Center(
             child: Text(
               "Pomodoro mjerač vremena",
-              style: GoogleFonts.inter(
+              style: fontService.font(
                 fontSize: screenSize.width * 0.06,
                 fontWeight: FontWeight.w800,
               ),
@@ -242,9 +244,10 @@ class _PomodoroPageState extends State<PomodoroPage> {
   }
 
   Widget _buildCycleCount() {
+    final fontService = Provider.of<FontService>(context);
     return Text(
       "#${1 + _cycleCount}",
-      style: GoogleFonts.inter(
+      style: fontService.font(
         fontWeight: FontWeight.w800,
         fontSize: 28,
         color: _getPhaseColor(),
@@ -253,11 +256,12 @@ class _PomodoroPageState extends State<PomodoroPage> {
   }
 
   Widget _buildPhaseHint() {
+    final fontService = Provider.of<FontService>(context);
     return Text(
       _currentPhase == "Pomodoro"
           ? "Vrijeme je za učiti!"
           : "Vrijeme je za pauzu!",
-      style: GoogleFonts.inter(
+      style: fontService.font(
         fontWeight: FontWeight.w800,
         fontSize: 20,
         color: Colors.black,

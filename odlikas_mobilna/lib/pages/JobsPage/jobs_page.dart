@@ -1,12 +1,13 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:odlikas_mobilna/pages/JobsPage/Widgets/exclusiveJobs.dart';
 import 'package:odlikas_mobilna/pages/JobsPage/Widgets/nonExclusiveJobs.dart';
+import 'package:provider/provider.dart';
 
 class JobsPage extends StatefulWidget {
   const JobsPage({super.key});
@@ -26,6 +27,7 @@ class _JobsPageState extends State<JobsPage> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -56,7 +58,7 @@ class _JobsPageState extends State<JobsPage> {
                   SizedBox(height: screenHeight * 0.04),
                   Text(
                     "Eksluzivni poslovi:",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontSize: screenWidth * 0.045,
                         fontWeight: FontWeight.w900,
                         color: AppColors.secondary),
@@ -87,7 +89,7 @@ class _JobsPageState extends State<JobsPage> {
 
                   Text(
                     "Izdvojeni poslovi: ",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                         fontSize: screenWidth * 0.045,
                         fontWeight: FontWeight.w900,
                         color: AppColors.secondary),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class NotesTable extends StatelessWidget {
   final HomePageViewModel viewModel;
@@ -11,6 +12,7 @@ class NotesTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final fontService = Provider.of<FontService>(context);
 
     final notes =
         viewModel.subjectGrades?.expand((month) => month.grades).toList() ?? [];
@@ -39,7 +41,7 @@ class NotesTable extends StatelessWidget {
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     "BILJEŠKE",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       fontSize: screenWidth * 0.04,
@@ -82,10 +84,12 @@ class NotesTable extends StatelessWidget {
                             bottomLeft: Radius.circular(15),
                           )
                         : null,
+                    context,
                   ),
                   _buildNotesCellWithRadius(
                     notes[i].grade,
                     null,
+                    context,
                   ),
                   _buildNotesCellWithRadius(
                     notes[i].gradeNote,
@@ -94,6 +98,7 @@ class NotesTable extends StatelessWidget {
                             bottomRight: Radius.circular(15),
                           )
                         : null,
+                    context,
                   ),
                 ],
               ),
@@ -103,7 +108,9 @@ class NotesTable extends StatelessWidget {
     );
   }
 
-  Widget _buildNotesCellWithRadius(String text, BorderRadius? borderRadius) {
+  Widget _buildNotesCellWithRadius(
+      String text, BorderRadius? borderRadius, BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.zero,
       child: Container(
@@ -112,7 +119,7 @@ class NotesTable extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Text(
           text,
-          style: GoogleFonts.inter(
+          style: fontService.font(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppColors.secondary,

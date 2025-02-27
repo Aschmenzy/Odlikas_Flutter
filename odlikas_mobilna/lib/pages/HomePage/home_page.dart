@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
@@ -296,6 +296,8 @@ class _HomePageState extends State<HomePage> {
     final viewModel = context.watch<HomePageViewModel>();
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: viewModel.isLoading
@@ -317,11 +319,12 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 20),
                       Text(
                         "Dobrodošao/la, \n$studentName",
-                        style: GoogleFonts.inter(
-                            height: 1.1,
-                            fontSize: MediaQuery.of(context).size.width * 0.07,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.secondary),
+                        style: fontService.font(
+                          fontWeight: FontWeight.w900,
+                          height: 1.1,
+                          fontSize: MediaQuery.of(context).size.width * 0.07,
+                          color: AppColors.secondary,
+                        ),
                       ),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05),

@@ -1,7 +1,7 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/SubjectsPage/Widgets/gradesTile.dart';
@@ -31,6 +31,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomePageViewModel>();
+    final fontService = Provider.of<FontService>(context);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -68,7 +69,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
                         Text(
                           viewModel.studentProfile?.studentProgram ??
                               "Loading...",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             color: AppColors.secondary,
                             fontSize: screenWidth * 0.055,
                             fontWeight: FontWeight.bold,
@@ -79,7 +80,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
                         ),
                         Text(
                           "Razrednik/ca: ${viewModel.studentProfile?.classMaster ?? ''}",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             fontSize: screenWidth * 0.03,
                             fontWeight: FontWeight.w700,
                             color: AppColors.tertiary,

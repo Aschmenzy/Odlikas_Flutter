@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
@@ -40,6 +40,7 @@ class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomePageViewModel>();
+    final fontService = Provider.of<FontService>(context);
 
     final selectedSubject = viewModel.grades!.subjects.firstWhere(
       (subject) => subject.subjectId == widget.subjectId,
@@ -86,7 +87,7 @@ class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
                             ),
                             Text(
                               selectedSubject.subjectName,
-                              style: GoogleFonts.inter(
+                              style: fontService.font(
                                   fontSize:
                                       MediaQuery.of(context).size.width * 0.07,
                                   fontWeight: FontWeight.bold,
@@ -96,7 +97,7 @@ class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
                             const SizedBox(height: 10),
                             Text(
                               "Nastavnik/ca: ${selectedSubject.professor}",
-                              style: GoogleFonts.inter(
+                              style: fontService.font(
                                 fontWeight: FontWeight.w700,
                                 fontSize:
                                     MediaQuery.of(context).size.width * 0.04,

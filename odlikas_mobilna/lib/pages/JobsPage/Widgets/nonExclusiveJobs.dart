@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/JobDetailsPage/job_details_page.dart';
+import 'package:provider/provider.dart';
 
 class NonExclusiveJob extends StatelessWidget {
   const NonExclusiveJob({
@@ -21,6 +22,7 @@ class NonExclusiveJob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -51,14 +53,14 @@ class NonExclusiveJob extends StatelessWidget {
                   ),
                 ),
               Text(jobData['recruter'],
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                       fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.bold,
                       color: AppColors.secondary)),
               Spacer(),
               Text(
                 jobData['location'],
-                style: GoogleFonts.inter(
+                style: fontService.font(
                     fontWeight: FontWeight.w600,
                     color: AppColors.secondary,
                     fontSize: screenWidth * 0.05),
@@ -72,8 +74,8 @@ class NonExclusiveJob extends StatelessWidget {
           SizedBox(height: screenHeight * 0.005),
           Text(
             jobData['title'],
-            style: GoogleFonts.inter(
-                fontWeight: FontWeight.w800,
+            style: fontService.font(
+                fontWeight: FontWeight.w700,
                 fontSize: screenWidth * 0.04,
                 color: AppColors.secondary),
           ),
@@ -83,14 +85,14 @@ class NonExclusiveJob extends StatelessWidget {
             children: [
               Text(
                 "Prosječna neto plaća ",
-                style: GoogleFonts.inter(
+                style: fontService.font(
                     fontWeight: FontWeight.w600,
                     fontSize: screenWidth * 0.03,
                     color: AppColors.secondary),
               ),
               Text(
                 jobData['pay'],
-                style: GoogleFonts.inter(
+                style: fontService.font(
                     fontWeight: FontWeight.bold,
                     fontSize: screenWidth * 0.05,
                     color: AppColors.secondary),

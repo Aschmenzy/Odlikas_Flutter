@@ -3,6 +3,8 @@ import 'package:lottie/lottie.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
+import 'package:odlikas_mobilna/FontService.dart';
+import 'package:provider/provider.dart';
 
 class ConnectScreen extends StatefulWidget {
   const ConnectScreen({super.key});
@@ -101,6 +103,8 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Connect to Screen'),
@@ -118,12 +122,12 @@ class _ConnectScreenState extends State<ConnectScreen> {
               },
             ),
           ),
-          const Padding(
+          Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
               'Scan the QR code displayed on your tablet screen',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: fontService.font(fontSize: 16),
             ),
           ),
         ],

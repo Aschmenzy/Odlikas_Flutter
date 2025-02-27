@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
@@ -14,10 +15,12 @@ import 'package:odlikas_mobilna/pages/IntroPage/intro_page.dart';
 import 'package:odlikas_mobilna/pages/NotificationsPage/notifications_page.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
+import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/dislexycTile.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/profile_page.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:odlikas_mobilna/pages/TermsAndConditionsPage/terms_and_conditions_page.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -27,21 +30,92 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool isDyslexic = false;
+  String? userEmail;
+  bool isLoading = true;
+
   late Future<Map<String, dynamic>> _profileFuture;
 
+  Future<void> _loadUserData() async {
+    final box = await Hive.openBox('User');
+    userEmail = box.get('email');
+
+    print('Loading user data for email: $userEmail'); // Debug log
+
+    if (userEmail != null) {
+      // Try to load existing preferences
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection("StudentNotificationsPreferences")
+            .doc(userEmail)
+            .get();
+
+        if (doc.exists) {
+          final data = doc.data();
+          if (data != null) {
+            print('Loaded preferences data: $data'); // Debug log
+            setState(() {
+              isDyslexic = data['dyslexic'] ?? false;
+            });
+          }
+        }
+      } catch (e) {
+        print('Error loading notification preferences: $e');
+      }
+    } else {
+      print('Cannot load preferences: User email is null');
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+// Replace your _saveNotificationPreferences function with this version:
+  Future<void> _saveNotificationPreferences({
+    required String field,
+    required bool value,
+  }) async {
+    if (userEmail == null) {
+      print('Cannot save preferences: User email is null');
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection("StudentNotificationsPreferences")
+          .doc(userEmail)
+          .set({
+        field: value,
+      }, SetOptions(merge: true));
+
+      print('Successfully updated $field to $value');
+    } catch (e) {
+      print('Error saving notification preference: $e');
+      // Show error message to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Greška pri spremanju postavki obavijesti'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+// Update the _fetchProfile function to use userEmail instead of Email
   Future<Map<String, dynamic>> _fetchProfile() async {
     final box = await Hive.openBox('User');
-    final email = box.get('email');
+    userEmail = box.get('email');
     final isConnected = box.get('isConnected') ?? false;
 
     try {
       final docSnapshot = await FirebaseFirestore.instance
           .collection('studentProfiles')
-          .doc(email)
+          .doc(userEmail)
           .get();
 
       return {
-        'email': email,
+        'email': userEmail,
         'isConnected': isConnected,
         'pfp': docSnapshot.exists && docSnapshot.data() != null
             ? docSnapshot.data()!['pfp']
@@ -64,12 +138,14 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _profileFuture = _fetchProfile();
+    _loadUserData();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -108,20 +184,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   Text(
                     "Postavke",
-                    style: GoogleFonts.inter(
-                      fontSize: screenWidth * 0.09,
-                      fontWeight: FontWeight.bold,
+                    style: fontService.font(
+                      fontSize: screenWidth * 0.1,
+                      fontWeight: FontWeight.w500,
                       color: AppColors.secondary,
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.05),
                   Text(
                     "Profil",
-                    style: GoogleFonts.inter(
-                      fontSize: screenWidth * 0.06,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.secondary,
-                    ),
+                    style: fontService.font(
+                        fontSize: screenWidth * 0.075,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.secondary,
+                        height: 1.1),
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   GestureDetector(
@@ -152,16 +228,16 @@ class _SettingsPageState extends State<SettingsPage> {
                             Text(
                               "${data['email']}",
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
-                                fontSize: screenWidth * 0.043,
+                              style: fontService.font(
+                                fontSize: screenWidth * 0.045,
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.secondary,
                               ),
                             ),
                             Text(
                               'Pokaži profil',
-                              style: GoogleFonts.inter(
-                                fontSize: screenWidth * 0.04,
+                              style: fontService.font(
+                                fontSize: screenWidth * 0.044,
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.tertiary,
                               ),
@@ -200,7 +276,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   SizedBox(height: screenHeight * 0.01),
                   Text(
                     "Općenito",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       fontSize: screenWidth * 0.06,
                       fontWeight: FontWeight.w600,
                       color: AppColors.secondary,
@@ -216,9 +292,22 @@ class _SettingsPageState extends State<SettingsPage> {
                           builder: (context) => NotificationsPage()),
                     ),
                   ),
-                  SettingsTile(
+                  DislexycTile(
                     label: "Dislekcijski tekst",
                     path: "assets/images/dyslexia.png",
+                    value: isDyslexic,
+                    onChanged: (newValue) {
+                      setState(() {
+                        isDyslexic = newValue;
+                      });
+                      _saveNotificationPreferences(
+                        field: 'dyslexic',
+                        value: newValue,
+                      );
+
+                      //change the font of the app
+                      context.read<FontService>().toggleDyslexicMode();
+                    },
                   ),
                   SettingsTile(
                     onTap: () => Navigator.push(
@@ -250,7 +339,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   SizedBox(height: screenHeight * 0.023),
                   Text(
                     "Podrška",
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       fontSize: screenWidth * 0.06,
                       fontWeight: FontWeight.w600,
                       color: AppColors.secondary,

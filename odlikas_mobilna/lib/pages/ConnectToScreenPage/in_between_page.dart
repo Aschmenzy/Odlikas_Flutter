@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/ConnectToScreenPage/connect_screen.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
+import 'package:provider/provider.dart';
 
 class InBetweenPage extends StatelessWidget {
   const InBetweenPage({super.key});
@@ -10,6 +11,8 @@ class InBetweenPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
@@ -33,7 +36,7 @@ class InBetweenPage extends StatelessWidget {
                       Text(
                           "Tražite rješenje kako bi "
                           "mogli učit učinkovitije?",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                             fontSize: screenSize.width * 0.07,
                             fontWeight: FontWeight.w800,
                             color: AppColors.background,
@@ -47,7 +50,7 @@ class InBetweenPage extends StatelessWidget {
                         "da bolje upravljate vremenom "
                         "i održite fokus, povećavajući "
                         "produktivnost u učenju.",
-                        style: GoogleFonts.inter(
+                        style: fontService.font(
                           fontSize: screenSize.width * 0.04,
                           fontWeight: FontWeight.w600,
                           color: AppColors.background,
@@ -65,7 +68,7 @@ class InBetweenPage extends StatelessWidget {
               child: Column(
                 children: [
                   Text("Znanstvene bilješke",
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                         fontSize: screenSize.width * 0.065,
                         fontWeight: FontWeight.w900,
                         color: AppColors.accent,
@@ -85,29 +88,43 @@ class InBetweenPage extends StatelessWidget {
 
                   RichText(
                     text: TextSpan(
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                         color: AppColors.secondary,
                         fontSize: screenSize.width * 0.045,
                         fontWeight: FontWeight.w600,
                       ),
                       children: [
-                        const TextSpan(
-                            text: 'prepoznaju vaš rukopis i koriste '),
+                        TextSpan(
+                          text: 'prepoznaju vaš rukopis i koriste ',
+                          style: fontService.font(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenSize.width * 0.045),
+                        ),
                         TextSpan(
                           text: 'umjetnu inteligenciju',
-                          style: GoogleFonts.inter(
-                            color: AppColors.accent,
-                          ),
+                          style: fontService.font(
+                              color: AppColors.accent, fontSize: 16),
                         ),
-                        const TextSpan(
-                            text: ' za rješavanje zadataka, prikazujući '),
+                        TextSpan(
+                          text: ' za rješavanje zadataka, prikazujući ',
+                          style: fontService.font(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenSize.width * 0.045),
+                        ),
                         TextSpan(
                           text: 'korake rješenja',
-                          style: GoogleFonts.inter(
-                            color: AppColors.accent,
-                          ),
+                          style: fontService.font(
+                              color: AppColors.accent, fontSize: 16),
                         ),
-                        const TextSpan(text: ' na jednostavan način.'),
+                        TextSpan(
+                          text: ' na jednostavan način.',
+                          style: fontService.font(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenSize.width * 0.045),
+                        ),
                       ],
                     ),
                   ),
@@ -117,7 +134,7 @@ class InBetweenPage extends StatelessWidget {
                   // Second paragraph with blue highlight
                   RichText(
                     text: TextSpan(
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                         color: AppColors.secondary,
                         fontSize: screenSize.width * 0.045,
                         fontWeight: FontWeight.w600,
@@ -130,13 +147,18 @@ class InBetweenPage extends StatelessWidget {
                         ),
                         TextSpan(
                           text: 'ODLIKAŠ+',
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                               color: AppColors.primary,
-                              fontWeight: FontWeight.w600),
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenSize.width * 0.045),
                         ),
-                        const TextSpan(
+                        TextSpan(
                           text:
                               ' je vaš savršeni pomoćnik za bolje rezultate u školi.',
+                          style: fontService.font(
+                              color: AppColors.secondary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: screenSize.width * 0.045),
                         ),
                       ],
                     ),
@@ -147,7 +169,7 @@ class InBetweenPage extends StatelessWidget {
 
                   Text(
                     'Biti organiziran, učinkovit i uspješan nikada nije bilo lakše!',
-                    style: GoogleFonts.inter(
+                    style: fontService.font(
                       color: AppColors.primary,
                       fontSize: screenSize.width * 0.045,
                       fontWeight: FontWeight.w600,

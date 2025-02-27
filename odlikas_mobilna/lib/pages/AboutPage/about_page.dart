@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -8,6 +9,7 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -33,7 +35,7 @@ class AboutPage extends StatelessWidget {
                     ),
                     Text(
                       "ODLIKAŠ",
-                      style: GoogleFonts.inter(
+                      style: fontService.font(
                         fontSize: size.width * 0.075,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
@@ -46,7 +48,7 @@ class AboutPage extends StatelessWidget {
                         textAlign: TextAlign.center,
                         softWrap: true,
                         overflow: TextOverflow.visible,
-                        style: GoogleFonts.inter(
+                        style: fontService.font(
                           fontSize: size.width * 0.055,
                           fontWeight: FontWeight.w800,
                           color: AppColors.secondary,
@@ -91,54 +93,57 @@ class AboutPage extends StatelessWidget {
                   left: size.width * 0.1,
                   right: size.width * 0.3,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: size.height * 0.05),
-                    Container(
-                      width: size.width * 0.9,
-                      child: Column(
-                        children: [
-                          Text(
-                            "ODLIKAŠ je inovativna aplikacija stvorena kako bi osnovnoškolcima i srednjoškolcima pomogla u organizaciji školskih obaveza i učenju.",
-                            overflow: TextOverflow.visible,
-                            softWrap: true,
-                            style: GoogleFonts.inter(
-                              fontSize: size.width * 0.045,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.background,
-                              height: 1.3,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: size.height * 0.05),
+                      Container(
+                        width: size.width * 0.9,
+                        child: Column(
+                          children: [
+                            Text(
+                              "ODLIKAŠ je inovativna aplikacija stvorena kako bi osnovnoškolcima i srednjoškolcima pomogla u organizaciji školskih obaveza i učenju.",
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
+                              style: fontService.font(
+                                fontSize: size.width * 0.045,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.background,
+                                height: 1.3,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: size.height * 0.02),
-                          Text(
-                            "Prvotno razvijena kao projekt za natjecanje Razvoj softvera 2024/2025, aplikacija je brzo postala mnogo više, nezaobilazan alat za svakog učenika koji želi postići bolje rezultate uz bolju organizaciju i manje stresa.",
-                            overflow: TextOverflow.visible,
-                            softWrap: true,
-                            style: GoogleFonts.inter(
-                              fontSize: size.width * 0.045,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.background,
-                              height: 1.3,
+                            SizedBox(height: size.height * 0.02),
+                            Text(
+                              "Prvotno razvijena kao projekt za natjecanje Razvoj softvera 2024/2025, aplikacija je brzo postala mnogo više, nezaobilazan alat za svakog učenika koji želi postići bolje rezultate uz bolju organizaciju i manje stresa.",
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
+                              style: fontService.font(
+                                fontSize: size.width * 0.045,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.background,
+                                height: 1.3,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: size.height * 0.02),
-                          Text(
-                            "ODLIKAŠ je više od obične aplikacije,   to je osobni asistent za školu koji pomaže učenicima da ostanu organizirani, smanje stres i postignu najbolje moguće rezultate.",
-                            overflow: TextOverflow.visible,
-                            softWrap: true,
-                            style: GoogleFonts.inter(
-                              fontSize: size.width * 0.045,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.background,
-                              height: 1.3,
+                            SizedBox(height: size.height * 0.02),
+                            Text(
+                              "ODLIKAŠ je više od obične aplikacije,   to je osobni asistent za školu koji pomaže učenicima da ostanu organizirani, smanje stres i postignu najbolje moguće rezultate.",
+                              overflow: TextOverflow.visible,
+                              softWrap: true,
+                              style: fontService.font(
+                                fontSize: size.width * 0.045,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.background,
+                                height: 1.3,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: size.height * 0.02),
-                        ],
+                            SizedBox(height: size.height * 0.02),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

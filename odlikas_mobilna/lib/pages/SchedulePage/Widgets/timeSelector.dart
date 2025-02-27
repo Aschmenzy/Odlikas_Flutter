@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:provider/provider.dart';
 
 class TimeSelector extends StatelessWidget {
   final bool isMorning;
@@ -51,6 +52,7 @@ class _TimeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -63,9 +65,10 @@ class _TimeButton extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: fontService.font(
               color: isSelected ? Colors.white : AppColors.secondary,
               fontWeight: FontWeight.w800,
+              fontSize: 16,
             ),
           ),
         ),

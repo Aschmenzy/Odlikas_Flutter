@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayCell.dart';
-import 'package:intl/intl.dart';
 
 class CalendarGrid extends StatelessWidget {
   final DateTime focusedDate;

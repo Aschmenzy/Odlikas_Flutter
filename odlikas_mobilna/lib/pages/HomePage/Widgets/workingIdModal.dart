@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
+import 'package:provider/provider.dart';
 
 class StudentIdModal extends StatefulWidget {
   final Function(Map<String, String>)? onSubmit;
@@ -46,6 +47,8 @@ class _StudentIdModalState extends State<StudentIdModal> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
+
     return SingleChildScrollView(
       controller: _scrollController,
       child: Padding(
@@ -74,7 +77,7 @@ class _StudentIdModalState extends State<StudentIdModal> {
               SizedBox(height: size.width * 0.02),
               Text(
                 'Učenička iskaznica',
-                style: GoogleFonts.inter(
+                style: fontService.font(
                     fontSize: size.width * 0.055,
                     fontWeight: FontWeight.w600,
                     color: AppColors.secondary),
@@ -82,7 +85,7 @@ class _StudentIdModalState extends State<StudentIdModal> {
               SizedBox(height: size.width * 0.02),
               Text(
                 'Unesite podatke kako bi dobili iskaznicu.',
-                style: GoogleFonts.inter(
+                style: fontService.font(
                     fontSize: size.width * 0.035,
                     color: Colors.grey,
                     fontWeight: FontWeight.w600),
@@ -184,12 +187,14 @@ class _CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    final fontService = Provider.of<FontService>(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           lableText,
-          style: GoogleFonts.inter(
+          style: fontService.font(
             fontSize: screenSize.width * 0.05,
             fontWeight: FontWeight.w600,
             color: AppColors.secondary,
@@ -200,7 +205,7 @@ class _CustomTextField extends StatelessWidget {
           onTap: onTap,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: GoogleFonts.inter(
+            hintStyle: fontService.font(
               fontSize: screenSize.width * 0.035,
               color: AppColors.tertiary,
             ),

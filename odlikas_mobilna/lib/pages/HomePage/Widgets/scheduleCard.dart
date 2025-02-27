@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
+import 'package:provider/provider.dart';
 
 class ScheduleCard extends StatefulWidget {
   const ScheduleCard({Key? key}) : super(key: key);
@@ -104,6 +105,8 @@ class _ScheduleCardState extends State<ScheduleCard> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final fontService = Provider.of<FontService>(context);
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -135,13 +138,13 @@ class _ScheduleCardState extends State<ScheduleCard> {
                       SizedBox(height: screenHeight * 0.01),
                       Text(
                         "Raspored",
-                        style: GoogleFonts.inter(
+                        style: fontService.font(
                             fontSize: screenWidth * 0.045,
                             fontWeight: FontWeight.w800,
                             color: AppColors.secondary),
                       ),
                       Text("Pogledaj i uredi svoj raspored",
-                          style: GoogleFonts.inter(
+                          style: fontService.font(
                               fontSize: screenWidth * 0.025,
                               fontWeight: FontWeight.w600,
                               color: AppColors.secondary)),
@@ -171,7 +174,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
                           Text(
                             "Prvi sat",
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
+                            style: fontService.font(
                               height: 1.2,
                               fontSize: screenWidth * 0.038,
                               fontWeight: FontWeight.w800,
@@ -190,7 +193,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
                           Text(
                             currentSubject ?? "Nema nastave",
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.inter(
+                            style: fontService.font(
                               height: 1.2,
                               fontSize: screenWidth * 0.03,
                               fontWeight: FontWeight.w800,

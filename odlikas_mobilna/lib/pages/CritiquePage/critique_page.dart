@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
+import 'package:provider/provider.dart';
 
 class CritiquePage extends StatefulWidget {
   const CritiquePage({super.key});
@@ -52,6 +53,7 @@ class _CritiquePageState extends State<CritiquePage> {
 
   @override
   Widget build(BuildContext context) {
+    final fontService = Provider.of<FontService>(context);
     final size = MediaQuery.of(context).size;
     return Scaffold(
       body: Center(
@@ -77,7 +79,7 @@ class _CritiquePageState extends State<CritiquePage> {
 
               //title
               Text("Kritike",
-                  style: GoogleFonts.inter(
+                  style: fontService.font(
                       fontSize: size.width * 0.07,
                       fontWeight: FontWeight.bold,
                       color: AppColors.secondary)),
@@ -87,7 +89,7 @@ class _CritiquePageState extends State<CritiquePage> {
                 "Cijenimo vaše mišljenje! Ostavite nam svoj"
                 "pozitivnu ili negativnu kritiku kako bismo bili još "
                 "bolje.",
-                style: GoogleFonts.inter(
+                style: fontService.font(
                     fontSize: size.width * 0.035,
                     color: AppColors.tertiary,
                     fontWeight: FontWeight.w700,
@@ -106,7 +108,7 @@ class _CritiquePageState extends State<CritiquePage> {
                   expands: true,
                   decoration: InputDecoration(
                     hintText: '...',
-                    hintStyle: GoogleFonts.inter(
+                    hintStyle: fontService.font(
                       color: AppColors.tertiary,
                       fontSize: 14,
                     ),
