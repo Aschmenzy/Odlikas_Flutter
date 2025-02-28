@@ -16,7 +16,7 @@ class FontService extends ChangeNotifier {
 
       // Initial fetch from Firestore
       final doc = await FirebaseFirestore.instance
-          .collection("StudentNotificationsPreferences")
+          .collection("dyslexicUsers")
           .doc(email)
           .get();
 
@@ -29,7 +29,7 @@ class FontService extends ChangeNotifier {
 
       // Set up a listener for real-time updates
       FirebaseFirestore.instance
-          .collection("StudentNotificationsPreferences")
+          .collection("dyslexicUsers")
           .doc(email)
           .snapshots()
           .listen((snapshot) {
@@ -63,7 +63,7 @@ class FontService extends ChangeNotifier {
       String email = box.get("email");
 
       await FirebaseFirestore.instance
-          .collection("StudentNotificationsPreferences")
+          .collection("dyslexicUsers")
           .doc(email)
           .update({'dyslexic': _isDyslexic});
     } catch (e) {

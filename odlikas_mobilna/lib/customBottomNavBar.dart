@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
+import 'package:odlikas_mobilna/pages/AiChatbotPage/ai_chatbot_page.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -36,6 +37,13 @@ class CustomBottomNavBar extends StatelessWidget {
             child: SizedBox(
               height: 35,
               child: TextField(
+                readOnly: true,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AiChatbotPage(),
+                  ),
+                ),
                 style: GoogleFonts.inter(height: 1, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',

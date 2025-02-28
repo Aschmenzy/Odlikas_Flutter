@@ -9,6 +9,7 @@ import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/calendarGrid.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayDetailsDialog.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/monthHeader.dart';
+import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/scrollableCalendaer.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/weeklyHeader.dart';
 import 'package:provider/provider.dart';
 
@@ -270,43 +271,11 @@ class _CalendarPageState extends State<CalendarPage> {
               ),
             )
           : viewModel.tests != null
-              ? GestureDetector(
-                  onVerticalDragEnd: (DragEndDetails details) {
-                    if (details.primaryVelocity != null) {
-                      if (details.primaryVelocity! > 0) {
-                        _goToPreviousMonth();
-                      } else if (details.primaryVelocity! < 0) {
-                        _goToNextMonth();
-                      }
-                    }
-                  },
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        SizedBox(height: screenHeight * 0.03),
-                        MonthHeader(
-                          focusedDate: _focusedDate,
-                          screenWidth: screenWidth,
-                        ),
-                        const WeekDayHeader(),
-                        Divider(
-                          color: AppColors.tertiary,
-                          thickness: 0.5,
-                          indent: screenWidth * 0.05,
-                          endIndent: screenWidth * 0.05,
-                        ),
-                        CalendarGrid(
-                          focusedDate: _focusedDate,
-                          screenWidth: screenWidth,
-                          onDayTap: _showDayDetailsPopup,
-                          firstDayOfMonth: _firstDayOfMonth,
-                          isWithinCurrentMonth: _isWithinCurrentMonth,
-                          isHoliday: _isHoliday,
-                          isTest: isTest,
-                        ),
-                      ],
-                    ),
-                  ),
+              ? ScrollableCalendar(
+                  onDayTap: _showDayDetailsPopup,
+                  isWithinCurrentMonth: _isWithinCurrentMonth,
+                  isHoliday: _isHoliday,
+                  isTest: isTest,
                 )
               : const Center(
                   child: Text("No data available"),

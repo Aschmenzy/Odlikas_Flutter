@@ -320,7 +320,7 @@ class _HomePageState extends State<HomePage> {
                       Text(
                         "Dobrodošao/la, \n$studentName",
                         style: fontService.font(
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w700,
                           height: 1.1,
                           fontSize: MediaQuery.of(context).size.width * 0.07,
                           color: AppColors.secondary,

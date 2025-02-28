@@ -46,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
       // Try to load existing preferences
       try {
         final doc = await FirebaseFirestore.instance
-            .collection("StudentNotificationsPreferences")
+            .collection("dyslexicUsers")
             .doc(userEmail)
             .get();
 
@@ -72,7 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
 // Replace your _saveNotificationPreferences function with this version:
-  Future<void> _saveNotificationPreferences({
+  Future<void> _saveDyslexicUsers({
     required String field,
     required bool value,
   }) async {
@@ -83,7 +83,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     try {
       await FirebaseFirestore.instance
-          .collection("StudentNotificationsPreferences")
+          .collection("dyslexicUsers")
           .doc(userEmail)
           .set({
         field: value,
@@ -300,7 +300,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       setState(() {
                         isDyslexic = newValue;
                       });
-                      _saveNotificationPreferences(
+                      _saveDyslexicUsers(
                         field: 'dyslexic',
                         value: newValue,
                       );
