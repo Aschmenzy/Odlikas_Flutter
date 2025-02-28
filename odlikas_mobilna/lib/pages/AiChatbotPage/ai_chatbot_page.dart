@@ -106,13 +106,14 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 16),
+            SizedBox(height: size.height * 0.02),
 
             // loading indicator
             if (_isLoading)
@@ -121,8 +122,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
                 child: Center(
                     child: Image.asset(
                   'assets/animations/spinningCircle.gif',
-                  width: 90,
-                  height: 90,
+                  width: size.width * 0.15,
                 )),
               )
             else
@@ -131,13 +131,12 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
                 child: Center(
                   child: Image.asset(
                     'assets/images/AiCircle.png',
-                    width: 90,
-                    height: 90,
+                    width: size.width * 0.15,
                   ),
                 ),
               ),
 
-            SizedBox(height: 20),
+            SizedBox(height: size.height * 0.02),
 
             // Chat messages
             Expanded(
@@ -179,7 +178,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
         child: Text(
           message.text,
           style: GoogleFonts.inter(
-            color: message.isUser ? Colors.black : Colors.white,
+            color: message.isUser ? AppColors.secondary : AppColors.background,
             fontSize: 14,
           ),
         ),
@@ -211,13 +210,14 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
           style: GoogleFonts.inter(
             height: 1,
             fontSize: 14,
-            color: Colors.black,
+            color: AppColors.secondary,
           ),
           decoration: InputDecoration(
             hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
-            hintStyle: GoogleFonts.inter(color: Colors.grey, fontSize: 14),
+            hintStyle:
+                GoogleFonts.inter(color: AppColors.tertiary, fontSize: 14),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: AppColors.background,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide: BorderSide.none,

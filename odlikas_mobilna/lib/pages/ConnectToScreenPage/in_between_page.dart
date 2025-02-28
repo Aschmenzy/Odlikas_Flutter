@@ -80,8 +80,11 @@ class InBetweenPage extends StatelessWidget {
 
                   Container(
                     width: screenSize.width * 0.9,
-                    height: screenSize.height * 0.22,
-                    color: AppColors.tertiary,
+                    height: screenSize.height * 0.225,
+                    child: Image.asset(
+                      'assets/images/znanstveneBiljeske.png',
+                      fit: BoxFit.fill,
+                    ),
                   ),
 
                   SizedBox(height: screenSize.height * 0.02),

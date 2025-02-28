@@ -22,10 +22,22 @@ class _IntroPageState extends State<IntroPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-            Image.asset(
-              'assets/images/globe.png',
-              width: MediaQuery.of(context).size.width * 1,
+
+            // Replace the simple Image.asset with a Stack to overlay images
+            Stack(
+              alignment: Alignment.center, // Center the overlaid image
+              children: [
+                Image.asset(
+                  'assets/images/spiningGlobeBackground.png',
+                  width: MediaQuery.of(context).size.width,
+                ),
+                Image.asset(
+                  'assets/animations/globeSpinning.gif',
+                  width: MediaQuery.of(context).size.width,
+                ),
+              ],
             ),
+
             SizedBox(height: MediaQuery.of(context).size.height * 0.08),
             Text(
               "Dobrodošli u\nODLIKAŠ",

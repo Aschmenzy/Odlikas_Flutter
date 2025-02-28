@@ -4,9 +4,12 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
+import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/firestore_pomodoro_service.dart';
+import 'package:odlikas_mobilna/pages/PomodoroPage/Widgets/horizontal_streak_progress.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/Widgets/pomodoroContainer.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +22,7 @@ class PomodoroPage extends StatefulWidget {
 
 class _PomodoroPageState extends State<PomodoroPage> {
   late FirestorePomodoroService pomodoroService;
+  var _isLoading = true;
   String? _email;
   String _currentPhase = 'Pomodoro';
   bool _isRunning = false;
@@ -28,6 +32,8 @@ class _PomodoroPageState extends State<PomodoroPage> {
   final int _displayedSecondsLeft = 25 * 60;
   Timer? _localTimer;
   late ValueNotifier<int> _secondsNotifier;
+  int? _daysLearning;
+  int? _hoursLearning;
 
   @override
   void initState() {
@@ -36,6 +42,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initFromHive();
     });
+    _getLearningStats();
   }
 
   @override
@@ -151,63 +158,143 @@ class _PomodoroPageState extends State<PomodoroPage> {
     }
   }
 
+  Future<void> _getLearningStats() async {
+    final _email = await Hive.openBox('User').then((box) => box.get('email'));
+
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection("studentProfiles")
+          .doc(_email)
+          .get();
+
+      // Check if document exists
+      if (!doc.exists) {
+        debugPrint('Document does not exist for email: $_email');
+        return;
+      }
+
+      final data = doc.data();
+
+      // Check if data is not null
+      if (data == null) {
+        debugPrint('Document data is null');
+        return;
+      }
+
+      // Check if preferences exists
+      if (!data.containsKey('preferences') || data['preferences'] == null) {
+        debugPrint('Preferences field does not exist or is null');
+        return;
+      }
+
+      // Try to cast to Map<String, dynamic> but handle potential different map types
+      final preferences = data['preferences'];
+      if (!(preferences is Map)) {
+        debugPrint('Preferences is not a Map: ${preferences.runtimeType}');
+        return;
+      }
+
+      // Access map values but handle potential type differences
+      final daysLearning = preferences.containsKey('daysLearning')
+          ? (preferences['daysLearning'] is int
+              ? preferences['daysLearning'] as int
+              : int.tryParse(preferences['daysLearning'].toString()) ?? 0)
+          : 0;
+
+      final hoursLearning = preferences.containsKey('hoursLearning')
+          ? (preferences['hoursLearning'] is int
+              ? preferences['hoursLearning'] as int
+              : int.tryParse(preferences['hoursLearning'].toString()) ?? 0)
+          : 0;
+
+      setState(() {
+        _daysLearning = daysLearning;
+        _hoursLearning = hoursLearning;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error fetching learning stats: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            SizedBox(height: screenSize.height * 0.02),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    PomodoroContainer(
-                      currentPhase: _currentPhase,
-                      currentDuration: Duration(seconds: _displayedSecondsLeft),
-                      isRunning: _isRunning,
-                      secondsNotifier: _secondsNotifier,
-                      startTimer: () {
-                        final leftover = _secondsNotifier.value;
-                        pomodoroService.startTimer(
-                            _currentPhase, leftover, _cycleCount);
-                        setState(() {
-                          _isRunning = true;
-                          _startTimestamp = Timestamp.now();
-                          _initialDuration = leftover;
-                        });
-                        _startLocalTicker();
-                      },
-                      stopTimer: () {
-                        final now = DateTime.now();
-                        final elapsed = _startTimestamp != null
-                            ? now
-                                .difference(_startTimestamp!.toDate())
-                                .inSeconds
-                            : 0;
-                        final leftover = (_initialDuration - elapsed)
-                            .clamp(0, _initialDuration);
-                        pomodoroService.stopTimerWithLocalLeftover(leftover);
-                        _stopLocalTicker();
-                      },
-                      forwardTimer: _forwardTimer,
+      body: _isLoading
+          ? Center(
+              child: Lottie.asset(
+              'assets/animations/loadingBird.json',
+              width: MediaQuery.of(context).size.width * 0.80,
+              height: 120,
+            ))
+          : SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(context),
+                  SizedBox(height: screenSize.height * 0.02),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          HorizontalStreakProgress(
+                            daysLearning: _daysLearning ?? 1,
+                            hoursLearning: _hoursLearning ?? 1,
+                            streakCount: 0,
+                            color: _currentPhase == "Pomodoro"
+                                ? const Color.fromRGBO(236, 146, 31, 1)
+                                : _currentPhase == "Kratka pauza"
+                                    ? const Color.fromRGBO(23, 148, 210, 1)
+                                    : const Color.fromRGBO(20, 133, 186, 1),
+                            onTap: () {},
+                          ),
+                          SizedBox(height: screenSize.height * 0.02),
+                          PomodoroContainer(
+                            currentPhase: _currentPhase,
+                            currentDuration:
+                                Duration(seconds: _displayedSecondsLeft),
+                            isRunning: _isRunning,
+                            secondsNotifier: _secondsNotifier,
+                            startTimer: () {
+                              final leftover = _secondsNotifier.value;
+                              pomodoroService.startTimer(
+                                  _currentPhase, leftover, _cycleCount);
+                              setState(() {
+                                _isRunning = true;
+                                _startTimestamp = Timestamp.now();
+                                _initialDuration = leftover;
+                              });
+                              _startLocalTicker();
+                            },
+                            stopTimer: () {
+                              final now = DateTime.now();
+                              final elapsed = _startTimestamp != null
+                                  ? now
+                                      .difference(_startTimestamp!.toDate())
+                                      .inSeconds
+                                  : 0;
+                              final leftover = (_initialDuration - elapsed)
+                                  .clamp(0, _initialDuration);
+                              pomodoroService
+                                  .stopTimerWithLocalLeftover(leftover);
+                              _stopLocalTicker();
+                            },
+                            forwardTimer: _forwardTimer,
+                          ),
+                          SizedBox(height: screenSize.height * 0.02),
+                          _buildCycleCount(),
+                          SizedBox(height: screenSize.height * 0.01),
+                          _buildPhaseHint(),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: screenSize.height * 0.02),
-                    _buildCycleCount(),
-                    SizedBox(height: screenSize.height * 0.01),
-                    _buildPhaseHint(),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
       bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
     );
   }

@@ -131,7 +131,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final box = await Hive.openBox('User');
     await box.clear();
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => IntroPage()));
+      context,
+      MaterialPageRoute(
+        builder: (context) => IntroPage(),
+      ),
+    );
   }
 
   @override
