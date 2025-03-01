@@ -187,46 +187,139 @@ class _SchedulePageState extends State<SchedulePage> {
 
   Future<void> _showSubjectDialog(int periodNumber) async {
     final TextEditingController controller = TextEditingController();
-
+    final TextEditingController controllerUcionice = TextEditingController();
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Add Subject',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-            color: AppColors.secondary,
+        backgroundColor: AppColors.background,
+        shadowColor: AppColors.tertiary,
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        content: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.3,
+          width: MediaQuery.of(context).size.width * 0.9,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //header
+              Text(
+                periodNumber == 0 ? '1. sat' : '${periodNumber + 1}. sat',
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.secondary,
+                  fontSize: 20,
+                ),
+              ),
+
+              Divider(
+                color: AppColors.tertiary,
+                thickness: 0.5,
+              ),
+
+              //body
+
+              Text(
+                'Prvi sat:',
+                style: GoogleFonts.inter(
+                  color: AppColors.secondary,
+                  fontSize: 16,
+                ),
+              ),
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: 'Ime predmeta...',
+                  isDense: true,
+                  hintStyle: GoogleFonts.inter(
+                    color: AppColors.tertiary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(color: AppColors.tertiary),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(color: AppColors.tertiary),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(color: AppColors.tertiary),
+                  ),
+                  suffixIcon: Icon(Icons.edit, color: AppColors.tertiary),
+                ),
+              ),
+
+              SizedBox(height: 16),
+
+              Text(
+                'Učionica:',
+                style: GoogleFonts.inter(
+                  color: AppColors.secondary,
+                  fontSize: 16,
+                ),
+              ),
+              TextField(
+                controller: controllerUcionice,
+                decoration: InputDecoration(
+                  hintText: 'Ime učionice...',
+                  hintStyle: GoogleFonts.inter(
+                    color: AppColors.tertiary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(color: AppColors.tertiary),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(color: AppColors.tertiary),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(color: AppColors.tertiary),
+                  ),
+                  suffixIcon: Icon(Icons.edit, color: AppColors.tertiary),
+                ),
+              ),
+              SizedBox(height: 16),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: SizedBox(
+                      width: 40,
+                      child: Image.asset(
+                        'assets/images/cancel.png',
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  GestureDetector(
+                    onTap: () {
+                      if (controller.text.isNotEmpty) {
+                        _updateSubject(periodNumber, controller.text, false);
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: SizedBox(
+                      width: 40,
+                      child: Image.asset(
+                        'assets/images/submit.png',
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
         ),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: 'Enter subject name',
-            hintStyle: GoogleFonts.inter(color: AppColors.tertiary),
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.inter(color: AppColors.tertiary),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
-                _updateSubject(periodNumber, controller.text, false);
-                Navigator.pop(context);
-              }
-            },
-            child: Text(
-              'Add',
-              style: GoogleFonts.inter(color: AppColors.accent),
-            ),
-          ),
-        ],
       ),
     );
   }

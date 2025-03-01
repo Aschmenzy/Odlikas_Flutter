@@ -17,16 +17,20 @@ Future<StudentProfile?> handleLogin(
     BuildContext context, String email, String password) async {
   final _homeViewModel = HomePageViewModel(ApiService());
 
-  //open local storage to have the user email
+  // Otvaranje Hive box-a za spremanje podataka korisnika na lokalnom uređaju
   final box = await Hive.openBox('User');
 
   try {
+    // Inicijalizacija Firestore-a i reference na dokument korisnika
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final DocumentReference docRef =
         firestore.collection('studentProfiles').doc(email);
+
+    // Dohvaćanje profila učenika preko API-ja
     var profile = await _homeViewModel.fetchStudentProfile(email, password);
 
-    //check for N/A values in profile data
+    // Provjera "N/A" vrijednosti u podacima profila
+    // Ako postoji "N/A" vrijednost, to znači da su uneseni podaci nevažeći
     Map<String, String> fields = {
       'School': profile?.studentSchool ?? '',
       'City': profile?.studentSchoolCity ?? '',
@@ -37,8 +41,10 @@ Future<StudentProfile?> handleLogin(
       'Program': profile?.studentProgram ?? '',
     };
 
+    // Prolazak kroz sve vrijednosti i provjera postoji li "N/A"
     for (var entry in fields.entries) {
       if (entry.value == 'N/A') {
+        // Prikaz dijaloga o pogrešnom unosu
         await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -89,13 +95,16 @@ Future<StudentProfile?> handleLogin(
             );
           },
         );
+        // Postavljanje profila na null kako bi se spriječila daljnja obrada
         profile = null;
         break;
       }
     }
 
+    // Ako je profil uspješno dohvaćen i provjeren
     if (profile != null) {
-      // Save in the same format fromJson expects
+      // Priprema podataka profila za pohranu u Firestore
+      // Podaci se pohranjuju u podkolekciju 'studentProfile' dokumenta korisnika
       Map<String, dynamic> profileData = {
         'studentProfile': {
           'studentSchool': profile.studentSchool,
@@ -107,12 +116,21 @@ Future<StudentProfile?> handleLogin(
           'classMaster': profile.classMaster,
         }
       };
+
+      // Pohrana podataka za prijavu i osnovnih informacija o korisniku lokalno
+      // Podaci se pohranjuju u Hive box 'User'
+      // lozinka se sprema lokalno kako bi se koristila kasnije u aplikaciji za dohvaćanje podataka pomocu API-a
+      // i za prijavu korisnika na odlikas+ kada skeniraju QR kod
       await box.put('email', email);
       await box.put('password', password);
       await box.put('studentName', profile?.studentName);
       await box.put('studentSchool', profile?.studentSchool);
       await box.put('studentProgram', profile?.studentProgram);
+
+      // Ažuriranje ili kreiranje dokumenta u Firestore bazi
       await docRef.set(profileData, SetOptions(merge: true));
+
+      // Navigacija na stranicu postavki
       Navigator.replace(
         context,
         oldRoute: ModalRoute.of(context)!,
@@ -126,7 +144,7 @@ Future<StudentProfile?> handleLogin(
   } catch (e) {
     print("Error fetching student profile: $e");
 
-    // Show error dialog
+    // Prikaz dijaloga o grešci
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -162,20 +180,24 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   bool isLoading = false;
 
-  Future<void> _handleLoginWithLoading() async {
+  Future<void> _handleLogin() async {
+    // Sprječava višestruke prijave
     if (isLoading) return;
 
     setState(() {
+      // Postavlja indikator učitavanja
       isLoading = true;
     });
 
     try {
+      // Poziv funkcije za prijavu s pretvorenim emailom u mala slova kako bi se izbjegli problemi s kreiranjem korisnika
       await handleLogin(
         context,
         emailController.text.toLowerCase(),
         passwordController.text,
       );
     } finally {
+      // Vraćanje stanja učitavanja na false nakon završetka
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -203,6 +225,7 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Naslov aplikacije
                   Text(
                     "Prijavi se i postani \nODLIKAŠ",
                     style: GoogleFonts.inter(
@@ -213,6 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.04),
+                  // Podnaslov
                   Text(
                     "Bez stresa i bez brige",
                     style: GoogleFonts.inter(
@@ -221,6 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                       color: AppColors.tertiary,
                     ),
                   ),
+                  // Slika za prijavu
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -231,6 +256,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.01),
+                  // Polje za unos korisničkog imena
                   MyTextField(
                     controller: emailController,
                     labelText: "Tvoje korisničko ime",
@@ -239,6 +265,7 @@ class _LoginPageState extends State<LoginPage> {
                     enabled: !isLoading,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.12),
+                  // Polje za unos lozinke
                   MyTextField(
                     controller: passwordController,
                     labelText: "Tvoja lozinka",
@@ -246,10 +273,11 @@ class _LoginPageState extends State<LoginPage> {
                     enabled: !isLoading,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+                  // Gumb za prijavu
                   MyButton(
                     fontSize: 24,
                     buttonText: "PRIJAVI SE",
-                    ontap: isLoading ? null : _handleLoginWithLoading,
+                    ontap: isLoading ? null : _handleLogin,
                     height: MediaQuery.of(context).size.width * 0.175,
                     width: MediaQuery.of(context).size.width * 1,
                     decorationColor:
@@ -260,6 +288,7 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.w800,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.08),
+                  // Tekst o uvjetima korištenja
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -295,6 +324,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
+          // Overlay za prikaz animacije učitavanja
           if (isLoading)
             Container(
               color: Colors.black54,

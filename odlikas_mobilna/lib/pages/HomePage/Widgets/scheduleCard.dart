@@ -46,44 +46,57 @@ class _ScheduleCardState extends State<ScheduleCard> {
     return day;
   }
 
+  // Funkcija za dohvaćanje prvog predmeta iz rasporeda za današnji dan
   Future<void> _fetchfistSubject() async {
-    final box = await Hive.openBox('User');
-    final email = await box.get('email');
+    // Dohvaćanje email adrese korisnika iz lokalne pohrane
+    final email = (await Hive.openBox('User')).get("email");
+
     String today = getTodaySchedule();
 
     print("start fetching first subject for $today");
 
     try {
+      // Dohvaćanje dokumenta korisnika iz Firestore baze podataka
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection("studentProfiles")
           .doc(email)
           .get();
 
+      // Provjera postoji li dokument za korisnika
       if (doc.exists) {
+        // Pretvaranje podataka dokumenta u Map strukturu
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-        // Navigate through the nested schedule structure
+        // Dohvaćanje glavnog kontejnera rasporeda
         Map<String, dynamic> scheduleContainer =
             data['schedule'] as Map<String, dynamic>;
+        // Dohvaćanje liste rasporeda po danima
         List<dynamic> scheduleList =
             scheduleContainer['schedule'] as List<dynamic>;
 
-        // Find today's schedule
+        // Pronalaženje rasporeda za današnji dan
+        // Ako ne postoji, vraća null kroz orElse funkciju
         var todaySchedule = scheduleList
             .firstWhere((item) => item['day'] == today, orElse: () => null);
 
+        // Provjera je li pronađen raspored za danas
         if (todaySchedule != null) {
+          // Dohvaćanje liste predmeta za današnji dan
           List<dynamic> subjects = todaySchedule['subjects'] as List<dynamic>;
+          // Provjera postoji li barem jedan predmet u rasporedu
           if (subjects.isNotEmpty) {
+            // Ažuriranje stanja widgeta s prvim predmetom
             setState(() {
               currentSubject = subjects[0].toString();
             });
             print("First subject set to: $currentSubject");
           }
         } else {
+          // Poruka ako nema rasporeda za današnji dan
           print("No schedule found for today");
+          // Postavljanje informacije da nema nastave
           setState(() {
-            currentSubject = "Nema nastave";
+            currentSubject = "Unesite raspored";
           });
         }
       }

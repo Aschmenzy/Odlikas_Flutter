@@ -11,5 +11,11 @@ class AppColors {
   static const gradivo = Color.fromARGB(255, 24, 68, 184);
   static const gradivoAccent = Color.fromARGB(255, 255, 199, 0);
 
+  static const odlican = Color.fromARGB(255, 26, 199, 89);
+  static const vrloDobar = Color.fromARGB(255, 253, 243, 217);
+  static const dobar = Color.fromARGB(255, 255, 212, 96);
+  static const dovoljan = Color.fromARGB(255, 240, 123, 63);
+  static const nedovoljan = Color.fromARGB(255, 234, 84, 85);
+
   AppColors._();
 }

@@ -154,13 +154,14 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Card(
-      elevation: 1.5,
+      elevation: 0.5,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
+      shadowColor: AppColors.tertiary,
       child: Container(
-        height: 140,
-        width: double.infinity,
+        height: 153,
+        width: size.width * 0.9,
         color: AppColors.background,
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
@@ -199,7 +200,8 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
 
             // Calendar cards with PageView
             SizedBox(
-              height: 80,
+              height: 90,
+              width: double.infinity,
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: _onPageChanged,
@@ -212,23 +214,21 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
 
                   // Determine card color based on selection and test status
                   Color cardColor;
-                  if (isSelected) {
-                    cardColor =
-                        hasTest ? AppColors.accent : Colors.grey.shade300;
+                  if (hasTest) {
+                    cardColor = AppColors.accent;
                   } else {
-                    cardColor =
-                        hasTest ? AppColors.accent : AppColors.background;
+                    cardColor = AppColors.background;
                   }
 
                   // Determine text color based on selection or test
-                  final textColor = (isSelected || hasTest)
+                  final textColor = hasTest
                       ? AppColors.background
-                      : AppColors.secondary;
+                      : (isSelected ? AppColors.accent : AppColors.secondary);
 
                   return GestureDetector(
                     onTap: () => widget.onDayTap(context, date),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      margin: const EdgeInsets.symmetric(horizontal: 2.5),
                       decoration: BoxDecoration(
                         color: cardColor,
                         borderRadius: BorderRadius.circular(5),
@@ -269,6 +269,15 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
                             Expanded(
                               child: Row(
                                 children: [
+                                  Container(
+                                    margin: const EdgeInsets.only(right: 4),
+                                    height: 8,
+                                    width: 2,
+                                    decoration: BoxDecoration(
+                                      color: textColor,
+                                      shape: BoxShape.rectangle,
+                                    ),
+                                  ),
                                   Expanded(
                                     child: Text(
                                       testSubject,

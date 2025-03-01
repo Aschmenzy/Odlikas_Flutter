@@ -6,11 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
-import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/calendarGrid.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayDetailsDialog.dart';
-import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/monthHeader.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/scrollableCalendaer.dart';
-import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/weeklyHeader.dart';
 import 'package:provider/provider.dart';
 
 class CalendarPage extends StatefulWidget {
@@ -232,7 +229,6 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<TestViewmodel>();
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     if (viewModel.tests == null && !viewModel.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -243,6 +239,7 @@ class _CalendarPageState extends State<CalendarPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        surfaceTintColor: AppColors.background,
         backgroundColor: AppColors.background,
         elevation: 0,
         leading: IconButton(

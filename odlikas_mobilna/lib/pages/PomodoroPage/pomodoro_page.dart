@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
-import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/database/firestore_pomodoro_service.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/Widgets/horizontal_streak_progress.dart';

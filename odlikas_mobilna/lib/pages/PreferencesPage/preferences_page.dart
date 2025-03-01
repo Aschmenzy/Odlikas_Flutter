@@ -18,14 +18,16 @@ class PreferencesPage extends StatefulWidget {
 Future<void> _savePreferences(BuildContext context, int selectedDaysPerWeek,
     int selectedHoursPerDay) async {
   try {
-    // Open the box first
+    // dohvacanje emaila iz lokalnog nstorage kako bi mogli spremiti podatke u bazu
     final box = await Hive.openBox('User');
     var email = box.get("email");
 
+    // spremanje podataka u bazu studentProfiles
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final DocumentReference docRef =
         firestore.collection('studentProfiles').doc(email);
 
+    // spremanje podataka u bazu podkolekciju preferences'
     await docRef.set({
       'preferences': {
         'daysLearning': selectedDaysPerWeek,
@@ -33,7 +35,7 @@ Future<void> _savePreferences(BuildContext context, int selectedDaysPerWeek,
       }
     }, SetOptions(merge: true));
 
-    //navigate to the home page
+    //promjena stranice
     Navigator.replace(
       context,
       oldRoute: ModalRoute.of(context)!,
@@ -41,8 +43,7 @@ Future<void> _savePreferences(BuildContext context, int selectedDaysPerWeek,
     );
   } catch (e) {
     print('Error saving learning metrics: $e');
-
-    // Add error dialog
+    //prikazivanje dialoga u slucaju greske
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -98,24 +99,29 @@ Future<void> _savePreferences(BuildContext context, int selectedDaysPerWeek,
   }
 }
 
+//funkcija za dohvacanje podataka iz baze
+//ako nema podataka vraca defaultne vrijednosti
 Future<Map<String, int>> _loadInitialPreferences() async {
   try {
-    final box = await Hive.openBox('User');
-    var email = box.get("email");
+    // dohvacanje emaila iz lokalnog storagea
+    final email = (await Hive.openBox('User')).get("email");
 
+    // dohvacanje podataka iz baze
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final DocumentReference docRef =
         firestore.collection('studentProfiles').doc(email);
 
     final DocumentSnapshot doc = await docRef.get();
     final data = doc.data() as Map<String, dynamic>?;
-
+    //provjera da li postoje podaci u bazi i ako postoje dohvati ih i vrati ih kao mapu
     if (data != null && data.containsKey('preferences')) {
       final preferences = data['preferences'];
+      // dohvacanje podataka iz mape preferences i spremanje u varijable
+      // ako podaci ne postoje koristi defaultne vrijednosti
       final daysLearning = preferences['daysLearning'] as int? ?? 1;
       final hoursLearning = preferences['hoursLearning'] as int? ?? 1;
 
-      //print the preferences to see that they are loaded
+      //ispisi podataka u konzoli radi provjere
       print('Days learning: $daysLearning');
       print('Hours learning: $hoursLearning');
 
@@ -146,6 +152,7 @@ class _PreferencesPageState extends State<PreferencesPage> {
     _loadPreferences();
   }
 
+  //poziva funkciju za dohvacanje podataka iz baze
   Future<void> _loadPreferences() async {
     final preferences = await _loadInitialPreferences();
 

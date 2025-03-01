@@ -24,21 +24,31 @@ class _StudentIdModalState extends State<StudentIdModal> {
     'city': TextEditingController(),
   };
 
+  // Metoda koja se poziva kada se widget uklanja iz widget stabla
+  // Osigurava pravilno oslobađanje resursa i sprječava curenje memorije
   @override
   void dispose() {
+    // Prolazi kroz sve text controllere u mapi i poziva dispose() metodu na svakom
     controllers.forEach((_, controller) => controller.dispose());
+    // Oslobađa resurse scroll controllera
     _scrollController.dispose();
+    // Poziva dispose metodu nadređene klase (obavezno za ispravno čišćenje resursa)
     super.dispose();
   }
 
+  // Metoda koja se poziva prilikom potvrde forme za studentsku iskaznicu
   void _handleSubmit() {
     if (_formKey.currentState?.validate() ?? false) {
+      // Kreira mapu podataka iz vrijednosti unesenih u tekstualna polja
       final formData = {
+        // Dohvaća OIB, adrese, postanskog broja i grada ili prazan string ako je null
         'oib': controllers['oib']?.text ?? '',
         'address': controllers['address']?.text ?? '',
         'postalCode': controllers['postalCode']?.text ?? '',
         'city': controllers['city']?.text ?? '',
       };
+
+      // Poziva callback funkciju koja je proslijeđena widgetu i prosljeđuje unesene podatke
       widget.onSubmit?.call(formData);
       Navigator.of(context).pop();
     }
@@ -58,7 +68,7 @@ class _StudentIdModalState extends State<StudentIdModal> {
         child: Container(
           padding: const EdgeInsets.all(25),
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.background,
             borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
           ),
           child: Column(
@@ -153,11 +163,10 @@ class _StudentIdModalState extends State<StudentIdModal> {
   }
 
   void _scrollToField(int index) {
-    // Add a small delay to ensure the keyboard is shown before scrolling
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          index * 100.0, // Approximate height of each field
+          index * 100.0,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );

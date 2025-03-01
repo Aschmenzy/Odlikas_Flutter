@@ -25,9 +25,15 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+// Funkcija za dohvaćanje ocjena korisnika
 Future<Grades?> fetchGrades(BuildContext context) async {
+  // Dohvaćanje modela za podatke
   final homeViewModel = context.read<HomePageViewModel>();
+  // Otvaranje lokalne baze podataka
   final box = await Hive.openBox('User');
+
+  //dohvaćanje emaila i lozinke iz lokalne baze
+  //lozinka i email se koriste kako bi se pozvao API
   final email = await box.get('email');
   final password = await box.get('password');
 
@@ -48,6 +54,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    // Inicijalizacija - dohvaćanje ocjena i podataka o korisniku
     fetchGrades(context).then((_) async {
       final box = await Hive.openBox('User');
       var name = box.get('studentName');
@@ -58,10 +65,12 @@ class _HomePageState extends State<HomePage> {
         studentPassword = password;
         studentEmail = email;
       });
+      // Dohvaćanje podataka za iskaznicu
       await _getStudentIdCardData();
     });
   }
 
+  // Prikaz modalnog prozora za unos podataka o studentskoj iskaznici
   void _showStudentIdModal(BuildContext context) {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -71,6 +80,7 @@ class _HomePageState extends State<HomePage> {
       ),
       context: context,
       builder: (context) => StudentIdModal(
+        // Obrada nakon predaje forme
         onSubmit: (formData) async {
           final box = await Hive.openBox('User');
           final email = box.get('email');
@@ -81,6 +91,9 @@ class _HomePageState extends State<HomePage> {
           }
 
           try {
+            // Spremanje podataka o iskaznici u Firestore
+            // Podaci se spremaju u kolekciju studentProfiles
+            //kao podmapa workingId
             await FirebaseFirestore.instance
                 .collection('studentProfiles')
                 .doc(email)
@@ -94,10 +107,10 @@ class _HomePageState extends State<HomePage> {
               },
             }, SetOptions(merge: true));
 
-            // Refresh the data after saving
+            // Osvježavanje podataka nakon spremanja
             await _getStudentIdCardData();
 
-            // Show success message
+            // Prikaz poruke o uspjehu
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Podaci su uspješno spremljeni'),
@@ -106,7 +119,7 @@ class _HomePageState extends State<HomePage> {
             );
           } catch (e) {
             print('Error saving student ID data: $e');
-            // Show error message
+            // Prikaz poruke o grešci
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Greška pri spremanju podataka'),
@@ -119,6 +132,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Dohvaćanje podataka o studentskoj iskaznici iz Firebase-a
   Future<Map<String, dynamic>?> _getStudentIdCardData() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
@@ -129,6 +143,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     try {
+      // Dohvaćanje dokumenta iz Firestore-a
       final doc = await FirebaseFirestore.instance
           .collection('studentProfiles')
           .doc(email)
@@ -137,6 +152,7 @@ class _HomePageState extends State<HomePage> {
       if (doc.exists && doc.data()?['workingId'] != null) {
         final workingIdData = doc.data()!['workingId'] as Map<String, dynamic>;
 
+        // Ažuriranje stanja s podacima
         setState(() {
           studentOib = workingIdData['oib'];
           studentAddress = workingIdData['address'];
@@ -155,13 +171,17 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Odabrani datum
   DateTime _selectedDate = DateTime.now();
+
+  // Funkcija koja se poziva kada korisnik odabere datum
   void _onDateSelected(DateTime date) {
     setState(() {
       _selectedDate = date;
     });
   }
 
+  // Provjera je li određeni datum praznik
   bool _isHoliday(DateTime date) {
     for (var holiday in _holidays) {
       DateTime startDate = holiday['startDate'];
@@ -173,6 +193,7 @@ class _HomePageState extends State<HomePage> {
       DateTime normalizedEndDate =
           DateTime(endDate.year, endDate.month, endDate.day);
 
+      // Provjera je li datum unutar perioda praznika
       if ((normalizedDate.isAtSameMomentAs(normalizedStartDate) ||
               normalizedDate.isAtSameMomentAs(normalizedEndDate)) ||
           (normalizedDate.isAfter(normalizedStartDate) &&
@@ -183,14 +204,17 @@ class _HomePageState extends State<HomePage> {
     return false;
   }
 
+  // Provjera je li određeni datum test
   bool _isTest(DateTime date) {
     final viewModel = context.read<TestViewmodel>();
     if (viewModel.tests == null) return false;
 
+    // Iteracija kroz sve testove
     for (var monthTests in viewModel.tests!.testsByMonth.values) {
       for (var test in monthTests) {
         if (test.testDate.isEmpty || !test.testDate.contains('.')) continue;
 
+        // Parsiranje datuma testa
         final dateParts = test.testDate.split('.');
         if (dateParts.length < 2) continue;
 
@@ -198,6 +222,7 @@ class _HomePageState extends State<HomePage> {
         final month = int.parse(dateParts[1]);
         final testDate = DateTime(date.year, month, day);
 
+        // Provjera podudara li se datum s datumom testa
         if (testDate.year == date.year &&
             testDate.month == date.month &&
             testDate.day == date.day) {
@@ -208,6 +233,7 @@ class _HomePageState extends State<HomePage> {
     return false;
   }
 
+  // Dohvaćanje događaja za određeni datum iz Firebase-a
   Future<List<Map<String, String>>> _fetchEvents(DateTime date) async {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -229,6 +255,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Spremanje novog događaja u Firebase
   Future<void> saveEvent({
     required String title,
     required String description,
@@ -251,11 +278,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // Prikaz pop-up dijaloga s detaljima odabranog dana
   void _showDayDetailsPopup(BuildContext context, DateTime date) {
     final viewModel = context.read<TestViewmodel>();
     List<Map<String, String>> tests = [];
 
-    // Prepare tests list
+    // Priprema liste testova za odabrani datum
     if (viewModel.tests != null) {
       for (var monthTests in viewModel.tests!.testsByMonth.values) {
         for (var test in monthTests) {
@@ -266,6 +294,7 @@ class _HomePageState extends State<HomePage> {
               final month = int.parse(dateParts[1]);
               final testDate = DateTime(date.year, month, day);
 
+              // Provjera podudara li se datum testa s odabranim datumom
               if (testDate.year == date.year &&
                   testDate.month == date.month &&
                   testDate.day == date.day) {
@@ -280,6 +309,7 @@ class _HomePageState extends State<HomePage> {
       }
     }
 
+    // Prikaz dijaloga s detaljima dana
     showDialog(
       context: context,
       builder: (context) => DayDetailsDialog(
@@ -294,14 +324,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomePageViewModel>();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final size = MediaQuery.of(context).size;
     final fontService = Provider.of<FontService>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: viewModel.isLoading
           ? Center(
+              // Prikaz animacije učitavanja
               child: Lottie.asset(
                 'assets/animations/loadingBird.json',
                 width: MediaQuery.of(context).size.width * 0.80,
@@ -309,14 +339,17 @@ class _HomePageState extends State<HomePage> {
               ),
             )
           : SingleChildScrollView(
+              // Omogućavanje skrolanja
               scrollDirection: Axis.vertical,
               child: SafeArea(
+                // Osiguravanje da sadržaj bude unutar sigurnog područja ekrana
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 20), // Razmak
+                      // Pozdravna poruka s imenom studenta
                       Text(
                         "Dobrodošao/la, \n$studentName",
                         style: fontService.font(
@@ -328,11 +361,12 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05),
+                      // Horizontalna lista kartica (ocjene i studentska iskaznica)
                       LayoutBuilder(
                         builder: (context, constraints) {
                           return SizedBox(
                             width: constraints.maxWidth,
-                            height: screenHeight * 0.25,
+                            height: size.height * 0.25,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: 2,
@@ -341,17 +375,19 @@ class _HomePageState extends State<HomePage> {
                               itemBuilder: (context, index) {
                                 return index == 0
                                     ? SizedBox(
-                                        width: screenWidth * 0.8,
+                                        // Kartica s ocjenama
+                                        width: size.width * 0.8,
                                         child: GradesCard(
                                             subjects:
                                                 viewModel.grades?.subjects ??
                                                     []),
                                       )
                                     : GestureDetector(
+                                        // Kartica s podacima studentske iskaznice
                                         onTap: () =>
                                             _showStudentIdModal(context),
                                         child: SizedBox(
-                                          width: screenWidth * 0.8,
+                                          width: size.width * 0.8,
                                           child: Workingidcard(
                                             name: studentName,
                                             oib: studentOib,
@@ -368,12 +404,14 @@ class _HomePageState extends State<HomePage> {
                       ),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.03),
+                      // Red s karticama za raspored i gradivo
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [ScheduleCard(), GradivoCard()],
                       ),
                       SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.05),
+                          height: MediaQuery.of(context).size.height * 0.025),
+                      // Widget kalendara s mogućnošću navigacije na stranicu kalendara
                       GestureDetector(
                           onTap: () => Navigator.push(
                                 context,
@@ -393,6 +431,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+      // Donja navigacijska traka s aktivnim prvim elementom (Home)
       bottomNavigationBar: CustomBottomNavBar(currentIndex: 0),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayCell.dart';
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/monthHeader.dart';
@@ -25,106 +26,91 @@ class ScrollableCalendar extends StatefulWidget {
 class _ScrollableCalendarState extends State<ScrollableCalendar> {
   late PageController _pageController;
   late DateTime _focusedDate;
-  static const int _initialPage =
-      1000; // Large number to allow scrolling both ways
-  late int _currentPage;
-  final ScrollController _verticalScrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
+  final List<DateTime> _months = [];
 
   @override
   void initState() {
     super.initState();
     _focusedDate = DateTime.now();
     _focusedDate = DateTime(_focusedDate.year, _focusedDate.month, 1);
-    _currentPage = _initialPage;
-    _pageController = PageController(initialPage: _initialPage);
+
+    // Initialize the list of months
+    DateTime currentDate = DateTime.now();
+    DateTime firstMonth = DateTime(currentDate.year, currentDate.month, 1);
+
+    for (int i = 0; i < 12; i++) {
+      _months.add(DateTime(
+        firstMonth.year,
+        firstMonth.month + i,
+        1,
+      ));
+    }
+
+    // Add scroll listener to detect month changes
+    _scrollController.addListener(_updateCurrentMonth);
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
-    _verticalScrollController.dispose();
+    _scrollController.removeListener(_updateCurrentMonth);
+    _scrollController.dispose();
     super.dispose();
   }
 
-  // Get the month date for a specific page
-  DateTime _getMonthForPage(int page) {
-    final monthDiff = page - _initialPage;
-    return DateTime(
-      DateTime.now().year + ((DateTime.now().month - 1 + monthDiff) ~/ 12),
-      (DateTime.now().month - 1 + monthDiff) % 12 + 1,
-      1,
-    );
-  }
+  // Estimate visible month based on scroll position
+  void _updateCurrentMonth() {
+    if (!_scrollController.hasClients) return;
 
-  // Handle page changes
-  void _onPageChanged(int page) {
-    setState(() {
-      _currentPage = page;
-      _focusedDate = _getMonthForPage(page);
-    });
-  }
+    // Get current scroll position
+    double scrollPosition = _scrollController.position.pixels;
 
-  // Build multiple month views vertically
-  List<Widget> _buildMonthViews(BuildContext context, double screenWidth) {
-    List<Widget> monthViews = [];
+    // Estimate which month is currently visible (adjust these values based on your actual layout)
+    const double monthHeaderHeight = 70.0; // Height of the month header
+    const double calendarMonthHeight =
+        350.0; // Approximate height of one month's worth of cells
+    const double monthSpacing = 20.0; // Space between months
 
-    // Build 12 months starting from current month
-    for (int i = 0; i < 12; i++) {
-      final monthDate = DateTime(
-        _focusedDate.year + (((_focusedDate.month - 1) + i) ~/ 12),
-        ((_focusedDate.month - 1) + i) % 12 + 1,
-        1,
-      );
+    double totalMonthHeight =
+        monthHeaderHeight + calendarMonthHeight + monthSpacing;
 
-      monthViews.add(
-        Column(
-          children: [
-            // Month header for each month
-            if (i > 0) // Skip the first month header as it's already shown
-              MonthHeader(
-                focusedDate: monthDate,
-                screenWidth: screenWidth,
-              ),
+    // Calculate current visible month index
+    int currentMonthIndex = scrollPosition ~/ totalMonthHeight;
 
-            // Month view
-            MonthView(
-              focusedDate: monthDate,
-              screenWidth: screenWidth,
-              onDayTap: widget.onDayTap,
-              firstDayOfMonth: DateTime(monthDate.year, monthDate.month, 1),
-              isWithinCurrentMonth: (date) =>
-                  date.month == monthDate.month && date.year == monthDate.year,
-              isHoliday: widget.isHoliday,
-              isTest: widget.isTest,
-            ),
+    // Ensure index is within bounds
+    currentMonthIndex =
+        math.max(0, math.min(currentMonthIndex, _months.length - 1));
 
-            SizedBox(height: 20), // Space between months
-          ],
-        ),
-      );
+    // Update focused date if it changed
+    if (_months[currentMonthIndex].month != _focusedDate.month ||
+        _months[currentMonthIndex].year != _focusedDate.year) {
+      setState(() {
+        _focusedDate = _months[currentMonthIndex];
+        print("Month changed to: ${_focusedDate.month}/${_focusedDate.year}");
+      });
     }
-
-    return monthViews;
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return CustomScrollView(
-      controller: _verticalScrollController,
-      slivers: [
-        SliverToBoxAdapter(
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        surfaceTintColor: AppColors.background,
+        title: MonthHeader(
+          focusedDate: _focusedDate,
+          screenWidth: screenWidth,
+        ),
+        centerTitle: true,
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50),
           child: Column(
             children: [
-              // Month header (fixed at top)
-              MonthHeader(
-                focusedDate: _focusedDate,
-                screenWidth: screenWidth,
-              ),
-
               const WeekDayHeader(),
-
               Divider(
                 color: AppColors.tertiary,
                 thickness: 0.5,
@@ -134,14 +120,39 @@ class _ScrollableCalendarState extends State<ScrollableCalendar> {
             ],
           ),
         ),
-
-        // Scrollable months
-        SliverList(
-          delegate: SliverChildListDelegate(
-            _buildMonthViews(context, screenWidth),
-          ),
+      ),
+      body: Container(
+        color: AppColors.background,
+        child: ListView.builder(
+          controller: _scrollController,
+          itemCount: _months.length,
+          itemBuilder: (context, index) {
+            final monthDate = _months[index];
+            return Column(
+              children: [
+                if (index >
+                    0) // Don't show month header for first month (it's in the app bar)
+                  MonthHeader(
+                    focusedDate: monthDate,
+                    screenWidth: screenWidth,
+                  ),
+                MonthView(
+                  focusedDate: monthDate,
+                  screenWidth: screenWidth,
+                  onDayTap: widget.onDayTap,
+                  firstDayOfMonth: monthDate,
+                  isWithinCurrentMonth: (date) =>
+                      date.month == monthDate.month &&
+                      date.year == monthDate.year,
+                  isHoliday: widget.isHoliday,
+                  isTest: widget.isTest,
+                ),
+                SizedBox(height: 20),
+              ],
+            );
+          },
         ),
-      ],
+      ),
     );
   }
 }
@@ -155,6 +166,21 @@ class MonthView extends StatelessWidget {
   final Function(DateTime) isWithinCurrentMonth;
   final Function(DateTime) isHoliday;
   final Function(DateTime) isTest;
+
+  static const List<String> monthNames = [
+    'SIJ',
+    'VELJ',
+    'OŽU',
+    'TRA',
+    'SVI',
+    'LIP',
+    'SRP',
+    'KOL',
+    'RUJ',
+    'LIS',
+    'STU',
+    'PRO'
+  ];
 
   const MonthView({
     super.key,
@@ -239,6 +265,10 @@ class MonthView extends StatelessWidget {
     }
 
     return cells;
+  }
+
+  String _getMonthLabel(DateTime date) {
+    return monthNames[date.month - 1];
   }
 
   @override

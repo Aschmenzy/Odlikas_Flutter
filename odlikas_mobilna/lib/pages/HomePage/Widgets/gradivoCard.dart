@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 class GradivoCard extends StatelessWidget {
   const GradivoCard({Key? key}) : super(key: key);
 
+// funkcija koja poziva url i otvara ga u browseru
   Future<void> _launchURL() async {
     final Uri url = Uri.parse(
         'https://gradivo.hr?utm_source=odlikas&utm_medium=banner&utm_campaign=odlikas25');

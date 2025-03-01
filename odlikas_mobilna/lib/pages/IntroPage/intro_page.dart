@@ -23,9 +23,9 @@ class _IntroPageState extends State<IntroPage> {
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.1),
 
-            // Replace the simple Image.asset with a Stack to overlay images
+            //postavljanje slike i animacije
             Stack(
-              alignment: Alignment.center, // Center the overlaid image
+              alignment: Alignment.center,
               children: [
                 Image.asset(
                   'assets/images/spiningGlobeBackground.png',
@@ -66,6 +66,8 @@ class _IntroPageState extends State<IntroPage> {
               ),
             ),
             Spacer(),
+
+            // botun za nastavak
             MyButton(
               fontSize: MediaQuery.of(context).size.width * 0.05,
               buttonText: "NASTAVI",

@@ -53,30 +53,80 @@ class GradesCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildGradeLabel(
-                        'Odličan',
-                        '${(gradePercentages['5.0'] ?? 0).toStringAsFixed(0)}%',
-                        context,
+                      Row(
+                        children: [
+                          Container(
+                            height: screenHeight * 0.025,
+                            width: screenHeight * 0.003,
+                            color: AppColors.odlican,
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          _buildGradeLabel(
+                            'Odličan',
+                            '${(gradePercentages['5.0'] ?? 0).toStringAsFixed(0)}%',
+                            context,
+                          ),
+                        ],
                       ),
-                      _buildGradeLabel(
-                        'Vrlo dobar',
-                        '${(gradePercentages['4.0'] ?? 0).toStringAsFixed(0)}%',
-                        context,
+                      Row(
+                        children: [
+                          Container(
+                            height: screenHeight * 0.025,
+                            width: screenHeight * 0.003,
+                            color: AppColors.vrloDobar,
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          _buildGradeLabel(
+                            'Vrlo dobar',
+                            '${(gradePercentages['4.0'] ?? 0).toStringAsFixed(0)}%',
+                            context,
+                          ),
+                        ],
                       ),
-                      _buildGradeLabel(
-                        'Dobar',
-                        '${(gradePercentages['3.0'] ?? 0).toStringAsFixed(0)}%',
-                        context,
+                      Row(
+                        children: [
+                          Container(
+                            height: screenHeight * 0.025,
+                            width: screenHeight * 0.003,
+                            color: AppColors.dobar,
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          _buildGradeLabel(
+                            'Dobar',
+                            '${(gradePercentages['3.0'] ?? 0).toStringAsFixed(0)}%',
+                            context,
+                          ),
+                        ],
                       ),
-                      _buildGradeLabel(
-                        'Dovoljan',
-                        '${(gradePercentages['2.0'] ?? 0).toStringAsFixed(0)}%',
-                        context,
+                      Row(
+                        children: [
+                          Container(
+                            height: screenHeight * 0.025,
+                            width: screenHeight * 0.003,
+                            color: AppColors.dovoljan,
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          _buildGradeLabel(
+                            'Dovoljan',
+                            '${(gradePercentages['2.0'] ?? 0).toStringAsFixed(0)}%',
+                            context,
+                          ),
+                        ],
                       ),
-                      _buildGradeLabel(
-                        'Nedovoljan',
-                        '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%',
-                        context,
+                      Row(
+                        children: [
+                          Container(
+                            height: screenHeight * 0.025,
+                            width: screenHeight * 0.003,
+                            color: AppColors.nedovoljan,
+                          ),
+                          SizedBox(width: screenWidth * 0.02),
+                          _buildGradeLabel(
+                            'Nedovoljan',
+                            '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%',
+                            context,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -232,11 +282,11 @@ class GradesCardPainter extends CustomPainter {
   }
 
   Color getColorForGrade(double grade) {
-    if (grade == 5.0) return Colors.green;
-    if (grade == 4.0) return Colors.yellow;
-    if (grade == 3.0) return Colors.orange;
-    if (grade == 2.0) return Colors.red;
-    return Colors.red.shade900;
+    if (grade == 5.0) return AppColors.odlican;
+    if (grade == 4.0) return AppColors.vrloDobar;
+    if (grade == 3.0) return AppColors.dobar;
+    if (grade == 2.0) return AppColors.dovoljan;
+    return AppColors.nedovoljan;
   }
 
   @override

@@ -119,6 +119,30 @@ class CalendarGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final positions = _calculatePositions();
 
+    // Create month label with positioning aligned with the first day
+    Widget monthLabel = Container(
+      height: 20,
+      margin: EdgeInsets.only(bottom: 0),
+      child: Row(
+        children: List.generate(7, (index) {
+          if (index == positions['labelColumn']) {
+            return Expanded(
+              child: Text(
+                _getMonthLabel(firstDayOfMonth),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.secondary,
+                  fontWeight: FontWeight.w800,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }
+          return const Expanded(child: SizedBox());
+        }),
+      ),
+    );
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.05,
@@ -127,26 +151,8 @@ class CalendarGrid extends StatelessWidget {
       child: Column(
         children: [
           // Month label row
-          SizedBox(
-            height: 20,
-            child: Row(
-              children: List.generate(7, (index) {
-                if (index == positions['labelColumn']) {
-                  return Expanded(
-                    child: Text(
-                      _getMonthLabel(firstDayOfMonth),
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.secondary,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  );
-                }
-                return const Expanded(child: SizedBox());
-              }),
-            ),
-          ),
+          monthLabel,
+
           // Calendar grid
           GridView.count(
             shrinkWrap: true,
