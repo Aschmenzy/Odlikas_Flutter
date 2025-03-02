@@ -102,7 +102,7 @@ class OpenAIService {
   Future<String> generateText({
     required String prompt,
     double temperature = 0.7,
-    int maxTokens = 256,
+    int maxTokens = 512,
   }) async {
     try {
       final response = await _makeRequest(

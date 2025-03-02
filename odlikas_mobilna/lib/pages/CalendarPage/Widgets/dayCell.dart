@@ -31,7 +31,7 @@ class DayCell extends StatelessWidget {
           height: screenSize.height * 0.4,
           decoration: BoxDecoration(
             color: isTest
-                ? const Color.fromRGBO(236, 145, 32, 1)
+                ? AppColors.accent
                 : (isHoliday
                     ? const Color.fromRGBO(23, 148, 210, 1)
                     : Colors.white),

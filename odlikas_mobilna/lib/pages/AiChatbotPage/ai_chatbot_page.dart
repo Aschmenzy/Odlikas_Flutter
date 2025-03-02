@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:odlikas_mobilna/services/openAiService.dart';
+import 'package:odlikas_mobilna/services/AIAssistantService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
 class AiChatbotPage extends StatefulWidget {
@@ -20,7 +20,7 @@ class Message {
 
 class _AiChatbotPageState extends State<AiChatbotPage> {
   final _promptController = TextEditingController();
-  final _openAIService = OpenAIService();
+  final _aiAssistantService = AIAssistantService();
   final _scrollController = ScrollController();
 
   List<Message> _messages = [];
@@ -32,7 +32,8 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
     // Add initial welcome messages
     _messages.add(
       Message(
-        text: 'Što možemo napraviti za tebe?',
+        text:
+            'Što mogu učiniti za tebe danas? Pitaj me o ocjenama, rasporedu, testovima ili profilu.',
         isUser: false,
         timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
       ),
@@ -59,10 +60,8 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
     _scrollToBottom();
 
     try {
-      final response = await _openAIService.generateText(
-        prompt: userMessage,
-        maxTokens: 150,
-      );
+      // Use our AI Assistant service instead of OpenAI directly
+      final response = await _aiAssistantService.processQuery(userMessage);
 
       final aiMessageObj = Message(
         text: response,
@@ -75,7 +74,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
       });
     } catch (e) {
       final errorMessageObj = Message(
-        text: 'Error: $e',
+        text: 'Pogreška: $e',
         isUser: false,
         timestamp: DateTime.now(),
       );

@@ -40,8 +40,11 @@ class CustomBottomNavBar extends StatelessWidget {
                 readOnly: true,
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => AiChatbotPage(),
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        AiChatbotPage(),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
                   ),
                 ),
                 style: GoogleFonts.inter(height: 1, fontSize: 14),
@@ -96,7 +99,16 @@ class CustomBottomNavBar extends StatelessWidget {
     return InkWell(
       onTap: () {
         if (currentIndex != index) {
-          Navigator.pushReplacementNamed(context, route);
+          Navigator.of(context).pushReplacementNamed(
+            route,
+            // This is the key change for instant navigation
+            result: PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  Container(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
         }
       },
       child: Column(
