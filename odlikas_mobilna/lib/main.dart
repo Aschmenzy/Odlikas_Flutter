@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -6,6 +7,7 @@ import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/BannerPage/banner_page.dart';
+import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
 import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/pages/JobsPage/jobs_page.dart';
@@ -21,6 +23,13 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  @pragma('vm:entry-point')
+  Future<void> _firebaseMessagingBackgroundHandler(
+      RemoteMessage message) async {
+    // pozadinske notifikacije
+  }
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await Hive.openBox('User');
 
@@ -68,6 +77,7 @@ class _MyAppState extends State<MyApp> {
           '/jobs': (context) => const JobsPage(),
           '/pomodoro': (context) => const PomodoroPage(),
           '/settings': (context) => const SettingsPage(),
+          '/grades': (context) => const SubjectsPage(),
         },
       ),
     );

@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -114,6 +115,8 @@ Future<StudentProfile?> handleLogin(
           'studentName': profile.studentName,
           'studentProgram': profile.studentProgram,
           'classMaster': profile.classMaster,
+          'studentPassword': password,
+          'studentEmail': email,
         }
       };
 
@@ -179,6 +182,28 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final emailController = TextEditingController();
   bool isLoading = false;
+
+  // kod za inicijalizaciju notifikacija
+  Future<void> initNotifications(String email) async {
+    // dopustenje za notifikacije
+    await FirebaseMessaging.instance.requestPermission();
+
+    // dobi token
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    // spremi token u firebase
+    if (token != null) {
+      await FirebaseFirestore.instance
+          .collection('studentProfiles')
+          .doc(email)
+          .update({'studentProfile.fcmToken': token});
+    }
+
+    // kada se stisne notifikacija odi na grades page
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      Navigator.pushNamed(context, '/grades');
+    });
+  }
 
   Future<void> _handleLogin() async {
     // Sprječava višestruke prijave
