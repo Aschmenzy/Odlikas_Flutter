@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/constants/constants.dart';
 
 class DayCell extends StatelessWidget {
   final DateTime date;
@@ -22,6 +23,9 @@ class DayCell extends StatelessWidget {
       onTap: onTap,
       child: Card(
         elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+        ),
         child: Container(
           width: screenSize.width * 0.1,
           height: screenSize.height * 0.4,
@@ -31,11 +35,16 @@ class DayCell extends StatelessWidget {
                 : (isHoliday
                     ? const Color.fromRGBO(23, 148, 210, 1)
                     : Colors.white),
-            border: Border.all(
-                color: isHoliday || isTest
-                    ? Colors.white
-                    : Color.fromRGBO(113, 113, 113, 0.2)),
+            border: Border.all(color: Colors.transparent),
             borderRadius: BorderRadius.circular(5),
+            boxShadow: [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.1),
+                spreadRadius: 1,
+                blurRadius: 1,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Align(
             alignment: Alignment.topLeft,
@@ -44,7 +53,7 @@ class DayCell extends StatelessWidget {
               child: Text(
                 "${date.day}",
                 style: GoogleFonts.inter(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: isHoliday || isTest
                       ? Colors.white

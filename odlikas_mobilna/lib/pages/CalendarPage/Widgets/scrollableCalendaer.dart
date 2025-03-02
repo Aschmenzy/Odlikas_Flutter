@@ -24,7 +24,6 @@ class ScrollableCalendar extends StatefulWidget {
 }
 
 class _ScrollableCalendarState extends State<ScrollableCalendar> {
-  late PageController _pageController;
   late DateTime _focusedDate;
   final ScrollController _scrollController = ScrollController();
   final List<DateTime> _months = [];
@@ -65,10 +64,9 @@ class _ScrollableCalendarState extends State<ScrollableCalendar> {
     // Get current scroll position
     double scrollPosition = _scrollController.position.pixels;
 
-    // Estimate which month is currently visible (adjust these values based on your actual layout)
+    // Estimate which month is currently visible
     const double monthHeaderHeight = 70.0; // Height of the month header
-    const double calendarMonthHeight =
-        350.0; // Approximate height of one month's worth of cells
+    const double calendarMonthHeight = 350.0; // Approximate height of calendar
     const double monthSpacing = 20.0; // Space between months
 
     double totalMonthHeight =
@@ -86,7 +84,6 @@ class _ScrollableCalendarState extends State<ScrollableCalendar> {
         _months[currentMonthIndex].year != _focusedDate.year) {
       setState(() {
         _focusedDate = _months[currentMonthIndex];
-        print("Month changed to: ${_focusedDate.month}/${_focusedDate.year}");
       });
     }
   }
@@ -136,17 +133,7 @@ class _ScrollableCalendarState extends State<ScrollableCalendar> {
                     focusedDate: monthDate,
                     screenWidth: screenWidth,
                   ),
-                MonthView(
-                  focusedDate: monthDate,
-                  screenWidth: screenWidth,
-                  onDayTap: widget.onDayTap,
-                  firstDayOfMonth: monthDate,
-                  isWithinCurrentMonth: (date) =>
-                      date.month == monthDate.month &&
-                      date.year == monthDate.year,
-                  isHoliday: widget.isHoliday,
-                  isTest: widget.isTest,
-                ),
+                _buildCalendarMonth(context, monthDate),
                 SizedBox(height: 20),
               ],
             );
@@ -155,142 +142,91 @@ class _ScrollableCalendarState extends State<ScrollableCalendar> {
       ),
     );
   }
-}
 
-// This is a modified version of your CalendarGrid that works with PageView
-class MonthView extends StatelessWidget {
-  final DateTime focusedDate;
-  final DateTime firstDayOfMonth;
-  final double screenWidth;
-  final Function(BuildContext, DateTime) onDayTap;
-  final Function(DateTime) isWithinCurrentMonth;
-  final Function(DateTime) isHoliday;
-  final Function(DateTime) isTest;
+  Widget _buildCalendarMonth(BuildContext context, DateTime month) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cellWidth = (screenWidth * 0.9) / 7; // Equal width for all 7 days
+    final cellHeight =
+        cellWidth * 1.4; // Use aspect ratio of 0.7 (same as original)
 
-  static const List<String> monthNames = [
-    'SIJ',
-    'VELJ',
-    'OŽU',
-    'TRA',
-    'SVI',
-    'LIP',
-    'SRP',
-    'KOL',
-    'RUJ',
-    'LIS',
-    'STU',
-    'PRO'
-  ];
+    // Get the number of days in the month
+    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
 
-  const MonthView({
-    super.key,
-    required this.focusedDate,
-    required this.firstDayOfMonth,
-    required this.screenWidth,
-    required this.onDayTap,
-    required this.isWithinCurrentMonth,
-    required this.isHoliday,
-    required this.isTest,
-  });
+    // Get the first day of the month
+    final firstDay = DateTime(month.year, month.month, 1);
 
-  Map<String, int> _calculatePositions() {
-    int startOffset = firstDayOfMonth.weekday - 1;
+    // Calculate the weekday of the first day (1 = Monday, 7 = Sunday)
+    final firstWeekday = firstDay.weekday;
 
-    // Define target positions for each weekday (1 = Monday, 7 = Sunday)
-    Map<int, int> targetPositions = {
-      1: 14, // Monday -> position 14
-      2: 1, // Tuesday -> position 1
-      3: 2, // Wednesday -> position 2
-      4: 3, // Thursday -> position 3
-      5: 4, // Friday -> position 4
-      6: 5, // Saturday -> position 5
-      7: 6, // Sunday -> position 6
-    };
+    // Build calendar cells - one for each day of the month
+    List<Widget> calendarRows = [];
+    List<Widget> weekRow = [];
 
-    int desiredPosition = targetPositions[firstDayOfMonth.weekday] ?? 0;
-    int currentPosition = startOffset;
-    int emptySpacesNeeded;
-
-    // Calculate needed empty spaces
-    if (desiredPosition > currentPosition) {
-      emptySpacesNeeded = desiredPosition - currentPosition;
-    } else {
-      emptySpacesNeeded = (7 - currentPosition) + desiredPosition;
+    // Add empty cells for days before the first day of the month
+    for (int i = 1; i < firstWeekday; i++) {
+      weekRow.add(
+        SizedBox(
+          width: cellWidth,
+          height: cellHeight,
+          child: Container(),
+        ),
+      );
     }
 
-    // Calculate label column based on where first day will actually appear
-    int labelColumn = (startOffset + emptySpacesNeeded) % 7;
+    // Add cells for each day of the month
+    for (int day = 1; day <= daysInMonth; day++) {
+      final date = DateTime(month.year, month.month, day);
 
-    return {
-      'startOffset': startOffset,
-      'desiredPosition': desiredPosition,
-      'emptySpacesNeeded': emptySpacesNeeded,
-      'labelColumn': labelColumn,
-    };
-  }
+      weekRow.add(
+        SizedBox(
+          width: cellWidth,
+          height: cellHeight,
+          child: DayCell(
+            onTap: () => widget.onDayTap(context, date),
+            date: date,
+            isWithinCurrentMonth: true,
+            isHoliday: widget.isHoliday(date),
+            isTest: widget.isTest(date),
+          ),
+        ),
+      );
 
-  List<Widget> _buildCalendarCells(
-      BuildContext context, Map<String, int> positions) {
-    List<Widget> cells = [];
+      // Start a new row when we reach Sunday or the end of the month
+      if ((firstWeekday + day - 1) % 7 == 0 || day == daysInMonth) {
+        // If we're at the end of the month but not Sunday, add empty cells to complete the week
+        if (day == daysInMonth && (firstWeekday + day - 1) % 7 != 0) {
+          final remainingDays = 7 - ((firstWeekday + day - 1) % 7);
+          for (int i = 0; i < remainingDays; i++) {
+            weekRow.add(
+              SizedBox(
+                width: cellWidth,
+                height: cellHeight,
+                child: Container(),
+              ),
+            );
+          }
+        }
 
-    // Add cells for previous month's days
-    for (int i = 0; i < positions['startOffset']!; i++) {
-      DateTime day = firstDayOfMonth
-          .subtract(Duration(days: positions['startOffset']! - i));
-      cells.add(DayCell(
-        onTap: () => onDayTap(context, day),
-        date: day,
-        isWithinCurrentMonth: isWithinCurrentMonth(day),
-        isHoliday: isHoliday(day),
-        isTest: isTest(day),
-      ));
+        // Add the completed row with proper spacing
+        calendarRows.add(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [...weekRow],
+          ),
+        );
+
+        // Clear the week row for the next week
+        weekRow = [];
+      }
     }
 
-    // Add empty spaces
-    for (int i = 0; i < positions['emptySpacesNeeded']!; i++) {
-      cells.add(Container());
-    }
-
-    // Add remaining days
-    int remainingCells = 42 - cells.length;
-    for (int i = 0; i < remainingCells; i++) {
-      DateTime day = firstDayOfMonth.add(Duration(days: i));
-      cells.add(DayCell(
-        onTap: () => onDayTap(context, day),
-        date: day,
-        isWithinCurrentMonth: isWithinCurrentMonth(day),
-        isHoliday: isHoliday(day),
-        isTest: isTest(day),
-      ));
-    }
-
-    return cells;
-  }
-
-  String _getMonthLabel(DateTime date) {
-    return monthNames[date.month - 1];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final positions = _calculatePositions();
-
+    // Return the calendar grid
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.05,
-        vertical: screenWidth * 0.01,
       ),
       child: Column(
-        children: [
-          // Calendar grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 7,
-            childAspectRatio: 0.7,
-            children: _buildCalendarCells(context, positions),
-          ),
-        ],
+        children: calendarRows,
       ),
     );
   }

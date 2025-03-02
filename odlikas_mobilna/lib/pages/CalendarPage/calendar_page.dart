@@ -257,6 +257,59 @@ class _CalendarPageState extends State<CalendarPage> {
             color: AppColors.secondary,
           ),
         ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: screenWidth * 0.08),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.01),
+                    Text(
+                      'PRAZNICI',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenWidth * 0.01),
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.01),
+                    Text(
+                      'ISPITI',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: viewModel.isLoading
           ? Center(
