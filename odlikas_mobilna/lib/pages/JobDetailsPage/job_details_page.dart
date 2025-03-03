@@ -11,6 +11,7 @@ class JobDetailsPage extends StatelessWidget {
   final String jobId;
   final Map<String, dynamic> jobData;
 
+  //potrebne varilajble za ovaj page
   const JobDetailsPage({
     required this.jobId,
     required this.jobData,

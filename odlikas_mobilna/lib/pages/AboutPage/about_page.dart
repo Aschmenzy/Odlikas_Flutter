@@ -41,8 +41,9 @@ class AboutPage extends StatelessWidget {
                         color: AppColors.primary,
                       ),
                     ),
+                    // Constrain text width
                     Container(
-                      width: size.width * 0.8, // Constrain text width
+                      width: size.width * 0.8, 
                       child: Text(
                         "Tvoj Pametni Prijatelj za Školu",
                         textAlign: TextAlign.center,

@@ -1,5 +1,4 @@
-// ignore_for_file: unused_element, unused_field
-
+// Glavna datoteka koja sadrži definiciju CalendarPage klase
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +9,7 @@ import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/dayDetailsDialog.dart
 import 'package:odlikas_mobilna/pages/CalendarPage/Widgets/scrollableCalendaer.dart';
 import 'package:provider/provider.dart';
 
+// CalendarPage je StatefulWidget koji prima email i lozinku kao parametre
 class CalendarPage extends StatefulWidget {
   final String email;
   final String password;
@@ -25,6 +25,7 @@ class _CalendarPageState extends State<CalendarPage> {
   late DateTime _lastDayOfMonth;
   List<Map<String, dynamic>> _holidays = [];
 
+  // Definiranje naziva mjeseci
   final List<String> _monthNames = [
     'SIJEČANJ',
     'VELJAČA',
@@ -42,11 +43,14 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   void initState() {
+    // Inicijalno postavljanje prvog i zadnjeg dana mjeseca
     _updateMonth(_focusedDate);
     super.initState();
+    // Dohvaćanje praznika iz Firestore baze podataka
     _fetchHolidays();
   }
 
+  // Funkcija za dohvaćanje praznika iz Firestore baze podataka
   Future<void> _fetchHolidays() async {
     try {
       QuerySnapshot snapshot =
@@ -66,6 +70,7 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
+  // Funkcija za provjeru je li dan praznik
   bool _isHoliday(DateTime date) {
     for (var holiday in _holidays) {
       DateTime startDate = holiday['startDate'];
@@ -87,11 +92,13 @@ class _CalendarPageState extends State<CalendarPage> {
     return false;
   }
 
+  // Funkcija za ažuriranje mjeseca
   void _updateMonth(DateTime date) {
     _firstDayOfMonth = DateTime(date.year, date.month, 1);
     _lastDayOfMonth = DateTime(date.year, date.month + 1, 0);
   }
 
+  // Funkcija za prelazak na sljedeći mjesec
   void _goToNextMonth() {
     setState(() {
       _focusedDate = DateTime(_focusedDate.year, _focusedDate.month + 1);
@@ -99,6 +106,7 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  // Funkcija za prelazak na prethodni mjesec
   void _goToPreviousMonth() {
     setState(() {
       _focusedDate = DateTime(_focusedDate.year, _focusedDate.month - 1);
@@ -106,6 +114,7 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
+  // Funkcija za spremanje događaja u Firestore bazu podataka
   Future<void> saveEvent({
     required String title,
     required String description,
@@ -128,6 +137,7 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
+  // Funkcija za dohvaćanje događaja iz Firestore baze podataka za određeni datum
   Future<List<Map<String, String>>> _fetchEvents(DateTime date) async {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -149,10 +159,12 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
+  // Funkcija za provjeru je li datum unutar trenutnog mjeseca
   bool _isWithinCurrentMonth(DateTime date) {
     return date.month == _focusedDate.month;
   }
 
+  // Funkcija za izračunavanje dana za određenu ćeliju u kalendaru
   DateTime _calculateDayForCell(int index) {
     int leadingDays = _firstDayOfMonth.weekday - 1;
     return _firstDayOfMonth
@@ -160,6 +172,7 @@ class _CalendarPageState extends State<CalendarPage> {
         .add(Duration(days: index));
   }
 
+  // Funkcija za provjeru je li datum ispit
   bool isTest(DateTime date) {
     final viewModel = context.read<TestViewmodel>();
     if (viewModel.tests == null) return false;
@@ -185,11 +198,12 @@ class _CalendarPageState extends State<CalendarPage> {
     return false;
   }
 
+  // Funkcija za prikaz detalja dana u popup prozoru
   void _showDayDetailsPopup(BuildContext context, DateTime date) {
     final viewModel = context.read<TestViewmodel>();
     List<Map<String, String>> tests = [];
 
-    // Prepare tests list
+    // Priprema popisa ispita
     if (viewModel.tests != null) {
       for (var monthTests in viewModel.tests!.testsByMonth.values) {
         for (var test in monthTests) {
@@ -257,7 +271,7 @@ class _CalendarPageState extends State<CalendarPage> {
             color: AppColors.secondary,
           ),
         ),
-        actions: [
+                actions: [
           Padding(
             padding: EdgeInsets.only(right: screenWidth * 0.08),
             child: Column(
@@ -333,3 +347,4 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
+

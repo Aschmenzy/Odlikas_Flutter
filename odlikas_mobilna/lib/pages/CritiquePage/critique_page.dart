@@ -28,8 +28,10 @@ class _CritiquePageState extends State<CritiquePage> {
     super.dispose();
   }
 
+  //funkcija koja dohvaca email korisnika
+  //email se koristi samo kako vbi se napravio dokument sa nazivom njihobog emaila
+  //na taj nacin vidimo koji se korisnik zali i za sto se zale i kada
   Future<void> _saveCritique() async {
-    //get user email
     final box = await Hive.openBox('User');
 
     final critique = _controller.text;

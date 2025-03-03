@@ -7,6 +7,8 @@ import 'package:odlikas_mobilna/pages/JobDetailsPage/job_details_page.dart';
 import 'package:provider/provider.dart';
 
 class NonExclusiveJob extends StatelessWidget {
+
+  //varijavle koje widget zahtjeva
   const NonExclusiveJob({
     super.key,
     required this.jobData,
@@ -14,7 +16,7 @@ class NonExclusiveJob extends StatelessWidget {
     required this.screenWidth,
     required this.jobId,
   });
-
+  //jobData je mapa iz koje ce stranica uzimati podatke
   final Map<String, dynamic> jobData;
   final double screenHeight;
   final double screenWidth;
@@ -24,6 +26,7 @@ class NonExclusiveJob extends StatelessWidget {
   Widget build(BuildContext context) {
     final fontService = Provider.of<FontService>(context);
     return GestureDetector(
+      //funkcija koja prebacuje na drugi page zajedno s potrebnim podatcima
       onTap: () {
         Navigator.push(
             context,

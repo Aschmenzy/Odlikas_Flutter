@@ -40,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
 
-    print('Loading user data for email: $userEmail'); // Debug log
+    print('Loading user data for email: $userEmail');
 
     if (userEmail != null) {
       // Try to load existing preferences
@@ -53,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (doc.exists) {
           final data = doc.data();
           if (data != null) {
-            print('Loaded preferences data: $data'); // Debug log
+            print('Loaded preferences data: $data'); 
             setState(() {
               isDyslexic = data['dyslexic'] ?? false;
             });
@@ -71,7 +71,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-// Replace your _saveNotificationPreferences function with this version:
+// funkcija koja sprema korisnike koji imaju dislekciju u posebnu bazu podataka kako bi se aplikacija lakše prilagodila njima
   Future<void> _saveDyslexicUsers({
     required String field,
     required bool value,
@@ -102,7 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-// Update the _fetchProfile function to use userEmail instead of Email
+  //funkcija koja dohavca podatke okorisniku i vrcaca je li korisnik povezan s ekranom ili nije 
   Future<Map<String, dynamic>> _fetchProfile() async {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
@@ -127,6 +127,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  //funkcija koja vraca korisnika na into page i brise sve podatke iz lokalnog storega
   void _signOut() async {
     final box = await Hive.openBox('User');
     await box.clear();

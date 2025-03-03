@@ -15,14 +15,14 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  // State for switches
+  // stanje switcheva
   bool ispitiEnabled = false;
   bool ucenjeEnabled = false;
   bool prviSatEnabled = false;
   bool odgovoriEnabled = false;
   bool novaOcjenaEnabled = false;
 
-  // User email from Hive
+  // dohvacanje korisnovog emaila
   String? userEmail;
   bool isLoading = true;
 
@@ -32,19 +32,22 @@ class _NotificationsPageState extends State<NotificationsPage> {
     _loadUserData();
   }
 
-  // Load user data and notification preferences
+  //funkcija koja dohvaca preference korsina vezane za notifikacije
+  //tako mozemo napravit da korisnik vidi sto je vewc oznacio i uplatio
+  //na taj nacin ne dolazi do pogreska 
   Future<void> _loadUserData() async {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
 
     if (userEmail != null) {
-      // Try to load existing preferences
       try {
+        //dohvacanje podataka iz colleciona 
         final doc = await FirebaseFirestore.instance
             .collection("StudentNotificationsPreferences")
             .doc(userEmail)
             .get();
 
+        //postavljenje vrijenosti switcheva na ucinate podatke iz firebase
         if (doc.exists) {
           final data = doc.data();
           if (data != null) {
@@ -67,7 +70,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     });
   }
 
-  // Save notification preferences to Firebase
+  // funkcija koja sprema unose korisnika u switch
   Future<void> _saveNotificationPreferences({
     required String field,
     required bool value,

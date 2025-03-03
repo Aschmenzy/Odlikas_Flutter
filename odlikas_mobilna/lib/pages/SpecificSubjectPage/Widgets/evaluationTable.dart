@@ -14,7 +14,7 @@ class EvaluationTable extends StatelessWidget {
     final fontService = Provider.of<FontService>(context);
     return Column(
       children: [
-        // Months header table
+        // Header
         Table(
           border: TableBorder.all(
             color: const Color.fromRGBO(113, 113, 113, 1),
@@ -133,18 +133,21 @@ class EvaluationTable extends StatelessWidget {
   Widget _buildTableCell(String text, BuildContext context) {
     final fontService = Provider.of<FontService>(context);
     return Container(
-      height: 45, // Fixed height to make cells more square
+      // Fixed height to make cells more square
+      height: 45, 
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
-        text.replaceAll('\n', ', '), // Replace newlines with commas
+        // Replace newlines with commas
+        text.replaceAll('\n', ', '), 
         style: fontService.font(
           fontWeight: FontWeight.w800,
           color: Colors.black,
           fontSize: 14,
         ),
         overflow: TextOverflow.visible,
-        maxLines: 1, // Force single line
+        // Force single line
+        maxLines: 1, 
       ),
     );
   }

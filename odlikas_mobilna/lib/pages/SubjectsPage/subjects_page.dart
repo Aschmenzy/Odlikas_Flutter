@@ -15,6 +15,8 @@ class SubjectsPage extends StatefulWidget {
 }
 
 class _SubjectsPageState extends State<SubjectsPage> {
+  //funkcija koja se ucitava prije nego sto se pokaze page
+  //dohvacanje lokalnih varijabli poput emaila i lozinke kako bi se koristile za dohvacanje API-a
   @override
   void initState() {
     super.initState();
@@ -37,6 +39,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      //dok se viewModel ucitava pokazi animaciju
       body: viewModel.isLoading
           ? Center(
               child: Lottie.asset(
@@ -47,9 +50,11 @@ class _SubjectsPageState extends State<SubjectsPage> {
           : CustomScrollView(
               slivers: [
                 SliverAppBar(
+                   // app bar se pokazuje cim se srcolla prema gore
                   floating:
-                      true, // Makes the app bar reappear immediately when scrolling up
-                  snap: true, // Snaps the app bar into view
+                      true,
+                      // Snaps the app bar into view
+                  snap: true, 
                   backgroundColor: Colors.white,
                   elevation: 0,
                   leading: IconButton(
@@ -66,6 +71,7 @@ class _SubjectsPageState extends State<SubjectsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        //tekst koji prikazuje podatke o uceniku
                         Text(
                           viewModel.studentProfile?.studentProgram ??
                               "Loading...",
@@ -95,11 +101,11 @@ class _SubjectsPageState extends State<SubjectsPage> {
                 SliverPadding(
                   padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.01 +
-                        30, // Added 30 to match your original padding
+                        30, 
                     vertical: screenHeight * 0.01,
                   ),
                   sliver: SliverGrid(
-                    // Rest of your SliverGrid code remains the same
+                    
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 1,
                       crossAxisSpacing: screenWidth * 0.04,

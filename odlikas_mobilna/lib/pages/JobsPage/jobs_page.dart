@@ -19,6 +19,7 @@ class JobsPage extends StatefulWidget {
 class _JobsPageState extends State<JobsPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  //funkcija koja dohvaca sve promjene u Jobs collectionu
   Stream<QuerySnapshot> getJobs() {
     return _firestore.collection('Jobs').snapshots();
   }
@@ -34,6 +35,7 @@ class _JobsPageState extends State<JobsPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: StreamBuilder<QuerySnapshot>(
+            //stream builder koji se update kada funkcija getJobs vrati da je snapshot promijenjen
             stream: getJobs(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
@@ -44,7 +46,8 @@ class _JobsPageState extends State<JobsPage> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              // Separate jobs into exclusive and non-exclusive
+              // provjeravanje je li neki posalo exclusive ili nije
+              //ako ima boolean exclusive true onda je ako nema onda nije
               final exclusiveJobs = snapshot.data!.docs
                   .where((doc) => doc['exclusive'] == true)
                   .toList();
@@ -71,6 +74,7 @@ class _JobsPageState extends State<JobsPage> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: exclusiveJobs.map((job) {
+                        //spremanje podataka jobData u mapu i onda passanje tih podataka u widgete
                         final jobData = job.data() as Map<String, dynamic>;
                         return Padding(
                           padding: const EdgeInsets.only(right: 16.0),
@@ -103,6 +107,7 @@ class _JobsPageState extends State<JobsPage> {
                       scrollDirection: Axis.vertical,
                       child: Column(
                         children: nonExclusiveJobs.map((job) {
+                          //spremanje podataka jobData u mapu i onda passanje tih podataka u widgete
                           final jobData = job.data() as Map<String, dynamic>;
                           return Column(
                             children: [

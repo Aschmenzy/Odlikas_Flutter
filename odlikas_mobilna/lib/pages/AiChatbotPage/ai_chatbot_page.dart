@@ -29,7 +29,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
   @override
   void initState() {
     super.initState();
-    // Add initial welcome messages
+    //pocetna poruka
     _messages.add(
       Message(
         text:
@@ -40,6 +40,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
     );
   }
 
+  //funkcija koja dodaje poruke u listu
   Future<void> _sendMessage() async {
     if (_promptController.text.isEmpty) return;
 
@@ -56,13 +57,14 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
       _promptController.clear();
     });
 
-    // Scroll to bottom after adding user message
+  //skrolati na dno stranice
     _scrollToBottom();
 
     try {
       // Use our AI Assistant service instead of OpenAI directly
       final response = await _aiAssistantService.processQuery(userMessage);
 
+    //objekt koji reprezentira poruku koju vraca AI
       final aiMessageObj = Message(
         text: response,
         isUser: false,
@@ -86,11 +88,12 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
       setState(() {
         _isLoading = false;
       });
-      // Scroll to bottom after receiving AI response
+  //skrolati na dno stranice
       _scrollToBottom();
     }
   }
 
+//funkcija koja skorla na dno stranice s animacijon od 300ms
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {

@@ -11,6 +11,8 @@ class BannerPage extends StatefulWidget {
 }
 
 class _BannerPageState extends State<BannerPage> {
+  //funkcija koje se zove prije ucitavanje stranice
+  //nakon tri sekunde s laganim fade-om prebacuje na novu stranicu
   @override
   void initState() {
     super.initState();

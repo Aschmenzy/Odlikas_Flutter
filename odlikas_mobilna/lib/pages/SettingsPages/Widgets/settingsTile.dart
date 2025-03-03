@@ -46,6 +46,7 @@ class SettingsTile extends StatelessWidget {
               ),
             ],
           ),
+          //ako je nije zadnji pokazi divider ako je nemoj
           if (!isLast) ...[
             Divider(
               color: AppColors.tertiary,

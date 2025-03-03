@@ -26,6 +26,7 @@ class _QueryPageState extends State<QueryPage> {
   TextEditingController questions = TextEditingController();
   late String dquestions;
 
+  //funkcija koja dohvaca profil
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
@@ -50,6 +51,7 @@ class _QueryPageState extends State<QueryPage> {
     }
   }
 
+  //funkcija koja dohvaca spremljeni base64 string i decodira ga
   void _viewPDF() async {
     if (_pdfBase64 == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +98,8 @@ class _QueryPageState extends State<QueryPage> {
     }
   }
 
+  //funkcija koja daje korisniku mogucnost spremanja CV u firebase
+  //funkcija enkodira pdf u base64 string i sprema ga tako u firebase
   Future<void> _handleSubmit() async {
     // Validate CV
     if (_pdfBase64 == null) {

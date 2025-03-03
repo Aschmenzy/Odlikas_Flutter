@@ -20,6 +20,8 @@ class SubjectDetailsPage extends StatefulWidget {
 }
 
 class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
+  //funkcija koja se ucitava prije nego sto se pokaze page
+  //dohvacanje lokalnih varijabli poput emaila i lozinke kako bi se koristile za dohvacanje API-a
   @override
   void initState() {
     super.initState();
@@ -28,6 +30,8 @@ class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
       final email = await box.get('email');
       final password = await box.get('password');
       final viewModel = context.read<HomePageViewModel>();
+      //viewMode.fetch... koristi specifican subjectId koji se passdowna s drugog page-a
+      //na taj nacin API fetcha podatke za poseban page
       viewModel.fetchSpecificSubjectGrades(
         email,
         password,

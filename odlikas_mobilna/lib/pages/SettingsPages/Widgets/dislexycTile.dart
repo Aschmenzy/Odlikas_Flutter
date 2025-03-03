@@ -68,8 +68,8 @@ class DislexycTile extends StatelessWidget {
         if (!isLast) ...[
           Divider(
             color: AppColors.tertiary,
-            thickness: 0.5, // Thinner divider
-            height: 8, // Reduced space around divider
+            thickness: 0.5, 
+            height: 8, 
           ),
           SizedBox(height: size.height * 0.01),
         ]

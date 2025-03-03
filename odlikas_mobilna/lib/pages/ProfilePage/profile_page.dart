@@ -33,6 +33,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   bool _isLoading = true;
 
+  //funkcija koja horvaca podatke o korisniku 
+  //koristi email kako bi nasla dokument u collecitonu 
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
@@ -65,6 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  //funkcija koje sprema opis korisnika iz modala u studentProfiles collection
   Future<void> _saveDescription(String description) async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
@@ -86,6 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+//funkcija koja prima samo pfd, decodiga ga u base64 string i sprema ga pod navimo cv u studentprofils collection
   Future<void> _uploadPDF() async {
     try {
       setState(() => _isUploadingPDF = true);
