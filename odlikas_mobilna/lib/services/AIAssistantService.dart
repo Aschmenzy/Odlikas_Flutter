@@ -217,54 +217,105 @@ class AIAssistantService {
   // RESPONSE GENERATORS
 
   Future<String> _getNextTestInfo() async {
-    final tests = await _getTests();
+    try {
+      final tests = await _getTests();
 
-    // Get current date for comparison
-    final now = DateTime.now();
-
-    // Find the next upcoming test
-    TestDetail? nextTest;
-    DateTime? nextTestDate;
-
-    for (final entry in tests.testsByMonth.entries) {
-      for (final test in entry.value) {
-        try {
-          // Parse the test date
-          final testDate = _parseTestDate(test.testDate);
-
-          // Only consider future tests
-          if (testDate.isAfter(now)) {
-            // If we haven't found a next test yet, or this test is sooner
-            if (nextTest == null || testDate.isBefore(nextTestDate!)) {
-              nextTest = test;
-              nextTestDate = testDate;
-            }
-          }
-        } catch (e) {
-          // Skip tests with invalid dates
-          if (kDebugMode) {
-            print('Error parsing test date: ${test.testDate}, Error: $e');
+      // Debug output of test data
+      if (kDebugMode) {
+        print('Retrieved ${tests.testsByMonth.length} months of test data');
+        // Log sample of test dates for debugging
+        for (final entry in tests.testsByMonth.entries.take(1)) {
+          for (final test in entry.value.take(3)) {
+            print('Sample test date format: "${test.testDate}"');
           }
         }
       }
-    }
 
-    if (nextTest != null) {
-      final daysUntil = nextTestDate!.difference(now).inDays;
-      String timeDescription;
+      // Get current date for comparison
+      final now = DateTime.now();
 
-      if (daysUntil == 0) {
-        timeDescription = "danas";
-      } else if (daysUntil == 1) {
-        timeDescription = "sutra";
-      } else {
-        timeDescription = "za $daysUntil dana";
+      // Find the next upcoming test
+      TestDetail? nextTest;
+      DateTime? nextTestDate;
+      int totalTests = 0;
+      int invalidDateCount = 0;
+      List<String> invalidDates = [];
+
+      for (final entry in tests.testsByMonth.entries) {
+        for (final test in entry.value) {
+          totalTests++;
+          try {
+            // Try to parse the test date
+            if (test.testDate == null || test.testDate.isEmpty) {
+              invalidDateCount++;
+              invalidDates.add('empty date');
+              continue;
+            }
+
+            final testDate = _parseTestDate(test.testDate);
+
+            // Only consider future tests
+            if (testDate.isAfter(now)) {
+              // If we haven't found a next test yet, or this test is sooner
+              if (nextTest == null || testDate.isBefore(nextTestDate!)) {
+                nextTest = test;
+                nextTestDate = testDate;
+              }
+            }
+          } catch (e) {
+            // Count invalid dates
+            invalidDateCount++;
+            if (invalidDates.length < 5) {
+              // Limit to 5 examples
+              invalidDates.add(test.testDate);
+            }
+
+            // Skip tests with invalid dates
+            if (kDebugMode) {
+              print('Error parsing test date: "${test.testDate}", Error: $e');
+            }
+          }
+        }
       }
 
-      return "Tvoj sljedeći test je \"${nextTest.testName}\" zakazan za ${nextTest.testDate} ($timeDescription). "
-          "Detalji: ${nextTest.testDescription}";
-    } else {
-      return "Dobre vijesti! Nemaš zakazanih nadolazećih testova.";
+      if (kDebugMode) {
+        print('Total tests: $totalTests, Invalid dates: $invalidDateCount');
+        if (invalidDateCount > 0) {
+          print('Sample invalid dates: ${invalidDates.join(', ')}');
+        }
+      }
+
+      if (nextTest != null) {
+        final daysUntil = nextTestDate!.difference(now).inDays;
+        String timeDescription;
+
+        if (daysUntil == 0) {
+          timeDescription = "danas";
+        } else if (daysUntil == 1) {
+          timeDescription = "sutra";
+        } else {
+          timeDescription = "za $daysUntil dana";
+        }
+
+        return "Tvoj sljedeći test je \"${nextTest.testName}\" zakazan za ${nextTest.testDate} ($timeDescription). "
+            "Detalji: ${nextTest.testDescription}";
+      } else {
+        if (invalidDateCount > 0) {
+          // If most dates were invalid, there might be a format issue
+          if (invalidDateCount > totalTests * 0.5) {
+            return "Postoji problem s formatima datuma testova. Molimo prijavite ovo administratoru aplikacije. Nema pronađenih testova s valjanim datumima.";
+          } else {
+            return "Nisam mogao ispravno pročitati datume za $invalidDateCount ${invalidDateCount == 1 ? 'test' : 'testova'}, ali trenutno nema drugih nadolazećih testova.";
+          }
+        } else {
+          return "Dobre vijesti! Nemaš zakazanih nadolazećih testova.";
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in _getNextTestInfo: $e');
+      }
+      return "Žao mi je, došlo je do pogreške pri dohvaćanju informacija o testovima. Molimo pokušajte ponovno kasnije.";
     }
   }
 
@@ -535,15 +586,163 @@ class AIAssistantService {
   }
 
   DateTime _parseTestDate(String dateString) {
-    final parts = dateString.split('.');
-    if (parts.length != 3) {
-      throw FormatException('Invalid date format: $dateString');
+    try {
+      // First, check if the string is empty or null
+      if (dateString.isEmpty) {
+        throw FormatException('Empty date string');
+      }
+
+      // Clean up the date string - remove extra spaces
+      final cleaned = dateString.trim();
+
+      // Debug log
+      if (kDebugMode) {
+        print('Attempting to parse date: "$cleaned"');
+      }
+
+      // Special case for partial dates like "26.9." (missing year)
+      final partialDatePattern = RegExp(r'(\d{1,2})\.(\d{1,2})\.$');
+      if (partialDatePattern.hasMatch(cleaned)) {
+        final match = partialDatePattern.firstMatch(cleaned);
+        if (match != null && match.groupCount >= 2) {
+          final day = int.tryParse(match.group(1) ?? '') ?? 1;
+          final month = int.tryParse(match.group(2) ?? '') ?? 1;
+
+          // Use current year
+          final year = DateTime.now().year;
+
+          // Validate day and month ranges
+          if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+            // Create date with current year
+            DateTime result = DateTime(year, month, day);
+
+            // If the date is in the past, assume it's for next year
+            if (result.isBefore(DateTime.now())) {
+              result = DateTime(year + 1, month, day);
+            }
+
+            return result;
+          }
+        }
+      }
+
+      // Format: DD.MM.YYYY
+      final dotPattern = RegExp(r'(\d{1,2})\.(\d{1,2})\.(\d{4})');
+      if (dotPattern.hasMatch(cleaned)) {
+        final match = dotPattern.firstMatch(cleaned);
+        if (match != null && match.groupCount >= 3) {
+          final day = int.tryParse(match.group(1) ?? '') ?? 1;
+          final month = int.tryParse(match.group(2) ?? '') ?? 1;
+          final year = int.tryParse(match.group(3) ?? '') ?? 2000;
+
+          // Validate day and month ranges
+          if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+            return DateTime(year, month, day);
+          }
+        }
+      }
+
+      // Format: DD-MM-YYYY
+      final dashPattern = RegExp(r'(\d{1,2})-(\d{1,2})-(\d{4})');
+      if (dashPattern.hasMatch(cleaned)) {
+        final match = dashPattern.firstMatch(cleaned);
+        if (match != null && match.groupCount >= 3) {
+          final day = int.tryParse(match.group(1) ?? '') ?? 1;
+          final month = int.tryParse(match.group(2) ?? '') ?? 1;
+          final year = int.tryParse(match.group(3) ?? '') ?? 2000;
+
+          if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+            return DateTime(year, month, day);
+          }
+        }
+      }
+
+      // Format: DD/MM/YYYY
+      final slashPattern = RegExp(r'(\d{1,2})/(\d{1,2})/(\d{4})');
+      if (slashPattern.hasMatch(cleaned)) {
+        final match = slashPattern.firstMatch(cleaned);
+        if (match != null && match.groupCount >= 3) {
+          final day = int.tryParse(match.group(1) ?? '') ?? 1;
+          final month = int.tryParse(match.group(2) ?? '') ?? 1;
+          final year = int.tryParse(match.group(3) ?? '') ?? 2000;
+
+          if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+            return DateTime(year, month, day);
+          }
+        }
+      }
+
+      // Last resort: try to handle non-standard formats
+      // Split by common separators and try to make sense of the parts
+      final parts = cleaned.split(RegExp(r'[.\-/ ]'));
+
+      // Filter out empty parts (which can happen with trailing periods)
+      final filteredParts = parts.where((part) => part.isNotEmpty).toList();
+
+      if (filteredParts.length >= 2) {
+        // Try to extract numbers from the parts
+        final numbers = <int>[];
+        for (final part in filteredParts) {
+          final num = int.tryParse(part.replaceAll(RegExp(r'[^\d]'), ''));
+          if (num != null) {
+            numbers.add(num);
+          }
+        }
+
+        // If we got at least 2 numbers, assume they're day, month (use current year)
+        if (numbers.length >= 2) {
+          int day = numbers[0];
+          int month = numbers[1];
+          int year = DateTime.now().year;
+
+          // If we have a third number, use it as year
+          if (numbers.length >= 3) {
+            year = numbers[2];
+            // If the year seems too small, it might be a 2-digit year
+            if (year < 100) {
+              year += 2000;
+            }
+          }
+
+          // Validate and swap if needed (in case month and day are reversed)
+          if (month > 12) {
+            final temp = month;
+            month = day;
+            day = temp;
+          }
+
+          // Final validation
+          if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+            DateTime result = DateTime(year, month, day);
+
+            // If using current year made this date in the past, use next year
+            if (numbers.length < 3 && result.isBefore(DateTime.now())) {
+              result = DateTime(year + 1, month, day);
+            }
+
+            return result;
+          }
+        }
+      }
+
+      // If we reach here, try the DateTime.parse as a last resort
+      try {
+        return DateTime.parse(cleaned);
+      } catch (e) {
+        if (kDebugMode) {
+          print('DateTime.parse failed: $e');
+        }
+        throw FormatException('Could not parse date: $cleaned');
+      }
+    } catch (e) {
+      // Log the error for debugging
+      if (kDebugMode) {
+        print('Error parsing date "$dateString": $e');
+      }
+
+      // Return a default future date to ensure this test doesn't get selected as the "next test"
+      return DateTime.now()
+          .add(const Duration(days: 3650)); // 10 years in the future
     }
-
-    final day = int.parse(parts[0]);
-    final month = int.parse(parts[1]);
-    final year = int.parse(parts[2]);
-
-    return DateTime(year, month, day);
   }
 }

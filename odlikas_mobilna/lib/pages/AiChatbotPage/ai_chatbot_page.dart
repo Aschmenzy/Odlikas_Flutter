@@ -57,14 +57,14 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
       _promptController.clear();
     });
 
-  //skrolati na dno stranice
+    //skrolati na dno stranice
     _scrollToBottom();
 
     try {
       // Use our AI Assistant service instead of OpenAI directly
       final response = await _aiAssistantService.processQuery(userMessage);
 
-    //objekt koji reprezentira poruku koju vraca AI
+      //objekt koji reprezentira poruku koju vraca AI
       final aiMessageObj = Message(
         text: response,
         isUser: false,
@@ -88,7 +88,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
       setState(() {
         _isLoading = false;
       });
-  //skrolati na dno stranice
+      //skrolati na dno stranice
       _scrollToBottom();
     }
   }
@@ -178,7 +178,7 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         child: Text(
-          message.text,
+          _betterDiacriticsFix(message.text),
           style: GoogleFonts.inter(
             color: message.isUser ? AppColors.secondary : AppColors.background,
             fontSize: 14,
@@ -292,5 +292,43 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
     _promptController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  String _betterDiacriticsFix(String text) {
+    // Remove the strange character that appears after "Pronač"
+    text = text.replaceAll(String.fromCharCode(0x0087), '');
+    text = text.replaceAll(String.fromCharCode(0x008D), '');
+
+    // Direct character replacements for Croatian letters
+    final Map<String, String> replacements = {
+      'Ä': 'č',
+      'Å¡': 'š',
+      'Å¾': 'ž',
+      'Ä‡': 'ć',
+    };
+
+    // Apply replacements
+    replacements.forEach((key, value) {
+      text = text.replaceAll(key, value);
+    });
+
+    // Handle common word patterns
+    final wordReplacements = {
+      'PronaÄ': 'Pronađ',
+      'IzraÄunaj': 'Izračunaj',
+      'jednadÅ¾b': 'jednadžb',
+      'konaÄno': 'konačno',
+      'mnoÅ¾': 'množ',
+      'mnoÅ¾enj': 'množnj',
+      'Primjenjuje': 'Primjenjuje',
+      'poniÅ¡tavaju': 'poništavaju',
+    };
+
+    // Apply word-level replacements
+    wordReplacements.forEach((key, value) {
+      text = text.replaceAll(key, value);
+    });
+
+    return text;
   }
 }
