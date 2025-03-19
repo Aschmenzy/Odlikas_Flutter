@@ -42,7 +42,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
       // Get cached data from Firebase first
       final cachedSchedule = await FirebaseFirestore.instance
-          .collection('studentProfiles')
+          .collection('studentSchedule')
           .doc(email)
           .get();
 
@@ -81,7 +81,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
       // Save to Firebase
       await FirebaseFirestore.instance
-          .collection('studentProfiles')
+          .collection('studentSchedule')
           .doc(email)
           .set({
         'schedule': _homeViewModel.scheduleSubject?.toJson(),
@@ -168,7 +168,7 @@ class _SchedulePageState extends State<SchedulePage> {
 
       if (email != null) {
         await FirebaseFirestore.instance
-            .collection('studentProfiles')
+            .collection('studentSchedule')
             .doc(email)
             .set({
           'schedule': _homeViewModel.scheduleSubject?.toJson(),
@@ -191,132 +191,172 @@ class _SchedulePageState extends State<SchedulePage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.background,
-        shadowColor: AppColors.tertiary,
-        elevation: 1,
+        backgroundColor: Colors.white,
+        contentPadding: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10),
         ),
-        content: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.3,
-          width: MediaQuery.of(context).size.width * 0.9,
+        content: Container(
+          width: MediaQuery.of(context).size.width * 0.95,
+          padding: const EdgeInsets.all(10),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //header
-              Text(
-                periodNumber == 0 ? '1. sat' : '${periodNumber + 1}. sat',
-                style: GoogleFonts.inter(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.secondary,
-                  fontSize: 20,
+              // Header
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  periodNumber == 0 ? '1.sat' : '${periodNumber + 1}.sat',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: AppColors.secondary,
+                  ),
                 ),
               ),
 
+              // Divider
               Divider(
-                color: AppColors.tertiary,
-                thickness: 0.5,
+                height: 1,
+                thickness: 1,
+                color: Colors.grey.shade300,
               ),
 
-              //body
-
-              Text(
-                'Prvi sat:',
-                style: GoogleFonts.inter(
-                  color: AppColors.secondary,
-                  fontSize: 16,
-                ),
-              ),
-              TextField(
-                controller: controller,
-                decoration: InputDecoration(
-                  hintText: 'Ime predmeta...',
-                  isDense: true,
-                  hintStyle: GoogleFonts.inter(
-                    color: AppColors.tertiary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: AppColors.tertiary),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: AppColors.tertiary),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: AppColors.tertiary),
-                  ),
-                  suffixIcon: Icon(Icons.edit, color: AppColors.tertiary),
-                ),
-              ),
-
-              SizedBox(height: 16),
-
-              Text(
-                'Učionica:',
-                style: GoogleFonts.inter(
-                  color: AppColors.secondary,
-                  fontSize: 16,
-                ),
-              ),
-              TextField(
-                controller: controllerUcionice,
-                decoration: InputDecoration(
-                  hintText: 'Ime učionice...',
-                  hintStyle: GoogleFonts.inter(
-                    color: AppColors.tertiary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: AppColors.tertiary),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: AppColors.tertiary),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: AppColors.tertiary),
-                  ),
-                  suffixIcon: Icon(Icons.edit, color: AppColors.tertiary),
-                ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: SizedBox(
-                      width: 40,
-                      child: Image.asset(
-                        'assets/images/cancel.png',
+              // Body
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Subject field
+                    Text(
+                      'Predmet:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.secondary,
                       ),
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  GestureDetector(
-                    onTap: () {
-                      if (controller.text.isNotEmpty) {
-                        _updateSubject(periodNumber, controller.text, false);
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: SizedBox(
-                      width: 40,
-                      child: Image.asset(
-                        'assets/images/submit.png',
+                    const SizedBox(height: 2),
+                    TextField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        hintText: 'Ime predmeta...',
+                        hintStyle: TextStyle(
+                            color: AppColors.tertiary,
+                            fontWeight: FontWeight.w800),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: AppColors.tertiary),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: AppColors.tertiary),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: AppColors.tertiary),
+                        ),
+                        suffixIcon: Icon(Icons.edit,
+                            color: AppColors.tertiary, size: 20),
                       ),
                     ),
-                  ),
-                ],
-              )
+
+                    const SizedBox(height: 5),
+
+                    // Classroom field
+                    Text(
+                      'Učionica:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    TextField(
+                      controller: controllerUcionice,
+                      decoration: InputDecoration(
+                        hintText: 'Ime učionice...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: AppColors.tertiary),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: AppColors.tertiary),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                          borderSide: BorderSide(color: AppColors.tertiary),
+                        ),
+                        suffixIcon:
+                            Icon(Icons.edit, color: Colors.grey, size: 20),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Action buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // Cancel button
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.close,
+                                color: Colors.white, size: 20),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        // Submit button
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: Icon(Icons.check,
+                                color: Colors.white, size: 20),
+                            onPressed: () {
+                              if (controller.text.isNotEmpty) {
+                                _updateSubject(
+                                    periodNumber, controller.text, false);
+                                Navigator.pop(context);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

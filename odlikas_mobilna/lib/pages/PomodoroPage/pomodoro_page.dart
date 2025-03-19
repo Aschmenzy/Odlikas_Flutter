@@ -31,8 +31,11 @@ class _PomodoroPageState extends State<PomodoroPage> {
   final int _displayedSecondsLeft = 25 * 60;
   Timer? _localTimer;
   late ValueNotifier<int> _secondsNotifier;
-  int? _daysLearning;
-  int? _hoursLearning;
+  int _daysLearning = 0;
+  int _hoursLearning = 0;
+  int _streakCount = 0;
+  int _weeklySessions = 0;
+  int _weeklyStreak = 0;
 
   @override
   void initState() {
@@ -80,6 +83,10 @@ class _PomodoroPageState extends State<PomodoroPage> {
           _isRunning = mapData['isRunning'] ?? false;
           _initialDuration = mapData['currentDuration'] ?? 25 * 60;
           _startTimestamp = mapData['startTimestamp'] as Timestamp?;
+          // Add the new streak fields from paste-2.txt
+          _streakCount = mapData['streakCount'] ?? 0;
+          _weeklySessions = mapData['weeklySessions'] ?? 0;
+          _weeklyStreak = mapData['weeklyStreak'] ?? 0;
         });
 
         if (_isRunning && _startTimestamp != null) {
@@ -216,6 +223,129 @@ class _PomodoroPageState extends State<PomodoroPage> {
     }
   }
 
+  // New method for showing streak details
+  void _showStreakDetails() {
+    final targetSessions = _daysLearning * (_hoursLearning * 60 ~/ 25);
+    final progress =
+        targetSessions > 0 ? (_streakCount / targetSessions).clamp(0, 1) : 0;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Statistika Učenja',
+                style: Provider.of<FontService>(context).font(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 20),
+              _buildStatItem('🔥 Trenutni Niz', '$_weeklyStreak tjedan'),
+              const SizedBox(height: 15),
+              _buildStatItem('📅 Cilj tjedno', '$_daysLearning dana/tjedno'),
+              const SizedBox(height: 15),
+              _buildStatItem('⏳ Dnevni cilj', '$_hoursLearning sati/dan'),
+              const SizedBox(height: 15),
+              _buildStatItem('✅ Održane sesije', '$_weeklySessions sesija '),
+              const Spacer(),
+              LinearProgressIndicator(
+                value: progress.toDouble(),
+                backgroundColor: Colors.black.withOpacity(0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(_getPhaseColor()),
+                minHeight: 20,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Napredak:',
+                    style: Provider.of<FontService>(context).font(
+                      fontSize: 16,
+                      color: _getPhaseColor(),
+                    ),
+                  ),
+                  Text(
+                    '${(progress * 100).toStringAsFixed(1)}%',
+                    style: Provider.of<FontService>(context).font(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: _getPhaseColor(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: _getPhaseColor(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    'UREDU',
+                    style: Provider.of<FontService>(context).font(
+                      fontSize: 24,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method for stat items in the dialog
+  Widget _buildStatItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: Provider.of<FontService>(context).font(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: Provider.of<FontService>(context).font(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -240,15 +370,12 @@ class _PomodoroPageState extends State<PomodoroPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           HorizontalStreakProgress(
-                            daysLearning: _daysLearning ?? 1,
-                            hoursLearning: _hoursLearning ?? 1,
-                            streakCount: 0,
-                            color: _currentPhase == "Pomodoro"
-                                ? const Color.fromRGBO(236, 146, 31, 1)
-                                : _currentPhase == "Kratka pauza"
-                                    ? const Color.fromRGBO(23, 148, 210, 1)
-                                    : const Color.fromRGBO(20, 133, 186, 1),
-                            onTap: () {},
+                            daysLearning: _daysLearning,
+                            hoursLearning: _hoursLearning,
+                            streakCount: _streakCount,
+                            color: _getPhaseColor(),
+                            onTap:
+                                _showStreakDetails, // Add onTap handler for showing streak details
                           ),
                           SizedBox(height: screenSize.height * 0.02),
                           PomodoroContainer(

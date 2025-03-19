@@ -58,7 +58,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
     try {
       // Dohvaćanje dokumenta korisnika iz Firestore baze podataka
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection("studentProfiles")
+          .collection("studentSchedule")
           .doc(email)
           .get();
 

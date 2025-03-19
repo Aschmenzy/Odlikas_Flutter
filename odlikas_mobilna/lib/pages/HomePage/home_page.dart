@@ -92,10 +92,10 @@ class _HomePageState extends State<HomePage> {
 
           try {
             // Spremanje podataka o iskaznici u Firestore
-            // Podaci se spremaju u kolekciju studentProfiles
+            // Podaci se spremaju u kolekciju workingID
             //kao podmapa workingId
             await FirebaseFirestore.instance
-                .collection('studentProfiles')
+                .collection('workingID')
                 .doc(email)
                 .set({
               'workingId': {
