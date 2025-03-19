@@ -17,7 +17,6 @@ class FirestorePomodoroService {
         'isRunning': false,
         'cycleCount': 0,
         'startTimestamp': null,
-        // Add new streak-related fields
         'streakCount': 0,
         'weeklySessions': 0,
         'weeklyStreak': 0,
@@ -101,17 +100,15 @@ class FirestorePomodoroService {
     // Reset weekly sessions if it's a new week
     if (isNewWeek) {
       // If we completed the target number of sessions last week, increment the streak
-      final targetSessions =
-          4; // This should ideally be derived from user preferences
+      final targetSessions = 1;
       if (weeklySessions >= targetSessions) {
         weeklyStreak++;
       } else {
-        weeklyStreak = 0; // Reset streak if target wasn't met
+        weeklyStreak = 0;
       }
 
-      weeklySessions = 1; // Reset for the new week and count this session
+      weeklySessions = 1;
     } else {
-      // If it's a new day in the same week, increment sessions
       weeklySessions++;
     }
 

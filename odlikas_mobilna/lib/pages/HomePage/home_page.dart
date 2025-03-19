@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage> {
     try {
       // Dohvaćanje dokumenta iz Firestore-a
       final doc = await FirebaseFirestore.instance
-          .collection('studentProfiles')
+          .collection('workingID')
           .doc(email)
           .get();
 

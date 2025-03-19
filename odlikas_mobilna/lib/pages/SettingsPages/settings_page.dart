@@ -53,7 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
         if (doc.exists) {
           final data = doc.data();
           if (data != null) {
-            print('Loaded preferences data: $data'); 
+            print('Loaded preferences data: $data');
             setState(() {
               isDyslexic = data['dyslexic'] ?? false;
             });
@@ -102,7 +102,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  //funkcija koja dohavca podatke okorisniku i vrcaca je li korisnik povezan s ekranom ili nije 
+  //funkcija koja dohavca podatke okorisniku i vrcaca je li korisnik povezan s ekranom ili nije
   Future<Map<String, dynamic>> _fetchProfile() async {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
@@ -289,7 +289,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SizedBox(height: screenHeight * 0.01),
                   SettingsTile(
-                    label: "Obavjesti",
+                    label: "Obavijesti",
                     path: "assets/images/notification.png",
                     onTap: () => Navigator.push(
                       context,
