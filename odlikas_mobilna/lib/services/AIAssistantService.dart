@@ -447,8 +447,8 @@ class AIAssistantService {
       try {
         final daySchedule = schedule.schedule.firstWhere(
             (day) => day.day == englishDay,
-            orElse: () =>
-                DaySchedule(day: englishDay ?? 'Unknown', subjects: []));
+            orElse: () => DaySchedule(
+                day: englishDay ?? 'Unknown', subjects: [], classrooms: []));
 
         if (daySchedule.subjects.isEmpty) {
           return "Nemaš nastave zakazane za $specificDay.";

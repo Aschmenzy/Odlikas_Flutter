@@ -65,9 +65,47 @@ class _HomePageState extends State<HomePage> {
         studentPassword = password;
         studentEmail = email;
       });
+
       // Dohvaćanje podataka za iskaznicu
       await _getStudentIdCardData();
+
+      // Dohvaćanje podataka za kalendar
+      await _fetchHolidaysData();
+
+      // Inicijalizacija podataka o testovima
+      final testViewModel = context.read<TestViewmodel>();
+      if (testViewModel.tests == null) {
+        await testViewModel.fetchTests(studentEmail!, studentPassword!);
+        // Možemo osvježiti stanje za ponovni render kalendara
+        setState(() {});
+      }
     });
+  }
+
+  // Nova metoda za dohvaćanje podataka o praznicima
+  Future<void> _fetchHolidaysData() async {
+    try {
+      // Prilagodite ovo vašoj strukturi baze za praznike
+      final holidaysSnapshot =
+          await FirebaseFirestore.instance.collection('SchoolHolidays').get();
+
+      List<Map<String, dynamic>> holidays = [];
+
+      for (var doc in holidaysSnapshot.docs) {
+        var data = doc.data();
+        holidays.add({
+          'startDate': (data['startDate'] as Timestamp).toDate(),
+          'endDate': (data['endDate'] as Timestamp).toDate(),
+          'name': data['name'] as String,
+        });
+      }
+
+      setState(() {
+        _holidays = holidays;
+      });
+    } catch (e) {
+      print('Error fetching holidays: $e');
+    }
   }
 
   // Prikaz modalnog prozora za unos podataka o studentskoj iskaznici

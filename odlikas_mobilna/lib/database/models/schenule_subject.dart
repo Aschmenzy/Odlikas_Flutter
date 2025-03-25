@@ -21,13 +21,21 @@ class ScheduleSubject {
 class DaySchedule {
   final String day;
   final List<String> subjects;
+  List<String> classrooms;
 
-  DaySchedule({required this.day, required this.subjects});
+  DaySchedule({
+    required this.day,
+    required this.subjects,
+    List<String>? classrooms,
+  }) : classrooms = classrooms ?? List.filled(8, '');
 
   factory DaySchedule.fromJson(Map<String, dynamic> json) {
     return DaySchedule(
       day: json['day'],
-      subjects: List<String>.from(json['subjects']),
+      subjects: List<String>.from(json['subjects'] ?? []),
+      classrooms: json['classrooms'] != null
+          ? List<String>.from(json['classrooms'])
+          : null,
     );
   }
 
@@ -35,6 +43,7 @@ class DaySchedule {
     return {
       'day': day,
       'subjects': subjects,
+      'classrooms': classrooms,
     };
   }
 }

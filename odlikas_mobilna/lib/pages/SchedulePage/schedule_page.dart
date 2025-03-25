@@ -1,8 +1,5 @@
-// ignore_for_file: unnecessary_brace_in_string_interps
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
@@ -13,6 +10,7 @@ import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/daySelector.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/subjectTitle.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/timeSelector.dart';
+import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:provider/provider.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -50,15 +48,22 @@ class _SchedulePageState extends State<SchedulePage> {
         // If we have data in Firebase, use that and don't fetch from API
         var scheduleData = cachedSchedule.data()!['schedule'];
 
-        // Ensure each day's subjects array has 9 elements
+        // Ensure each day's subjects and classrooms array have 8 elements
         if (scheduleData['schedule'] is List) {
           for (var day in scheduleData['schedule']) {
             if (day['subjects'] is List) {
               var subjects = List<String>.from(day['subjects']);
+              var classrooms = List<String>.from(day['classrooms'] ?? []);
+
               while (subjects.length < 8) {
                 subjects.add('');
               }
+              while (classrooms.length < 8) {
+                classrooms.add('');
+              }
+
               day['subjects'] = subjects;
+              day['classrooms'] = classrooms;
             }
           }
         }
@@ -70,11 +75,14 @@ class _SchedulePageState extends State<SchedulePage> {
       // Only fetch from API if we don't have data in Firebase
       await _homeViewModel.fetchScheduleSubjects(email, password);
 
-      // Ensure the schedule has 9 slots before saving to Firebase
+      // Ensure the schedule has 8 slots before saving to Firebase
       if (_homeViewModel.scheduleSubject != null) {
         for (var day in _homeViewModel.scheduleSubject!.schedule) {
           while (day.subjects.length < 8) {
             day.subjects.add('');
+          }
+          while (day.classrooms.length < 8) {
+            day.classrooms.add('');
           }
         }
       }
@@ -97,23 +105,29 @@ class _SchedulePageState extends State<SchedulePage> {
     try {
       var daySchedule = schedule.firstWhere(
         (day) => day.day == dayToFind,
-        orElse: () =>
-            DaySchedule(day: dayToFind, subjects: List<String>.filled(9, '')),
+        orElse: () => DaySchedule(
+            day: dayToFind,
+            subjects: List<String>.filled(8, ''),
+            classrooms: List<String>.filled(8, '')),
       );
 
-      // Ensure we have 9 slots
+      // Ensure we have 8 slots for subjects and classrooms
       while (daySchedule.subjects.length < 8) {
         daySchedule.subjects.add('');
+      }
+      while (daySchedule.classrooms.length < 8) {
+        daySchedule.classrooms.add('');
       }
 
       return daySchedule;
     } catch (e) {
       debugPrint('Error in _getSelectedDaySchedule: $e');
-      return DaySchedule(day: dayToFind, subjects: List<String>.filled(9, ''));
+      return DaySchedule(
+          day: dayToFind,
+          subjects: List<String>.filled(8, ''),
+          classrooms: List<String>.filled(8, ''));
     }
   }
-
-  // In the ListView.builder, update the subject access:
 
   Future<void> _updateSubject(
       int periodNumber, String subject, bool isRemoving) async {
@@ -130,11 +144,11 @@ class _SchedulePageState extends State<SchedulePage> {
       List<String> subjects;
       if (dayIndex != -1) {
         subjects = List<String>.from(schedule.schedule[dayIndex].subjects);
-        while (subjects.length < 9) {
+        while (subjects.length < 8) {
           subjects.add('');
         }
       } else {
-        subjects = List.filled(9, '');
+        subjects = List.filled(8, '');
       }
 
       // Update the subject at the given period number
@@ -151,6 +165,9 @@ class _SchedulePageState extends State<SchedulePage> {
       final updatedDaySchedule = DaySchedule(
         day: currentDayString,
         subjects: subjects,
+        classrooms: dayIndex != -1
+            ? schedule.schedule[dayIndex].classrooms
+            : List.filled(8, ''),
       );
 
       if (dayIndex != -1) {
@@ -185,9 +202,106 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
+  Future<void> _updateSubjectClassroom(
+      int periodNumber, String classroom, bool isRemoving) async {
+    try {
+      final schedule = _homeViewModel.scheduleSubject;
+      if (schedule == null) return;
+
+      final currentDayString =
+          '${_selectedDay} ${_isMorning ? "Morning" : "Afternoon"}';
+      var dayIndex =
+          schedule.schedule.indexWhere((day) => day.day == currentDayString);
+
+      debugPrint('Updating Classroom:');
+      debugPrint('Day: $currentDayString');
+      debugPrint('Period: $periodNumber');
+      debugPrint('Classroom: $classroom');
+      debugPrint('Day Index: $dayIndex');
+
+      // Get or create classrooms list
+      List<String> classrooms;
+      if (dayIndex != -1) {
+        classrooms = List<String>.from(schedule.schedule[dayIndex].classrooms);
+        while (classrooms.length < 8) {
+          classrooms.add('');
+        }
+      } else {
+        classrooms = List.filled(8, '');
+      }
+
+      // Update the classroom at the given period number
+      if (isRemoving) {
+        classrooms[periodNumber] = '';
+      } else {
+        classrooms[periodNumber] = classroom;
+      }
+
+      // Create updated schedule list
+      List<DaySchedule> updatedSchedule =
+          List<DaySchedule>.from(schedule.schedule);
+
+      final updatedDaySchedule = DaySchedule(
+        day: currentDayString,
+        subjects: dayIndex != -1
+            ? schedule.schedule[dayIndex].subjects
+            : List.filled(8, ''),
+        classrooms: dayIndex != -1 ? classrooms : List.filled(8, ''),
+      );
+
+      if (dayIndex != -1) {
+        updatedSchedule[dayIndex] = updatedDaySchedule;
+      } else {
+        updatedSchedule.add(updatedDaySchedule);
+      }
+
+      // Update view model
+      _homeViewModel.updateSchedule(ScheduleSubject(schedule: updatedSchedule));
+
+      // Update Firebase
+      final box = await Hive.openBox('User');
+      final email = box.get('email');
+
+      if (email != null) {
+        await FirebaseFirestore.instance
+            .collection('studentSchedule')
+            .doc(email)
+            .set({
+          'schedule': _homeViewModel.scheduleSubject?.toJson(),
+          'lastUpdated': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+      }
+
+      setState(() {});
+    } catch (e) {
+      debugPrint('Error updating classroom: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update classroom: $e')),
+      );
+    }
+  }
+
   Future<void> _showSubjectDialog(int periodNumber) async {
-    final TextEditingController controller = TextEditingController();
-    final TextEditingController controllerUcionice = TextEditingController();
+    final TextEditingController subjectController = TextEditingController();
+    final TextEditingController classroomController = TextEditingController();
+
+    // Fetch the current subject and classroom for this period
+    final schedule = _homeViewModel.scheduleSubject;
+    final currentDayString =
+        '${_selectedDay} ${_isMorning ? "Morning" : "Afternoon"}';
+    var dayIndex =
+        schedule?.schedule.indexWhere((day) => day.day == currentDayString);
+
+    if (dayIndex != null && dayIndex != -1) {
+      final currentDay = schedule!.schedule[dayIndex];
+      if (periodNumber < currentDay.subjects.length) {
+        subjectController.text = currentDay.subjects[periodNumber];
+      }
+      if (periodNumber < currentDay.classrooms.length) {
+        classroomController.text = currentDay.classrooms[periodNumber];
+      }
+    }
+
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -248,7 +362,7 @@ class _SchedulePageState extends State<SchedulePage> {
                     ),
                     const SizedBox(height: 2),
                     TextField(
-                      controller: controller,
+                      controller: subjectController,
                       decoration: InputDecoration(
                         hintText: 'Ime predmeta...',
                         hintStyle: TextStyle(
@@ -273,7 +387,7 @@ class _SchedulePageState extends State<SchedulePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 16),
 
                     // Classroom field
                     Text(
@@ -285,11 +399,11 @@ class _SchedulePageState extends State<SchedulePage> {
                     ),
                     const SizedBox(height: 2),
                     TextField(
-                      controller: controllerUcionice,
+                      controller: classroomController,
                       decoration: InputDecoration(
-                        hintText: 'Ime učionice...',
+                        hintText: 'Broj ili ime učionice...',
                         hintStyle: TextStyle(
-                          color: Colors.grey,
+                          color: AppColors.tertiary,
                           fontWeight: FontWeight.w800,
                         ),
                         contentPadding:
@@ -306,8 +420,8 @@ class _SchedulePageState extends State<SchedulePage> {
                           borderRadius: BorderRadius.circular(4),
                           borderSide: BorderSide(color: AppColors.tertiary),
                         ),
-                        suffixIcon:
-                            Icon(Icons.edit, color: Colors.grey, size: 20),
+                        suffixIcon: Icon(Icons.edit,
+                            color: AppColors.tertiary, size: 20),
                       ),
                     ),
 
@@ -344,9 +458,12 @@ class _SchedulePageState extends State<SchedulePage> {
                             icon: Icon(Icons.check,
                                 color: Colors.white, size: 20),
                             onPressed: () {
-                              if (controller.text.isNotEmpty) {
-                                _updateSubject(
-                                    periodNumber, controller.text, false);
+                              if (subjectController.text.isNotEmpty) {
+                                // Update both subject and classroom
+                                _updateSubject(periodNumber,
+                                    subjectController.text, false);
+                                _updateSubjectClassroom(periodNumber,
+                                    classroomController.text, false);
                                 Navigator.pop(context);
                               }
                             },
@@ -424,24 +541,34 @@ class _SchedulePageState extends State<SchedulePage> {
                 final selectedSchedule =
                     _getSelectedDaySchedule(schedule.schedule);
                 final subjects =
-                    selectedSchedule?.subjects ?? List.filled(9, '');
+                    selectedSchedule?.subjects ?? List.filled(8, '');
+                final classrooms =
+                    selectedSchedule?.classrooms ?? List.filled(8, '');
 
                 return ListView.builder(
                   itemCount: 8,
                   itemBuilder: (context, index) {
                     String subject = '';
+                    String classroom = '';
                     if (subjects != null && index < subjects.length) {
                       subject = subjects[index];
+                    }
+                    if (classrooms != null && index < classrooms.length) {
+                      classroom = classrooms[index];
                     }
 
                     return SubjectTile(
                       periodNumber: index,
                       subject: subject,
+                      classroom: classroom,
                       isFirst: index == 0,
                       isLast: index == 7,
                       isEditMode: _isEditMode,
                       onAdd: () => _showSubjectDialog(index),
-                      onRemove: () => _updateSubject(index, '', true),
+                      onRemove: () {
+                        _updateSubject(index, '', true);
+                        _updateSubjectClassroom(index, '', true);
+                      },
                     );
                   },
                 );

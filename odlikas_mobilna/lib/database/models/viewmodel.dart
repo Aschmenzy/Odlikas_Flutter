@@ -108,7 +108,8 @@ class HomePageViewModel extends ChangeNotifier {
   List<String> getSubjectsForDay(String day) {
     return _scheduleSubject?.schedule
             .firstWhere((schedule) => schedule.day == day,
-                orElse: () => DaySchedule(day: day, subjects: []))
+                orElse: () =>
+                    DaySchedule(day: day, subjects: [], classrooms: []))
             .subjects ??
         [];
   }

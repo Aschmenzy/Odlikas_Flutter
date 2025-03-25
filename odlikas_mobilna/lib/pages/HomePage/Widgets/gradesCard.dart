@@ -145,7 +145,7 @@ class GradesCard extends StatelessWidget {
                         Transform.translate(
                           offset: Offset(-((180 / xOffset) - 120 / 2), 0),
                           child: Text(
-                            averageGrade.toStringAsFixed(1),
+                            averageGrade.toStringAsFixed(2),
                             style: const TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,

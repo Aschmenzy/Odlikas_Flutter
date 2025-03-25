@@ -11,6 +11,7 @@ class SubjectTile extends StatelessWidget {
   final bool isEditMode;
   final VoidCallback onAdd;
   final VoidCallback onRemove;
+  final String classroom;
 
   const SubjectTile({
     super.key,
@@ -21,6 +22,7 @@ class SubjectTile extends StatelessWidget {
     required this.isEditMode,
     required this.onAdd,
     required this.onRemove,
+    required this.classroom,
   });
 
   @override
@@ -51,14 +53,33 @@ class SubjectTile extends StatelessWidget {
           ),
         ),
       ),
-      title: Text(
-        subject,
-        overflow: TextOverflow.ellipsis,
-        style: fontService.font(
-          color: AppColors.secondary,
-          fontWeight: FontWeight.w600,
-          fontSize: screenWidth * 0.04,
-        ),
+      title: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                subject,
+                overflow: TextOverflow.ellipsis,
+                style: fontService.font(
+                  color: AppColors.secondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: screenWidth * 0.04,
+                ),
+              ),
+              Text(
+                classroom,
+                overflow: TextOverflow.ellipsis,
+                style: fontService.font(
+                  color: AppColors.tertiary,
+                  fontWeight: FontWeight.w400,
+                  fontSize: screenWidth * 0.04,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       trailing: isEditMode
           ? IconButton(
