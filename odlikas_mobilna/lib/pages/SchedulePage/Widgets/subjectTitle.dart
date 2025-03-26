@@ -29,68 +29,90 @@ class SubjectTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final fontService = Provider.of<FontService>(context);
-    return ListTile(
-      leading: Container(
-        width: screenWidth * 0.25,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.only(
-            topLeft: isFirst ? Radius.circular(15) : Radius.zero,
-            bottomLeft: isLast ? Radius.circular(15) : Radius.zero,
-          ),
-          border: Border.all(
-            color: AppColors.background,
+
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.tertiary,
             width: 0.5,
           ),
         ),
-        child: Text(
-          '$periodNumber.sat',
-          style: fontService.font(
-            color: AppColors.background,
-            fontWeight: FontWeight.w700,
-            fontSize: screenWidth * 0.05,
-          ),
-        ),
       ),
-      title: Row(
+      child: Row(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                subject,
-                overflow: TextOverflow.ellipsis,
-                style: fontService.font(
-                  color: AppColors.secondary,
-                  fontWeight: FontWeight.w600,
-                  fontSize: screenWidth * 0.04,
-                ),
+          // Period number box (left side)
+          Container(
+            width: screenWidth * 0.2,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.only(
+                topLeft: isFirst ? Radius.circular(15) : Radius.zero,
+                bottomLeft: isLast ? Radius.circular(15) : Radius.zero,
               ),
-              Text(
-                classroom,
-                overflow: TextOverflow.ellipsis,
-                style: fontService.font(
-                  color: AppColors.tertiary,
-                  fontWeight: FontWeight.w400,
-                  fontSize: screenWidth * 0.04,
-                ),
+            ),
+            child: Text(
+              '$periodNumber.sat',
+              style: fontService.font(
+                color: AppColors.background,
+                fontWeight: FontWeight.w700,
+                fontSize: screenWidth * 0.05,
               ),
-            ],
+            ),
           ),
+
+          // Subject and classroom info (middle)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    subject,
+                    overflow: TextOverflow.ellipsis,
+                    style: fontService.font(
+                      color: AppColors.secondary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: screenWidth * 0.04,
+                    ),
+                  ),
+                  if (classroom.isNotEmpty)
+                    Text(
+                      classroom,
+                      overflow: TextOverflow.ellipsis,
+                      style: fontService.font(
+                        color: AppColors.tertiary,
+                        fontWeight: FontWeight.w400,
+                        fontSize: screenWidth * 0.035, // Slightly smaller
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // Edit button (right side)
+          if (isEditMode)
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                icon: Icon(
+                  subject.isEmpty ? Icons.add : Icons.remove,
+                  color: AppColors.secondary,
+                  size: screenWidth * 0.06, // Reduced size
+                ),
+                onPressed: subject.isEmpty ? onAdd : onRemove,
+              ),
+            ),
         ],
       ),
-      trailing: isEditMode
-          ? IconButton(
-              icon: Icon(
-                subject.isEmpty ? Icons.add : Icons.remove,
-                color: AppColors.secondary,
-                size: screenWidth * 0.08,
-              ),
-              onPressed: subject.isEmpty ? onAdd : onRemove,
-            )
-          : null,
     );
   }
 }

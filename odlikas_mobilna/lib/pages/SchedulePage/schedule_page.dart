@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -10,7 +12,6 @@ import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/daySelector.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/subjectTitle.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/timeSelector.dart';
-import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:provider/provider.dart';
 
 class SchedulePage extends StatefulWidget {
@@ -545,32 +546,47 @@ class _SchedulePageState extends State<SchedulePage> {
                 final classrooms =
                     selectedSchedule?.classrooms ?? List.filled(8, '');
 
-                return ListView.builder(
-                  itemCount: 8,
-                  itemBuilder: (context, index) {
-                    String subject = '';
-                    String classroom = '';
-                    if (subjects != null && index < subjects.length) {
-                      subject = subjects[index];
-                    }
-                    if (classrooms != null && index < classrooms.length) {
-                      classroom = classrooms[index];
-                    }
+                return Padding(
+                  padding:
+                      const EdgeInsets.only(left: 20.0, right: 20, bottom: 45),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: AppColors.tertiary,
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: 8,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        String subject = '';
+                        String classroom = '';
+                        if (subjects != null && index < subjects.length) {
+                          subject = subjects[index];
+                        }
+                        if (classrooms != null && index < classrooms.length) {
+                          classroom = classrooms[index];
+                        }
 
-                    return SubjectTile(
-                      periodNumber: index,
-                      subject: subject,
-                      classroom: classroom,
-                      isFirst: index == 0,
-                      isLast: index == 7,
-                      isEditMode: _isEditMode,
-                      onAdd: () => _showSubjectDialog(index),
-                      onRemove: () {
-                        _updateSubject(index, '', true);
-                        _updateSubjectClassroom(index, '', true);
+                        return SubjectTile(
+                          periodNumber: index,
+                          subject: subject,
+                          classroom: classroom,
+                          isFirst: index == 0,
+                          isLast: index == 7,
+                          isEditMode: _isEditMode,
+                          onAdd: () => _showSubjectDialog(index),
+                          onRemove: () {
+                            _updateSubject(index, '', true);
+                            _updateSubjectClassroom(index, '', true);
+                          },
+                        );
                       },
-                    );
-                  },
+                    ),
+                  ),
                 );
               },
             ),

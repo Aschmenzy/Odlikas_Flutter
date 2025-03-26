@@ -15,6 +15,7 @@ class ScheduleCard extends StatefulWidget {
 
 class _ScheduleCardState extends State<ScheduleCard> {
   String? currentSubject;
+  String? currentClassroom;
 
   String getTodaySchedule() {
     DateTime now = DateTime.now();
@@ -46,14 +47,14 @@ class _ScheduleCardState extends State<ScheduleCard> {
     return day;
   }
 
-  // Funkcija za dohvaćanje prvog predmeta iz rasporeda za današnji dan
-  Future<void> _fetchfistSubject() async {
+  // Funkcija za dohvaćanje prvog predmeta i učionice iz rasporeda za današnji dan
+  Future<void> _fetchFirstSubjectAndClassroom() async {
     // Dohvaćanje email adrese korisnika iz lokalne pohrane
     final email = (await Hive.openBox('User')).get("email");
 
     String today = getTodaySchedule();
 
-    print("start fetching first subject for $today");
+    print("start fetching first subject and classroom for $today");
 
     try {
       // Dohvaćanje dokumenta korisnika iz Firestore baze podataka
@@ -83,13 +84,23 @@ class _ScheduleCardState extends State<ScheduleCard> {
         if (todaySchedule != null) {
           // Dohvaćanje liste predmeta za današnji dan
           List<dynamic> subjects = todaySchedule['subjects'] as List<dynamic>;
+          // Dohvaćanje liste učionica za današnji dan
+          List<dynamic> classrooms = todaySchedule['classrooms'] != null
+              ? todaySchedule['classrooms'] as List<dynamic>
+              : [];
+
           // Provjera postoji li barem jedan predmet u rasporedu
           if (subjects.isNotEmpty) {
             // Ažuriranje stanja widgeta s prvim predmetom
             setState(() {
               currentSubject = subjects[0].toString();
+              // Dohvaćanje odgovarajuće učionice
+              currentClassroom = classrooms.isNotEmpty && classrooms.length > 0
+                  ? classrooms[0].toString()
+                  : "Upišite učionicu";
             });
             print("First subject set to: $currentSubject");
+            print("First classroom set to: $currentClassroom");
           }
         } else {
           // Poruka ako nema rasporeda za današnji dan
@@ -97,6 +108,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
           // Postavljanje informacije da nema nastave
           setState(() {
             currentSubject = "Unesite raspored";
+            currentClassroom = "Upišite učionicu";
           });
         }
       }
@@ -104,6 +116,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
       print("Error fetching schedule: $e");
       setState(() {
         currentSubject = "Error loading schedule";
+        currentClassroom = "Error loading classroom";
       });
     }
   }
@@ -111,7 +124,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
   @override
   void initState() {
     super.initState();
-    _fetchfistSubject();
+    _fetchFirstSubjectAndClassroom();
   }
 
   @override
@@ -200,18 +213,33 @@ class _ScheduleCardState extends State<ScheduleCard> {
                         height: screenHeight * 0.002,
                       ),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          SizedBox(width: screenWidth * 0.083),
-                          Text(
-                            currentSubject ?? "Nema nastave",
-                            textAlign: TextAlign.center,
-                            style: fontService.font(
-                              height: 1.2,
-                              fontSize: screenWidth * 0.03,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.background,
-                            ),
+                          SizedBox(
+                            width: screenWidth * 0.075,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                currentSubject ?? "Nema nastave",
+                                style: fontService.font(
+                                  height: 1.2,
+                                  fontSize: screenWidth * 0.03,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.background,
+                                ),
+                              ),
+                              Text(
+                                currentClassroom ?? "Upišite učionicu",
+                                textAlign: TextAlign.center,
+                                style: fontService.font(
+                                  height: 1.2,
+                                  fontSize: screenWidth * 0.03,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.background,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
