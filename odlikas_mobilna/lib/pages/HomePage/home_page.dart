@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -15,6 +17,7 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradivoCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdModal.dart';
+import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -78,6 +81,15 @@ class _HomePageState extends State<HomePage> {
         await testViewModel.fetchTests(studentEmail!, studentPassword!);
         // Možemo osvježiti stanje za ponovni render kalendara
         setState(() {});
+      }
+    });
+
+    // Provjera ima li korisnik nepročitanih obavijesti
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        _hasNotifications();
+      } else {
+        timer.cancel();
       }
     });
   }
@@ -359,6 +371,54 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  bool _hasUnreadNotifications = false;
+  Future<void> _hasNotifications() async {
+    try {
+      final email =
+          await Hive.openBox('User').then((value) => value.get('email'));
+
+      if (email == null) return;
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('newNotifications')
+          .doc(email)
+          .collection('notifications')
+          .where('isRead', isEqualTo: false)
+          .limit(1)
+          .get();
+
+      setState(() {
+        _hasUnreadNotifications = snapshot.docs.isNotEmpty;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Widget _notificationIcon() {
+    return IconButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NewNotificationsPage()),
+        );
+
+        _hasNotifications();
+      },
+      icon: _hasUnreadNotifications
+          ? Icon(
+              Icons.notifications_active,
+              color: AppColors.primary,
+              size: 45,
+            )
+          : Icon(
+              Icons.notifications_none,
+              color: AppColors.secondary,
+              size: 45,
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<HomePageViewModel>();
@@ -388,14 +448,21 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       const SizedBox(height: 20), // Razmak
                       // Pozdravna poruka s imenom studenta
-                      Text(
-                        "Dobrodošao/la, \n$studentName",
-                        style: fontService.font(
-                          fontWeight: FontWeight.w700,
-                          height: 1.1,
-                          fontSize: MediaQuery.of(context).size.width * 0.07,
-                          color: AppColors.secondary,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Dobrodošao/la, \n$studentName",
+                            style: fontService.font(
+                              fontWeight: FontWeight.w700,
+                              height: 1.1,
+                              fontSize:
+                                  MediaQuery.of(context).size.width * 0.07,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                          _notificationIcon(),
+                        ],
                       ),
                       SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05),

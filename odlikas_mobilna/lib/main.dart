@@ -1,13 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/FontService.dart';
+import 'package:odlikas_mobilna/database/api/firebase_api.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/BannerPage/banner_page.dart';
 import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
+import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
 import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/pages/JobsPage/jobs_page.dart';
@@ -15,6 +18,20 @@ import 'package:odlikas_mobilna/pages/PomodoroPage/pomodoro_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/settings_page.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'database/firebase_options.dart';
+
+final navigatorKey = GlobalKey<NavigatorState>();
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Ensure Firebase is initialized
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Save the notification to Firestore
+  final FirebaseApi firebaseApi = FirebaseApi();
+  await firebaseApi.saveNotifications(message);
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +41,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  @pragma('vm:entry-point')
-  Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    // pozadinske notifikacije
-  }
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await FirebaseApi().initNotifications();
 
   await Hive.openBox('User');
 
@@ -72,12 +84,14 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: box.isEmpty ? const BannerPage() : const HomePage(),
+        navigatorKey: navigatorKey,
         routes: {
           '/home': (context) => const HomePage(),
           '/jobs': (context) => const JobsPage(),
           '/pomodoro': (context) => const PomodoroPage(),
           '/settings': (context) => const SettingsPage(),
           '/grades': (context) => const SubjectsPage(),
+          '/newNotifications': (context) => NewNotificationsPage(),
         },
       ),
     );
