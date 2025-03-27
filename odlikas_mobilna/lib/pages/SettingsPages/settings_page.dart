@@ -20,6 +20,7 @@ import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/profile_page.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:odlikas_mobilna/pages/TermsAndConditionsPage/terms_and_conditions_page.dart';
+import 'package:odlikas_mobilna/pages/UploadFilesOdlikasPlus/upload_files_odlikas_plus.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -106,7 +107,12 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<Map<String, dynamic>> _fetchProfile() async {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
-    final isConnected = box.get('isConnected') ?? false;
+
+    if (userEmail == null) {
+      throw Exception("User email is null. Cannot fetch profile.");
+    }
+
+    final isConnected = box.get('screenConnected') ?? false;
 
     try {
       final docSnapshot = await FirebaseFirestore.instance
@@ -170,10 +176,22 @@ class _SettingsPageState extends State<SettingsPage> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error loading profile',
+                'Error loading profile: ${snapshot.error}',
                 style: GoogleFonts.inter(
                   color: AppColors.secondary,
-                  fontSize: screenWidth * 0.05,
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
+                ),
+              ),
+            );
+          }
+
+          if (!snapshot.hasData || snapshot.data == null) {
+            return Center(
+              child: Text(
+                'No profile data available',
+                style: GoogleFonts.inter(
+                  color: AppColors.secondary,
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
                 ),
               ),
             );
@@ -295,6 +313,15 @@ class _SettingsPageState extends State<SettingsPage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => NotificationsPage()),
+                    ),
+                  ),
+                  SettingsTile(
+                    label: "Prenesi datoteke - Odlikaš+",
+                    path: "assets/images/odlikas_plus_upload_90x90.png",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UploadFilesOdlikasPlus()),
                     ),
                   ),
                   DislexycTile(

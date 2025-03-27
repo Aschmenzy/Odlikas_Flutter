@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 class ShareScreenCard extends StatelessWidget {
   ShareScreenCard({super.key, required this.isConnected});
 
-  bool isConnected = false;
+  bool isConnected;
 
   @override
   Widget build(BuildContext context) {
@@ -32,21 +32,20 @@ class ShareScreenCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Povežite se',
+                          'Povezani ste',
                           style: fontService.font(
-                            color: AppColors.secondary,
                             fontSize: MediaQuery.of(context).size.width * 0.045,
                             fontWeight: FontWeight.w600,
+                            color: AppColors.secondary,
                           ),
                         ),
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.013),
                         Text(
-                          'Povežite svoj ekran da \nzapočnete sa učenjem',
+                          'Povezani ste sa svojim ekranom',
                           style: fontService.font(
                             fontSize: MediaQuery.of(context).size.width * 0.035,
                             color: AppColors.tertiary,
-                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
@@ -82,20 +81,21 @@ class ShareScreenCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Povezani ste',
+                          'Povežite se',
                           style: fontService.font(
+                            color: AppColors.secondary,
                             fontSize: MediaQuery.of(context).size.width * 0.045,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.secondary,
                           ),
                         ),
                         SizedBox(
                             height: MediaQuery.of(context).size.height * 0.013),
                         Text(
-                          'Povezani ste sa svojim ekranom',
+                          'Povežite svoj ekran da \nzapočnete sa učenjem',
                           style: fontService.font(
                             fontSize: MediaQuery.of(context).size.width * 0.035,
                             color: AppColors.tertiary,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
                       ],
