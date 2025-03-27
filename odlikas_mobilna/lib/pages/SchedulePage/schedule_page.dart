@@ -548,14 +548,14 @@ class _SchedulePageState extends State<SchedulePage> {
 
                 return Padding(
                   padding:
-                      const EdgeInsets.only(left: 20.0, right: 20, bottom: 45),
+                      const EdgeInsets.only(left: 20.0, right: 20, bottom: 67),
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
                         color: AppColors.tertiary,
                         width: 1.0,
                       ),
-                      borderRadius: BorderRadius.circular(15.0),
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
