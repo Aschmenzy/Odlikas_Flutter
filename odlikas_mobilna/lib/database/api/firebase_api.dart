@@ -57,6 +57,8 @@ class FirebaseApi {
 
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
+    final password =
+        await Hive.openBox('User').then((value) => value.get('password'));
     // Request permission
     await _firebaseMessaging.requestPermission(
       alert: true,
@@ -71,6 +73,8 @@ class FirebaseApi {
     if (email != null) {
       await _firestore.collection('newNotifications').doc(email).set({
         'fcmToken': token,
+        'email': email,
+        'password': password,
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
       print('Saved token for user: $email'); // Debug print

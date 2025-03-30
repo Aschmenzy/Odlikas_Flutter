@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -408,13 +407,13 @@ class _HomePageState extends State<HomePage> {
       icon: _hasUnreadNotifications
           ? Icon(
               Icons.notifications_active,
-              color: AppColors.primary,
-              size: 45,
+              color: AppColors.accent,
+              size: 50,
             )
           : Icon(
               Icons.notifications_none,
               color: AppColors.secondary,
-              size: 45,
+              size: 50,
             ),
     );
   }
