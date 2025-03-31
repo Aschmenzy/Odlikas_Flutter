@@ -1,13 +1,11 @@
 import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
-import * as notificationFunctions from "./notifications";
 import axios from "axios";
 
 // Initialize Firebase Admin
 admin.initializeApp();
 
 // Export notification functions
-//export const processNotifications = notificationFunctions.processNotifications;
 export const processNotificationsSimple = functions.pubsub
   .schedule("every 1 minutes")
   .onRun(async () => {
@@ -45,14 +43,14 @@ export const processNotificationsSimple = functions.pubsub
 
             // Make the actual API call
             const apiResponse = await axios({
-              method: "get",
+              method: "post",
               url: "https://odlikas-e-dnevnik-api-d98502da5fd5.herokuapp.com/api/Scraper/ScrapeNewGrades",
               headers: {
                 "Content-Type": "application/json",
               },
-              params: {
-                email: userData.email,
-                password: userData.password,
+              data: {
+                "Email": userData.email,
+                "Password": userData.password,
               },
             });
 
@@ -67,29 +65,53 @@ export const processNotificationsSimple = functions.pubsub
               );
 
               // Create notification message
-              let title = "New Grades Available";
-              let body = "You have new grades to check.";
+              let title = "Imate novu ocjenu";
+              let body = "Pogledajte vaše ocjene.";
 
               // If there's only one grade, make a more specific notification
               if (grades.length === 1) {
                 const grade = grades[0];
-                title = `New Grade in ${grade.subjectName}`;
-                body = `You received ${grade.gradeNumber} for ${grade.elementOfEvaluation}`;
+                
+                // Check if it's a grade or a note
+                if (grade.gradeNumber && grade.gradeNumber.trim() !== "") {
+                  title = `Nova ocjena za predmet ${grade.subjectName}`;
+                  body = `Dobili ste: ${grade.gradeNumber} za ${grade.elementOfEvaluation}`;
+                } else {
+                  title = `Nova bilješka za predmet ${grade.subjectName}`;
+                  body = `Dobili ste novu bilješku za ${grade.elementOfEvaluation}`;
+                }
               } else {
-                // Multiple grades
-                title = `${grades.length} New Grades Available`;
+                // Count how many grades and how many notes
+                const actualGrades = grades.filter((g: { gradeNumber: string; }) => g.gradeNumber && g.gradeNumber.trim() !== "");
+                const notes = grades.filter((g: { gradeNumber: string; }) => !g.gradeNumber || g.gradeNumber.trim() === "");
+                
+                // Create an appropriate title
+                if (actualGrades.length > 0 && notes.length > 0) {
+                  title = `Imate ${actualGrades.length} nove ocjene i ${notes.length} bilješke`;
+                } else if (actualGrades.length > 0) {
+                  title = `Imate ${actualGrades.length} nove ocjene`;
+                } else {
+                  title = `Imate ${notes.length} nove bilješke`;
+                }
 
-                // List the subjects (up to 3)
-                const subjects = [
-                  ...new Set(
-                    grades.map((g: { subjectName: any }) => g.subjectName)
-                  ),
-                ];
-                const subjectList = subjects.slice(0, 3).join(", ");
-
-                body = `New grades in: ${subjectList}${
-                  subjects.length > 3 ? "..." : ""
-                }`;
+                // List the subjects with their grade numbers or indication of note
+                const gradeDetails = grades.map((g: { gradeNumber: string; subjectName: any; }) => {
+                  if (g.gradeNumber && g.gradeNumber.trim() !== "") {
+                    return `${g.subjectName}: ${g.gradeNumber}`;
+                  } else {
+                    return `${g.subjectName}: bilješka`;
+                  }
+                });
+                
+                // Take only the first 3 for the notification
+                const gradeList = gradeDetails.slice(0, 3).join(", ");
+                
+                // Create the message with appropriate ending
+                if (grades.length <= 3) {
+                  body = `Nove ocjene/bilješke: ${gradeList}`;
+                } else {
+                  body = `Nove ocjene/bilješke: ${gradeList} i još ${grades.length - 3}...`;
+                }
               }
 
               // Create the message object
@@ -146,10 +168,3 @@ export const processNotificationsSimple = functions.pubsub
       return null;
     }
   });
-
-export const sendNotificationHttp = notificationFunctions.sendNotificationHttp;
-
-// Simple test function to verify setup
-export const helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Hello from Firebase!");
-});
