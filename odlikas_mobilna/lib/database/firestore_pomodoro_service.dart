@@ -2,12 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestorePomodoroService {
   final String timerId;
+  final int daysLearning;
+  final int hoursLearning;
 
-  FirestorePomodoroService(this.timerId);
+  FirestorePomodoroService(this.timerId,
+      [this.daysLearning = 0, this.hoursLearning = 0]);
 
   DocumentReference get timerDoc =>
       FirebaseFirestore.instance.collection('pomodoroTimers').doc(timerId);
 
+  // funkcija koja inacijalizira timer u bazi podataka
   Future<void> initializeTimer() async {
     final docSnapshot = await timerDoc.get();
     if (!docSnapshot.exists) {
@@ -17,6 +21,7 @@ class FirestorePomodoroService {
         'isRunning': false,
         'cycleCount': 0,
         'startTimestamp': null,
+        'clientStartTime': null,
         'streakCount': 0,
         'weeklySessions': 0,
         'weeklyStreak': 0,
@@ -25,35 +30,49 @@ class FirestorePomodoroService {
     }
   }
 
+  // funkcija koja pokrece timer
   Future<void> startTimer(
       String currentPhase, int duration, int cycleCount) async {
-    // Combine the updates in a single operation to prevent double triggers
-    final docSnapshot = await timerDoc.get();
-    if (!docSnapshot.exists) return;
+    // dobijanje trenutnog vremena
+    final now = DateTime.now();
+    final currentMs = now.millisecondsSinceEpoch;
 
-    final data = docSnapshot.data() as Map<String, dynamic>?;
-    if (data == null) return;
+    // izracunavanje vremena do sljedece sekunde da bi se izbjeglo neprecizno mjerenje
+    final msToNextSecond = 1000 - (currentMs % 1000);
+    final nextSecondBoundary = currentMs + msToNextSecond;
 
-    final now = Timestamp.now();
+    // cekaj do sljedece sekunde
+    await Future.delayed(Duration(milliseconds: msToNextSecond));
+
+    // spremi i server i lokalni timestamp
     final updateData = {
       'currentPhase': currentPhase,
       'currentDuration': duration,
       'isRunning': true,
       'cycleCount': cycleCount,
-      'startTimestamp':
-          now, // Use explicit timestamp instead of FieldValue.serverTimestamp()
+      'startTimestamp': Timestamp.fromDate(DateTime.now()),
+      'clientStartTime': nextSecondBoundary,
+      'syncToken': DateTime.now().microsecondsSinceEpoch,
     };
 
-    // Merge streak updates into the same operation
-    final streakUpdates = await _calculateStreakUpdates(data, now);
-    if (streakUpdates.isNotEmpty) {
-      updateData.addAll(streakUpdates.cast<String, Object>());
+    // logika za streakove i sesije
+    final docSnapshot = await timerDoc.get();
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data() as Map<String, dynamic>?;
+      if (data != null) {
+        final streakUpdates =
+            await _calculateStreakUpdates(data, Timestamp.fromDate(now));
+        if (streakUpdates.isNotEmpty) {
+          updateData.addAll(streakUpdates.cast<String, Object>());
+        }
+      }
     }
 
-    // Apply all updates in a single write operation
+    // spremi podatke u bazu
     await timerDoc.set(updateData, SetOptions(merge: true));
   }
 
+  // funkcija koja racuna streakove i sesije
   Future<Map<String, dynamic>> _calculateStreakUpdates(
       Map<String, dynamic> data, Timestamp now) async {
     final lastSessionTimestamp = data['lastSessionDate'] as Timestamp?;
@@ -63,7 +82,7 @@ class FirestorePomodoroService {
 
     final currentDate = now.toDate();
 
-    // If this is the first session ever
+    // ako je prvi put pokrenut tajmer, postavi sve na 1
     if (lastSessionTimestamp == null) {
       return {
         'lastSessionDate': now,
@@ -75,32 +94,21 @@ class FirestorePomodoroService {
 
     final lastSessionDate = lastSessionTimestamp.toDate();
 
-    // Check if this is a new day
-    final isNewDay = currentDate.day != lastSessionDate.day ||
-        currentDate.month != lastSessionDate.month ||
-        currentDate.year != lastSessionDate.year;
+    // provjeri je li novi dan
+    final isNewDay = !_isSameDay(currentDate, lastSessionDate);
 
-    // Check if we're in a new week
-    final lastWeekNumber = (lastSessionDate
-                .difference(DateTime(lastSessionDate.year, 1, 1))
-                .inDays /
-            7)
-        .floor();
-    final currentWeekNumber =
-        (currentDate.difference(DateTime(currentDate.year, 1, 1)).inDays / 7)
-            .floor();
-    final isNewWeek = lastWeekNumber != currentWeekNumber ||
-        lastSessionDate.year != currentDate.year;
+    // provjeri jesmo li u istom tjednu
+    final isNewWeek = !_isSameWeek(currentDate, lastSessionDate);
 
-    // Skip streak updates if it's the same day to prevent multiple increments
+    // preskoči ako nije novi dan
     if (!isNewDay) {
       return {};
     }
 
-    // Reset weekly sessions if it's a new week
+    // resetiraj tjedne sesije ako je novi tjedan
     if (isNewWeek) {
-      // If we completed the target number of sessions last week, increment the streak
-      final targetSessions = 1;
+      // ako smo zavrsili sesiju, resetiraj tjedne sesije
+      final targetSessions = daysLearning > 0 ? daysLearning : 1;
       if (weeklySessions >= targetSessions) {
         weeklyStreak++;
       } else {
@@ -112,7 +120,7 @@ class FirestorePomodoroService {
       weeklySessions++;
     }
 
-    // Increment streak count for new sessions
+    // za nove sesije dodaj 1 na streak
     streakCount++;
 
     return {
@@ -123,21 +131,25 @@ class FirestorePomodoroService {
     };
   }
 
+  // funkcija koja zaustavlja timer s lokalnim preostalim vremenom
   Future<void> stopTimerWithLocalLeftover(int localLeftover) async {
-    // localLeftover is your local _secondsNotifier.value
-    final docSnapshot = await timerDoc.get();
-    if (docSnapshot.exists) {
-      await timerDoc.update({
-        'currentDuration': localLeftover,
-        'isRunning': false,
-        'startTimestamp': null,
-      });
-    }
+    final syncToken = DateTime.now().microsecondsSinceEpoch;
+
+    await timerDoc.update({
+      'currentDuration': localLeftover,
+      'isRunning': false,
+      'startTimestamp': null,
+      'clientStartTime': null,
+      'syncToken': syncToken,
+    });
   }
 
+  // funkcija koja preskače trenutnu fazu
   Future<void> forwardPhase(
       String newPhase, int newDuration, int cycleCount) async {
-    // If tracking completed Pomodoro sessions, do that here
+    final syncToken = DateTime.now().microsecondsSinceEpoch;
+
+    // Check if a Pomodoro was completed
     final docSnapshot = await timerDoc.get();
     final data = docSnapshot.exists
         ? (docSnapshot.data() as Map<String, dynamic>)
@@ -154,60 +166,62 @@ class FirestorePomodoroService {
       'cycleCount': cycleCount,
       'isRunning': false,
       'startTimestamp': null,
+      'clientStartTime': null,
+      'syncToken': syncToken,
     };
 
-    // If we've completed a Pomodoro, we might want to update session stats
-    // Only do this if we need to track completed sessions separately
+    // azuriraj podatke o tjednim sesijama i streakovima
     if (completedPomodoro) {
-      // Get current values
-      int completedSessions = data?['completedSessions'] ?? 0;
-      completedSessions++;
+      final now = DateTime.now();
+      final timestamp = Timestamp.fromDate(now);
 
-      // Add the updates
-      updateData['completedSessions'] = completedSessions;
+      // dobij podatke o trenutnom tjednu
+      int weeklySessions = data?['weeklySessions'] ?? 0;
+
+      // provjeri trebamo li azurirati tjedne sesije
+      final lastUpdatedWeek = data?['lastUpdatedWeek'] as Timestamp?;
+      if (lastUpdatedWeek != null) {
+        final lastWeekDate = lastUpdatedWeek.toDate();
+        if (!_isSameWeek(lastWeekDate, now)) {
+          // resetiraj za novi tjedan
+          final targetSessions = daysLearning > 0 ? daysLearning : 1;
+          final int weeklyStreak = data?['weeklyStreak'] ?? 0;
+
+          updateData['weeklyStreak'] =
+              weeklySessions >= targetSessions ? weeklyStreak + 1 : 0;
+          updateData['weeklySessions'] = 1;
+          updateData['lastUpdatedWeek'] = timestamp;
+        } else {
+          // ako je isti tjedan, samo povecaj broj sesija
+          updateData['weeklySessions'] = FieldValue.increment(1);
+        }
+      } else {
+        // prvi put postavi tjedne sesije
+        updateData['weeklySessions'] = 1;
+        updateData['lastUpdatedWeek'] = timestamp;
+      }
     }
 
-    // Set the new phase data
+    // postavi azurirane podatke u bazu
     await timerDoc.set(updateData, SetOptions(merge: true));
   }
 
-  // Listen to timer changes
+  // pomoćne funkcije za provjeru dana i tjedna
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  bool _isSameWeek(DateTime a, DateTime b) {
+    // dobij ponedjeljak kao prvi dan tjedna
+    final aStart = a.subtract(Duration(days: a.weekday - 1));
+    final bStart = b.subtract(Duration(days: b.weekday - 1));
+    return aStart.year == bStart.year &&
+        aStart.month == bStart.month &&
+        aStart.day == bStart.day;
+  }
+
+  // slušaj promjene u dokumentu u Firestoreu
   Stream<DocumentSnapshot> listenToTimer() {
     return timerDoc.snapshots();
-  }
-
-  // Reset streak data (useful if you need to provide a reset option)
-  Future<void> resetStreakData() async {
-    await timerDoc.update({
-      'streakCount': 0,
-      'weeklySessions': 0,
-      'weeklyStreak': 0,
-      'lastSessionDate': null,
-    });
-  }
-
-  // Update streak goals (if you implement custom goal setting)
-  Future<void> updateStreakGoals(int daysPerWeek, int hoursPerDay) async {
-    await timerDoc.update({
-      'targetDaysPerWeek': daysPerWeek,
-      'targetHoursPerDay': hoursPerDay,
-    });
-  }
-
-  // Get streak statistics as a single object (could be useful for detailed reports)
-  Future<Map<String, dynamic>> getStreakStats() async {
-    final docSnapshot = await timerDoc.get();
-    if (!docSnapshot.exists) return {};
-
-    final data = docSnapshot.data() as Map<String, dynamic>;
-    return {
-      'streakCount': data['streakCount'] ?? 0,
-      'weeklySessions': data['weeklySessions'] ?? 0,
-      'weeklyStreak': data['weeklyStreak'] ?? 0,
-      'lastSessionDate': data['lastSessionDate'],
-      'completedSessions': data['completedSessions'] ?? 0,
-      'targetDaysPerWeek': data['targetDaysPerWeek'] ?? 0,
-      'targetHoursPerDay': data['targetHoursPerDay'] ?? 0,
-    };
   }
 }
