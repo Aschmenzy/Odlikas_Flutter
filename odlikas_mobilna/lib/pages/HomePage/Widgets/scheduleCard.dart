@@ -210,7 +210,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
                         ],
                       ),
                       SizedBox(
-                        height: screenHeight * 0.002,
+                        height: screenHeight * 0.001,
                       ),
                       Row(
                         children: [
@@ -234,8 +234,8 @@ class _ScheduleCardState extends State<ScheduleCard> {
                                 textAlign: TextAlign.center,
                                 style: fontService.font(
                                   height: 1.2,
-                                  fontSize: screenWidth * 0.03,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: screenWidth * 0.025,
+                                  fontWeight: FontWeight.w500,
                                   color: AppColors.background,
                                 ),
                               ),

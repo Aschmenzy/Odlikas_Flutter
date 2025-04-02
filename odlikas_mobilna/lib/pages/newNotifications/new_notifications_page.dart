@@ -2,8 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/api/firebase_api.dart';
 import 'package:odlikas_mobilna/database/models/notification_model.dart';
 
@@ -103,9 +105,81 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text('Obavijesti'),
+        surfaceTintColor: AppColors.background,
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          iconSize: screenWidth * 0.09,
+          color: AppColors.accent,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        centerTitle: true,
+        title: Text(
+          "Obavijesti",
+          style: GoogleFonts.inter(
+            fontSize: screenWidth * 0.06,
+            fontWeight: FontWeight.w600,
+            color: AppColors.secondary,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: screenWidth * 0.08),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.01),
+                    Text(
+                      'OCJENE',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: screenWidth * 0.01),
+                Row(
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.01),
+                    Text(
+                      'ISPITI',
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -123,13 +197,12 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(
-                            child: Center(
                           child: Lottie.asset(
                             'assets/animations/loadingBird.json',
                             width: MediaQuery.of(context).size.width * 0.80,
                             height: 120,
                           ),
-                        ));
+                        );
                       }
 
                       if (snapshot.hasError) {
@@ -174,10 +247,32 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
   }
 
   Widget _buildNotificationTile(NotificationModel notification) {
-    final dateFormat = DateFormat('MMM d, yyyy · h:mm a');
+    final dateFormat = DateFormat('dd.MM.yyyy');
     final formattedDate = notification.timestamp != null
         ? dateFormat.format(notification.timestamp!)
-        : 'Unknown time';
+        : '';
+
+    // Determine notification category and color
+    Color categoryColor = AppColors.primary; // Default to primary (OCJENE)
+    String categoryLabel = 'OCJENE';
+
+    // Check notification data to determine category
+    // You might want to adjust this logic based on your actual data structure
+    if (notification.data.containsKey('type')) {
+      if (notification.data['type'] == 'exam') {
+        categoryColor = AppColors.accent;
+        categoryLabel = 'ISPITI';
+      }
+    }
+
+    // Extract score if available (assuming it might be in the data)
+    String score = '';
+    if (notification.data.containsKey('score')) {
+      score = notification.data['score'].toString();
+    } else if (notification.title.contains(':')) {
+      // Fallback: Try to extract from title if in format "Score: X"
+      score = notification.title.split(':').last.trim();
+    }
 
     return Dismissible(
       key: Key(notification.id),
@@ -193,49 +288,171 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Notification deleted')));
       },
-      child: ListTile(
-        title: Text(
-          notification.title,
-          style: TextStyle(
-            fontWeight:
-                notification.isRead ? FontWeight.normal : FontWeight.bold,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(notification.body),
-            SizedBox(height: 4),
-            Text(
-              formattedDate,
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        leading: Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: notification.isRead ? Colors.transparent : Colors.blue,
-          ),
-        ),
-        trailing: notification.isRead
-            ? null
-            : IconButton(
-                icon: Icon(Icons.check_circle_outline),
-                onPressed: () => _markAsRead(notification.id),
-                tooltip: 'Mark as read',
-              ),
+      child: GestureDetector(
         onTap: () {
           // Mark as read when tapped
           if (!notification.isRead) {
             _markAsRead(notification.id);
           }
-
           // Show notification details
           _showNotificationDetails(notification);
         },
+        child: Container(
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Score display (if available)
+                if (score.isNotEmpty)
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade200),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            score,
+                            style: GoogleFonts.inter(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                          if (formattedDate.isNotEmpty)
+                            Text(
+                              formattedDate,
+                              style: GoogleFonts.inter(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                SizedBox(width: 16),
+
+                // Content Column
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Category Label
+                      Row(
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                              color: categoryColor,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          SizedBox(width: 6),
+                          Text(
+                            categoryLabel,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 8),
+
+                      // Notification title - using Croatian language term "Bilješka" if appropriate
+                      Row(
+                        children: [
+                          Text(
+                            "Bilješka: ",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              notification.body,
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 8),
+
+                      // Element label (using a default if not in the data)
+                      Row(
+                        children: [
+                          Text(
+                            "Element: ",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            notification.data['element'] ?? "",
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Only show unread indicator or mark as read if needed
+                      if (!notification.isRead)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Container(
+                            margin: EdgeInsets.only(top: 8),
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
