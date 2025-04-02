@@ -21,86 +21,21 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
   @override
   void dispose() {
     // Clear all notifications when leaving the page
-    _clearAllNotifications(showConfirmation: false);
+    _firebaseApi.clearAllNotifications();
+
     super.dispose();
   }
 
   // Modified to allow silent clearing without confirmation dialog
-  void _clearAllNotifications({bool showConfirmation = true}) {
-    if (showConfirmation) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Clear All Notifications'),
-          content: Text('Are you sure you want to delete all notifications?'),
-          actions: [
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Clear All'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _firebaseApi.clearAllNotifications();
-              },
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Clear directly without showing dialog
-      _firebaseApi.clearAllNotifications();
-    }
-  }
 
   void _markAsRead(String notificationId) async {
     try {
       await _firebaseApi.markNotificationAsRead(notificationId);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to mark notification as read')),
+        SnackBar(content: Text('Nije moguće označiti obavijest kao pročitanu')),
       );
     }
-  }
-
-  void _showNotificationDetails(NotificationModel notification) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(notification.title),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(notification.body),
-              SizedBox(height: 16),
-              if (notification.data.isNotEmpty) ...[
-                Text('Additional Data:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Text(notification.data.toString()),
-              ],
-              SizedBox(height: 16),
-              Text(
-                notification.timestamp != null
-                    ? DateFormat('MMM d, yyyy · h:mm a')
-                        .format(notification.timestamp!)
-                    : 'Unknown time',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text('Close'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -211,7 +146,25 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                         return Center(
-                            child: Text('Trenutno nemate obavijesti'));
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.notifications_off,
+                                size: 64,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                'Trenutno nemate obavijesti',
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
                       }
 
                       final notifications = snapshot.data!.docs.map((doc) {
@@ -220,12 +173,19 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
                           id: doc.id,
                           title: data['title'] ?? 'No Title',
                           body: data['body'] ?? 'No Body',
-                          data: data['data'] ?? {},
+                          data: data['data'] != null
+                              ? Map<String, dynamic>.from(data['data'])
+                              : {},
                           timestamp:
                               (data['timestamp'] as Timestamp?)?.toDate(),
                           isRead: data['isRead'] ?? false,
                         );
                       }).toList();
+
+                      // Sort notifications by timestamp (newest first)
+                      notifications.sort((a, b) =>
+                          (b.timestamp ?? DateTime.now())
+                              .compareTo(a.timestamp ?? DateTime.now()));
 
                       return _buildNotificationsList(notifications);
                     },
@@ -252,26 +212,61 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
         ? dateFormat.format(notification.timestamp!)
         : '';
 
-    // Determine notification category and color
-    Color categoryColor = AppColors.primary; // Default to primary (OCJENE)
+    // Determine notification category and color based on the 'type' field
+    Color categoryColor = AppColors.primary; // Default to primary for grades
     String categoryLabel = 'OCJENE';
 
-    // Check notification data to determine category
-    // You might want to adjust this logic based on your actual data structure
+    // Check notification data to determine if it's a grade or test notification
     if (notification.data.containsKey('type')) {
-      if (notification.data['type'] == 'exam') {
+      if (notification.data['type'] == 'tests') {
         categoryColor = AppColors.accent;
         categoryLabel = 'ISPITI';
       }
     }
 
-    // Extract score if available (assuming it might be in the data)
-    String score = '';
-    if (notification.data.containsKey('score')) {
-      score = notification.data['score'].toString();
-    } else if (notification.title.contains(':')) {
-      // Fallback: Try to extract from title if in format "Score: X"
-      score = notification.title.split(':').last.trim();
+    // Check if it's specifically a note ("bilješka") and not a grade with number
+    bool isNote = notification.title.contains('bilješka') ||
+        notification.body.contains('bilješku');
+
+    // Extract relevant data
+    String gradeNumber = '';
+    String elementOfEvaluation = '';
+    String subjectName = '';
+
+    // Extract additional details to display
+    if (notification.data.containsKey('count')) {
+      int count = int.tryParse(notification.data['count'] ?? '0') ?? 0;
+
+      // This is structured to match your cloud function notification format
+      if (count == 1) {
+        // For single grade or test notifications, try to parse from the title/body
+        if (notification.title.contains('Nova ocjena za predmet')) {
+          subjectName =
+              notification.title.replaceAll('Nova ocjena za predmet ', '');
+
+          // Extract grade number and element from body
+          // Example format: "Dobili ste: 5 za Usmena provjera"
+          if (notification.body.contains('Dobili ste: ')) {
+            String details = notification.body.replaceAll('Dobili ste: ', '');
+            List<String> parts = details.split(' za ');
+            if (parts.length == 2) {
+              gradeNumber = parts[0];
+              elementOfEvaluation = parts[1];
+            }
+          }
+        } else if (notification.title.contains('Nova bilješka za predmet')) {
+          subjectName =
+              notification.title.replaceAll('Nova bilješka za predmet ', '');
+          elementOfEvaluation = notification.body
+                  .contains('Dobili ste novu bilješku za ')
+              ? notification.body.replaceAll('Dobili ste novu bilješku za ', '')
+              : '';
+        } else if (notification.title.contains('Novi ispit iz predmeta')) {
+          subjectName =
+              notification.title.replaceAll('Novi ispit iz predmeta ', '');
+          elementOfEvaluation = 'Ispit';
+        }
+      }
     }
 
     return Dismissible(
@@ -286,7 +281,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
       onDismissed: (direction) {
         _firebaseApi.deleteNotification(notification.id);
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Notification deleted')));
+            .showSnackBar(SnackBar(content: Text('Obavijest izbrisana')));
       },
       child: GestureDetector(
         onTap: () {
@@ -304,155 +299,251 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black,
+                color: Color.fromRGBO(0, 0, 0, 0.25),
                 blurRadius: 4,
-                offset: Offset(0, 2),
+                offset: Offset(0, 4),
               ),
             ],
           ),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Score display (if available)
-                if (score.isNotEmpty)
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade200),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            score,
-                            style: GoogleFonts.inter(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                          if (formattedDate.isNotEmpty)
-                            Text(
-                              formattedDate,
-                              style: GoogleFonts.inter(
-                                fontSize: 10,
-                                color: Colors.grey,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                SizedBox(width: 16),
-
-                // Content Column
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Category Label
-                      Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              color: categoryColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            categoryLabel,
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 8),
-
-                      // Notification title - using Croatian language term "Bilješka" if appropriate
-                      Row(
-                        children: [
-                          Text(
-                            "Bilješka: ",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Expanded(
-                            child: Text(
-                              notification.body,
-                              style: GoogleFonts.inter(
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black87,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 8),
-
-                      // Element label (using a default if not in the data)
-                      Row(
-                        children: [
-                          Text(
-                            "Element: ",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          Text(
-                            notification.data['element'] ?? "",
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Only show unread indicator or mark as read if needed
-                      if (!notification.isRead)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            margin: EdgeInsets.only(top: 8),
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                    ],
+          child: Column(
+            children: [
+              // Header with subject name
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Color(0xFF1D91D0), // Bright blue from image
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
                   ),
                 ),
-              ],
-            ),
+                child: Text(
+                  subjectName.isNotEmpty
+                      ? subjectName
+                      : (isNote ? "Bilješka" : "Ocjena"),
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              // Content area
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Grade or Date display
+                    if (gradeNumber.isNotEmpty && !isNote)
+                      Container(
+                        width: 80,
+                        height: 80,
+                        alignment: Alignment.center,
+                        child: Text(
+                          gradeNumber,
+                          style: GoogleFonts.inter(
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                      ),
+
+                    SizedBox(width: 16),
+
+                    // Details column
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // "Bilješka:" label and value
+                          RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                color: AppColors.secondary,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: "Bilješka: ",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                TextSpan(
+                                  text: isNote ? notification.body : "Ocjena",
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 8),
+
+                          // "Element:" label and value
+                          RichText(
+                            text: TextSpan(
+                              style: GoogleFonts.inter(
+                                fontSize: 16,
+                                color: AppColors.secondary,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: "Element: ",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                TextSpan(
+                                  text: elementOfEvaluation.isNotEmpty
+                                      ? elementOfEvaluation
+                                      : "primjena znanja",
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 8),
+
+                          // "Ocjena:" label and value
+                          if (gradeNumber.isNotEmpty && !isNote)
+                            RichText(
+                              text: TextSpan(
+                                style: GoogleFonts.inter(
+                                  fontSize: 16,
+                                  color: AppColors.secondary,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: "Ocjena: ",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  TextSpan(
+                                    text: gradeNumber,
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Unread indicator
+                          if (!notification.isRead)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                margin: EdgeInsets.only(top: 8),
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showNotificationDetails(NotificationModel notification) {
+    // Determine notification category
+    String categoryLabel = notification.data.containsKey('type') &&
+            notification.data['type'] == 'tests'
+        ? 'ISPITI'
+        : 'OCJENE';
+
+    // Format timestamp
+    final dateTimeFormat = DateFormat('dd.MM.yyyy - HH:mm');
+    final formattedDateTime = notification.timestamp != null
+        ? dateTimeFormat.format(notification.timestamp!)
+        : 'Nepoznato vrijeme';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: categoryLabel == 'ISPITI'
+                    ? AppColors.accent
+                    : AppColors.primary,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                notification.title,
+                style: GoogleFonts.inter(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(notification.body),
+              SizedBox(height: 16),
+              Divider(),
+              SizedBox(height: 8),
+              Text(
+                'Vrijeme obavijesti:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 4),
+              Text(formattedDateTime),
+
+              // Only show additional data if not empty and relevant
+              if (notification.data.isNotEmpty &&
+                  !notification.data.keys.every((key) =>
+                      ['type', 'timestamp', 'count'].contains(key))) ...[
+                SizedBox(height: 16),
+                Text(
+                  'Dodatni detalji:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4),
+                // Display only relevant data fields
+                for (var entry in notification.data.entries)
+                  if (!['type', 'timestamp', 'count'].contains(entry.key))
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text('${entry.key}: ${entry.value}'),
+                    ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text('Zatvori'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          if (!notification.isRead)
+            TextButton(
+              child: Text('Označi kao pročitano'),
+              onPressed: () {
+                _markAsRead(notification.id);
+                Navigator.of(context).pop();
+              },
+            ),
+        ],
       ),
     );
   }
