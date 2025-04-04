@@ -124,7 +124,7 @@ export const processNotificationsSimple = functions.pubsub
                 }
               }
 
-              // Create the message object
+              // Create the message object specifically for this user
               const message = {
                 notification: {
                   title: title,
@@ -138,14 +138,21 @@ export const processNotificationsSimple = functions.pubsub
                 token: userData.fcmToken,
               };
 
-              // Send the notification
+              // Send the notification only to this specific user
               try {
-                console.log(`Sending notification to ${userId}`);
+                console.log(
+                  `Sending notification to user ${userId} with token ${userData.fcmToken.substring(
+                    0,
+                    10
+                  )}...`
+                );
                 const response = await admin.messaging().send(message);
-                console.log(`Successfully sent message: ${response}`);
+                console.log(
+                  `Successfully sent message to ${userId}: ${response}`
+                );
               } catch (fcmError) {
                 console.error(
-                  `Error sending notification to ${userId}:`,
+                  `Error sending notification to user ${userId}:`,
                   fcmError
                 );
               }
@@ -201,7 +208,7 @@ export const processNewTests = functions.pubsub
         return null;
       }
 
-      // Process each user's notification
+      // Process each user's notification individually
       for (const doc of snapshot.docs) {
         const userData = doc.data();
         const userId = doc.id;
@@ -269,7 +276,7 @@ export const processNewTests = functions.pubsub
                 }
               }
 
-              // Create the message object
+              // Create the message object specifically for this user
               const message = {
                 notification: {
                   title: title,
@@ -283,14 +290,21 @@ export const processNewTests = functions.pubsub
                 token: userData.fcmToken,
               };
 
-              // Send the notification
+              // Send the notification only to this specific user
               try {
-                console.log(`Sending test notification to ${userId}`);
+                console.log(
+                  `Sending test notification to user ${userId} with token ${userData.fcmToken.substring(
+                    0,
+                    10
+                  )}...`
+                );
                 const response = await admin.messaging().send(message);
-                console.log(`Successfully sent test message: ${response}`);
+                console.log(
+                  `Successfully sent test message to ${userId}: ${response}`
+                );
               } catch (fcmError) {
                 console.error(
-                  `Error sending test notification to ${userId}:`,
+                  `Error sending test notification to user ${userId}:`,
                   fcmError
                 );
               }
