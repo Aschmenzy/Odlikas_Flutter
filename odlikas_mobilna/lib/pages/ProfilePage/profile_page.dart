@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
@@ -8,11 +7,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/Widgets/descriptionModal.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,18 +25,20 @@ class _ProfilePageState extends State<ProfilePage> {
   String? studentSchool;
   String? studentProgram;
   String? _description;
-  String? _pdfBase64;
-  String? _pfpBase64;
+  String? _cvUrl;
+  String? _pfpUrl;
   bool _isUploadingPDF = false;
   bool _isUploadingPFP = false;
 
   bool _isLoading = true;
+  String? _userEmail;
 
-  //funkcija koja horvaca podatke o korisniku 
-  //koristi email kako bi nasla dokument u collecitonu 
+  //funkcija koja horvaca podatke o korisniku
+  //koristi email kako bi nasla dokument u collecitonu
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
+    _userEmail = email;
 
     setState(() {
       studentName = box.get('studentName');
@@ -54,8 +55,8 @@ class _ProfilePageState extends State<ProfilePage> {
       if (docSnapshot.exists) {
         setState(() {
           _description = docSnapshot.data()?['description'];
-          _pdfBase64 = docSnapshot.data()?['cv'];
-          _pfpBase64 = docSnapshot.data()?['pfp'];
+          _cvUrl = docSnapshot.data()?['cvUrl'];
+          _pfpUrl = docSnapshot.data()?['pfpUrl'];
         });
       }
     } catch (e) {
@@ -69,10 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   //funkcija koje sprema opis korisnika iz modala u studentProfiles collection
   Future<void> _saveDescription(String description) async {
-    final box = await Hive.openBox('User');
-    final email = box.get('email');
-
-    if (email == null) {
+    if (_userEmail == null) {
       print('Error: No email found in local storage');
       return;
     }
@@ -80,7 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await FirebaseFirestore.instance
           .collection('studentProfiles')
-          .doc(email)
+          .doc(_userEmail)
           .set({
         'description': description,
       }, SetOptions(merge: true));
@@ -89,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-//funkcija koja prima samo pfd, decodiga ga u base64 string i sprema ga pod navimo cv u studentprofils collection
+  // Funkcija koja uploada PDF na Firebase Storage i sprema URL u Firestore
   Future<void> _uploadPDF() async {
     try {
       setState(() => _isUploadingPDF = true);
@@ -99,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
         allowedExtensions: ['pdf'],
       );
 
-      if (result != null) {
+      if (result != null && _userEmail != null) {
         final file = File(result.files.single.path!);
 
         // Check file size (max 1MB)
@@ -113,21 +111,25 @@ class _ProfilePageState extends State<ProfilePage> {
           return;
         }
 
-        // Convert to base64
-        final base64PDF = base64Encode(bytes);
+        // Upload to Firebase Storage
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('odlikasFiles')
+            .child(_userEmail!)
+            .child('cv.pdf');
 
-        // Save to Firestore
-        final box = await Hive.openBox('User');
-        final email = box.get('email');
+        await storageRef.putFile(file);
+        final downloadUrl = await storageRef.getDownloadURL();
 
+        // Save URL to Firestore
         await FirebaseFirestore.instance
             .collection('studentProfiles')
-            .doc(email)
+            .doc(_userEmail)
             .set({
-          'cv': base64PDF,
+          'cvUrl': downloadUrl,
         }, SetOptions(merge: true));
 
-        setState(() => _pdfBase64 = base64PDF);
+        setState(() => _cvUrl = downloadUrl);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _viewPDF() async {
-    if (_pdfBase64 == null) {
+    if (_cvUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Prvo prenesite životopis')),
       );
@@ -155,13 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      // Convert base64 back to PDF file
-      final bytes = base64Decode(_pdfBase64!);
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/cv.pdf');
-      await file.writeAsBytes(bytes);
-
-      // Show PDF viewer
+      // Show PDF viewer directly from URL
       if (mounted) {
         Navigator.push(
           context,
@@ -169,6 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
             builder: (context) => Scaffold(
               backgroundColor: AppColors.background,
               appBar: AppBar(
+                foregroundColor: AppColors.background,
                 title: Text(
                   'Vaš životopis',
                   style: GoogleFonts.inter(
@@ -178,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 backgroundColor: AppColors.primary,
               ),
-              body: SfPdfViewer.file(file),
+              body: SfPdfViewer.network(_cvUrl!),
             ),
           ),
         );
@@ -200,7 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
         type: FileType.image,
       );
 
-      if (result != null) {
+      if (result != null && _userEmail != null) {
         final file = File(result.files.single.path!);
 
         // Check file size (max 1MB)
@@ -214,21 +211,25 @@ class _ProfilePageState extends State<ProfilePage> {
           return;
         }
 
-        // Convert to base64
-        final pfpBase64 = base64Encode(bytes);
+        // Upload to Firebase Storage
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('odlikasFiles')
+            .child(_userEmail!)
+            .child('profilePicture.jpg');
 
-        // Save to Firestore
-        final box = await Hive.openBox('User');
-        final email = box.get('email');
+        await storageRef.putFile(file);
+        final downloadUrl = await storageRef.getDownloadURL();
 
+        // Save URL to Firestore
         await FirebaseFirestore.instance
             .collection('studentProfiles')
-            .doc(email)
+            .doc(_userEmail)
             .set({
-          'pfp': pfpBase64,
+          'pfpUrl': downloadUrl,
         }, SetOptions(merge: true));
 
-        setState(() => _pfpBase64 = pfpBase64);
+        setState(() => _pfpUrl = downloadUrl);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -336,13 +337,26 @@ class _ProfilePageState extends State<ProfilePage> {
                     shape: BoxShape.circle,
                     color: AppColors.background,
                   ),
-                  child: _pfpBase64 != null
+                  child: _pfpUrl != null
                       ? ClipOval(
-                          child: Image.memory(
-                            base64Decode(_pfpBase64!),
+                          child: Image.network(
+                            _pfpUrl!,
                             width: screenWidth * 0.22,
                             height: screenWidth * 0.22,
                             fit: BoxFit.cover,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                  color: AppColors.primary,
+                                ),
+                              );
+                            },
                           ),
                         )
                       : Image.asset(
@@ -392,7 +406,6 @@ class _ProfilePageState extends State<ProfilePage> {
               SizedBox(height: screenHeight * 0.03),
 
               // PDF Upload Container
-
               GestureDetector(
                 onTap: _isUploadingPDF ? null : _uploadPDF,
                 child: Container(
@@ -411,7 +424,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         Image.asset("assets/images/upload.png",
                             width: screenWidth * 0.3),
                         SizedBox(height: screenHeight * 0.02),
-                        _pdfBase64 != null
+                        _cvUrl != null
                             ? Text(
                                 "Promijente životopis",
                                 style: fontService.font(
@@ -450,9 +463,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: screenWidth * 0.85,
                   height: screenHeight * 0.06,
                   decoration: BoxDecoration(
-                    color: _pdfBase64 != null
-                        ? AppColors.primary
-                        : AppColors.tertiary,
+                    color:
+                        _cvUrl != null ? AppColors.primary : AppColors.tertiary,
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Center(
