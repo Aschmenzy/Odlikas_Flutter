@@ -14,7 +14,6 @@ class GradesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double xOffset = 2.5;
-    double averageGrade = calculateAverageGrade(subjects);
     Map<String, double> gradePercentages = calculateGradePercentages(subjects);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
@@ -28,10 +27,10 @@ class GradesCard extends StatelessWidget {
         ),
       ),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(left: 12, right: 20, top: 8),
         decoration: BoxDecoration(
           color: AppColors.primary,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -41,11 +40,11 @@ class GradesCard extends StatelessWidget {
               style: fontService.font(
                 height: 1.1,
                 color: AppColors.background,
-                fontSize: screenWidth * 0.06,
-                fontWeight: FontWeight.w900,
+                fontSize: screenWidth * 0.055,
+                fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(height: screenHeight * 0.005),
+            SizedBox(height: screenHeight * 0.007),
             Row(
               children: [
                 Expanded(
@@ -60,7 +59,7 @@ class GradesCard extends StatelessWidget {
                             width: screenHeight * 0.003,
                             color: AppColors.odlican,
                           ),
-                          SizedBox(width: screenWidth * 0.02),
+                          SizedBox(width: screenWidth * 0.01),
                           _buildGradeLabel(
                             'Odličan',
                             '${(gradePercentages['5.0'] ?? 0).toStringAsFixed(0)}%',
@@ -68,6 +67,7 @@ class GradesCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      SizedBox(height: screenHeight * 0.005),
                       Row(
                         children: [
                           Container(
@@ -75,7 +75,7 @@ class GradesCard extends StatelessWidget {
                             width: screenHeight * 0.003,
                             color: AppColors.vrloDobar,
                           ),
-                          SizedBox(width: screenWidth * 0.02),
+                          SizedBox(width: screenWidth * 0.01),
                           _buildGradeLabel(
                             'Vrlo dobar',
                             '${(gradePercentages['4.0'] ?? 0).toStringAsFixed(0)}%',
@@ -83,6 +83,7 @@ class GradesCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      SizedBox(height: screenHeight * 0.005),
                       Row(
                         children: [
                           Container(
@@ -90,7 +91,7 @@ class GradesCard extends StatelessWidget {
                             width: screenHeight * 0.003,
                             color: AppColors.dobar,
                           ),
-                          SizedBox(width: screenWidth * 0.02),
+                          SizedBox(width: screenWidth * 0.01),
                           _buildGradeLabel(
                             'Dobar',
                             '${(gradePercentages['3.0'] ?? 0).toStringAsFixed(0)}%',
@@ -98,6 +99,7 @@ class GradesCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      SizedBox(height: screenHeight * 0.005),
                       Row(
                         children: [
                           Container(
@@ -105,7 +107,7 @@ class GradesCard extends StatelessWidget {
                             width: screenHeight * 0.003,
                             color: AppColors.dovoljan,
                           ),
-                          SizedBox(width: screenWidth * 0.02),
+                          SizedBox(width: screenWidth * 0.01),
                           _buildGradeLabel(
                             'Dovoljan',
                             '${(gradePercentages['2.0'] ?? 0).toStringAsFixed(0)}%',
@@ -113,6 +115,7 @@ class GradesCard extends StatelessWidget {
                           ),
                         ],
                       ),
+                      SizedBox(height: screenHeight * 0.005),
                       Row(
                         children: [
                           Container(
@@ -120,7 +123,7 @@ class GradesCard extends StatelessWidget {
                             width: screenHeight * 0.003,
                             color: AppColors.nedovoljan,
                           ),
-                          SizedBox(width: screenWidth * 0.02),
+                          SizedBox(width: screenWidth * 0.01),
                           _buildGradeLabel(
                             'Nedovoljan',
                             '${(gradePercentages['1.0'] ?? 0).toStringAsFixed(0)}%',
@@ -132,29 +135,25 @@ class GradesCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: SizedBox(
-                    height: 120,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CustomPaint(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: CustomPaint(
                           size: const Size(120, 120),
-                          painter: GradesCardPainter(subjects,
-                              xOffset), // Pass the offset to the painter
-                        ),
-                        Transform.translate(
-                          offset: Offset(-((180 / xOffset) - 120 / 2), 0),
-                          child: Text(
-                            averageGrade.toStringAsFixed(2),
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                          painter: GradesCardPainter(
+                            subjects,
+                            xOffset,
+                            textStyle: TextStyle(
                               color: Colors.white,
+                              fontSize: screenWidth * 0.078,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -170,20 +169,20 @@ class GradesCard extends StatelessWidget {
     final fontService = Provider.of<FontService>(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 1.5),
+      padding: const EdgeInsets.only(left: 1.5, right: 1.5, top: 1.5),
       child: Row(
         children: [
           Text(
             '$label - ',
             style: fontService.font(
-                fontSize: MediaQuery.of(context).size.height * 0.02,
+                fontSize: MediaQuery.of(context).size.height * 0.018,
                 color: Colors.white,
                 fontWeight: FontWeight.w600),
           ),
           Text(
             percentage,
             style: fontService.font(
-                fontSize: MediaQuery.of(context).size.height * 0.02,
+                fontSize: MediaQuery.of(context).size.height * 0.0185,
                 color: Colors.white,
                 fontWeight: FontWeight.w600),
           ),
@@ -238,13 +237,15 @@ class GradesCard extends StatelessWidget {
 class GradesCardPainter extends CustomPainter {
   final List<Subject> subjects;
   final double xOffset;
+  final TextStyle? textStyle;
 
-  GradesCardPainter(this.subjects, this.xOffset);
+  GradesCardPainter(this.subjects, this.xOffset, {this.textStyle});
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Increase the radius to make the circle larger
     final center = Offset(size.width / xOffset, size.height / 2);
-    final radius = size.width / 1.8;
+    final radius = size.width / 1.6; // Increased from 1.8 to 1.6 to make larger
 
     final Map<double, int> gradeCounts = {};
     for (var subject in subjects) {
@@ -256,15 +257,18 @@ class GradesCardPainter extends CustomPainter {
     }
 
     final int totalSubjects = gradeCounts.values.fold(0, (a, b) => a + b);
-    double startAngle = -pi / 2;
+    double startAngle = 0;
 
     Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.165
-      ..strokeCap = StrokeCap.round;
+      ..strokeCap =
+          StrokeCap.butt; // Changed from round to butt for straight ends
 
+    // Draw background circle
     canvas.drawCircle(center, radius, paint);
 
+    // Draw arcs for each grade
     gradeCounts.forEach((grade, count) {
       final sweepAngle = (count / totalSubjects) * 2 * pi;
       paint.color = getColorForGrade(grade);
@@ -279,6 +283,44 @@ class GradesCardPainter extends CustomPainter {
 
       startAngle += sweepAngle;
     });
+
+    // Calculate average grade
+    double totalGradePoints = 0;
+    int gradedSubjects = 0;
+
+    for (var subject in subjects) {
+      if (subject.grade != 'N/A') {
+        totalGradePoints += double.parse(subject.grade.replaceAll(',', '.'));
+        gradedSubjects++;
+      }
+    }
+
+    double averageGrade =
+        gradedSubjects > 0 ? totalGradePoints / gradedSubjects : 0;
+
+    // Draw average text in the center
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(
+        text: averageGrade.toStringAsFixed(2),
+        style: textStyle ??
+            TextStyle(
+              color: Colors.white,
+              fontSize: size.width * 0.2,
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout();
+
+    // Center the text exactly in the middle
+    final textOffset = Offset(
+      center.dx - textPainter.width / 2,
+      center.dy - textPainter.height / 2,
+    );
+
+    textPainter.paint(canvas, textOffset);
   }
 
   Color getColorForGrade(double grade) {

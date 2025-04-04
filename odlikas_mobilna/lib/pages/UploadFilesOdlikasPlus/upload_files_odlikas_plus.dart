@@ -79,14 +79,14 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
     );
 
     if (result != null && result.files.single.path != null) {
-      // Ograniči veličinu datoteke na 10 MB.
-      const int maxFileSize = 10 * 1024 * 1024; // 10 MB u bajtovima.
+      // Ograniči veličinu datoteke na 15 MB.
+      const int maxFileSize = 15 * 1024 * 1024; // 10 MB u bajtovima.
       int fileSize = result.files.single.size;
       if (fileSize > maxFileSize) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
-                  "Datoteka je prevelika. Maksimalna dozvoljena veličina je 10 MB.")),
+                  "Datoteka je prevelika. Maksimalna dozvoljena veličina je 15 MB.")),
         );
         return;
       }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
@@ -408,12 +409,12 @@ class _HomePageState extends State<HomePage> {
           ? Icon(
               Icons.notifications_active,
               color: AppColors.accent,
-              size: 50,
+              size: 40,
             )
           : Icon(
               Icons.notifications_none,
-              color: AppColors.secondary,
-              size: 50,
+              color: AppColors.primary,
+              size: 40,
             ),
     );
   }
@@ -435,104 +436,91 @@ class _HomePageState extends State<HomePage> {
                 height: 120,
               ),
             )
-          : SingleChildScrollView(
-              // Omogućavanje skrolanja
-              scrollDirection: Axis.vertical,
-              child: SafeArea(
-                // Osiguravanje da sadržaj bude unutar sigurnog područja ekrana
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20), // Razmak
+                  // Pozdravna poruka s imenom studenta
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(height: 20), // Razmak
-                      // Pozdravna poruka s imenom studenta
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Dobrodošao/la, \n$studentName",
-                            style: fontService.font(
-                              fontWeight: FontWeight.w700,
-                              height: 1.1,
-                              fontSize:
-                                  MediaQuery.of(context).size.width * 0.07,
-                              color: AppColors.secondary,
-                            ),
-                          ),
-                          _notificationIcon(),
-                        ],
+                      Text(
+                        "Dobrodošao/la, \n$studentName",
+                        style: fontService.font(
+                          fontWeight: FontWeight.w700,
+                          height: 1.1,
+                          fontSize: MediaQuery.of(context).size.width * 0.06,
+                          color: AppColors.secondary,
+                        ),
                       ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.05),
-                      // Horizontalna lista kartica (ocjene i studentska iskaznica)
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          return SizedBox(
-                            width: constraints.maxWidth,
-                            height: size.height * 0.25,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: 2,
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(width: 16),
-                              itemBuilder: (context, index) {
-                                return index == 0
-                                    ? SizedBox(
-                                        // Kartica s ocjenama
-                                        width: size.width * 0.8,
-                                        child: GradesCard(
-                                            subjects:
-                                                viewModel.grades?.subjects ??
-                                                    []),
-                                      )
-                                    : GestureDetector(
-                                        // Kartica s podacima studentske iskaznice
-                                        onTap: () =>
-                                            _showStudentIdModal(context),
-                                        child: SizedBox(
-                                          width: size.width * 0.8,
-                                          child: Workingidcard(
-                                            name: studentName,
-                                            oib: studentOib,
-                                            address: studentAddress,
-                                            postalCode: studentPostalCode,
-                                            city: studentCity,
-                                          ),
-                                        ),
-                                      );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.03),
-                      // Red s karticama za raspored i gradivo
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [ScheduleCard(), GradivoCard()],
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.025),
-                      // Widget kalendara s mogućnošću navigacije na stranicu kalendara
-                      GestureDetector(
-                          onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => CalendarPage(
-                                          email: studentEmail ?? '',
-                                          password: studentPassword ?? '',
-                                        )),
-                              ),
-                          child: HorizontalCalendarWidget(
-                            onDayTap: _showDayDetailsPopup,
-                            isHoliday: _isHoliday,
-                            isTest: _isTest,
-                          )),
+                      _notificationIcon(),
                     ],
                   ),
-                ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                  // Horizontalna lista kartica (ocjene i studentska iskaznica)
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SizedBox(
+                        width: constraints.maxWidth,
+                        height: size.height * 0.235,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 2,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 16),
+                          itemBuilder: (context, index) {
+                            return index == 0
+                                ? SizedBox(
+                                    // Kartica s ocjenama
+                                    width: size.width * 0.835,
+                                    child: GradesCard(
+                                        subjects:
+                                            viewModel.grades?.subjects ?? []),
+                                  )
+                                : GestureDetector(
+                                    // Kartica s podacima studentske iskaznice
+                                    onTap: () => _showStudentIdModal(context),
+                                    child: SizedBox(
+                                      width: size.width * 0.8,
+                                      child: Workingidcard(
+                                        name: studentName,
+                                        oib: studentOib,
+                                        address: studentAddress,
+                                        postalCode: studentPostalCode,
+                                        city: studentCity,
+                                      ),
+                                    ),
+                                  );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.025),
+                  // Red s karticama za raspored i gradivo
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [ScheduleCard(), GradivoCard()],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.025),
+                  // Widget kalendara s mogućnošću navigacije na stranicu kalendara
+                  GestureDetector(
+                      onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CalendarPage(
+                                      email: studentEmail ?? '',
+                                      password: studentPassword ?? '',
+                                    )),
+                          ),
+                      child: HorizontalCalendarWidget(
+                        onDayTap: _showDayDetailsPopup,
+                        isHoliday: _isHoliday,
+                        isTest: _isTest,
+                      )),
+                ],
               ),
             ),
       // Donja navigacijska traka s aktivnim prvim elementom (Home)

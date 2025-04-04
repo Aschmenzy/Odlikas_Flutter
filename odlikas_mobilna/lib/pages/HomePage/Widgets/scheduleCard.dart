@@ -145,7 +145,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: SizedBox(
-            width: screenWidth * 0.4,
+            width: screenWidth * 0.42,
             height: screenHeight * 0.15,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -188,13 +188,14 @@ class _ScheduleCardState extends State<ScheduleCard> {
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           SizedBox(width: screenWidth * 0.02),
                           Image.asset(
                             "assets/images/scheduleWidgetIcon.png",
-                            scale: 1.8,
+                            scale: 2.3,
                           ),
                           SizedBox(width: screenWidth * 0.02),
                           Text(
@@ -215,7 +216,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
                       Row(
                         children: [
                           SizedBox(
-                            width: screenWidth * 0.075,
+                            width: screenWidth * 0.078,
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

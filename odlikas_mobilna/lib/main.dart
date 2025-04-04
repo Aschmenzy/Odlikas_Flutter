@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/FontService.dart';
@@ -41,6 +43,27 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [SystemUiOverlay.top],
+  );
+
+  Timer.periodic(Duration(seconds: 3), (timer) {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [SystemUiOverlay.top],
+    );
+  });
+
+  // Then make the status bar transparent
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor:
+        Colors.transparent, // Make bottom nav bar transparent too
+    statusBarIconBrightness: Brightness.light, // For Android (dark icons)
+    statusBarBrightness: Brightness.dark, // For iOS (dark icons)
+    systemNavigationBarContrastEnforced: false,
+  ));
   await FirebaseApi().initNotifications();
 
   await Hive.openBox('User');

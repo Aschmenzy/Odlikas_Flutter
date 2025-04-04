@@ -31,7 +31,7 @@ class GradivoCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: SizedBox(
-            width: screenWidth * 0.4,
+            width: screenWidth * 0.42,
             height: screenHeight * 0.15,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
