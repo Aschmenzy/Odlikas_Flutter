@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,7 +5,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class QueryPage extends StatefulWidget {
@@ -20,16 +16,17 @@ class QueryPage extends StatefulWidget {
 }
 
 class _QueryPageState extends State<QueryPage> {
-  String? _pdfBase64;
+  String? _cvUrl;
+  String? _userEmail;
   bool _isLoading = true;
   TextEditingController motivationLetter = TextEditingController();
   TextEditingController questions = TextEditingController();
-  late String dquestions;
 
   //funkcija koja dohvaca profil
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
+    _userEmail = email;
 
     try {
       final docSnapshot = await FirebaseFirestore.instance
@@ -39,7 +36,7 @@ class _QueryPageState extends State<QueryPage> {
 
       if (docSnapshot.exists) {
         setState(() {
-          _pdfBase64 = docSnapshot.data()?['cv'];
+          _cvUrl = docSnapshot.data()?['cvUrl'];
         });
       }
     } catch (e) {
@@ -51,9 +48,9 @@ class _QueryPageState extends State<QueryPage> {
     }
   }
 
-  //funkcija koja dohvaca spremljeni base64 string i decodira ga
+  //funkcija koja dohvaca CV iz Firebase Storage
   void _viewPDF() async {
-    if (_pdfBase64 == null) {
+    if (_cvUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Prvo prenesite životopis')),
       );
@@ -61,13 +58,7 @@ class _QueryPageState extends State<QueryPage> {
     }
 
     try {
-      // Convert base64 back to PDF file
-      final bytes = base64Decode(_pdfBase64!);
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/cv.pdf');
-      await file.writeAsBytes(bytes);
-
-      // Show PDF viewer
+      // Show PDF viewer directly from URL
       if (mounted) {
         Navigator.push(
           context,
@@ -75,6 +66,7 @@ class _QueryPageState extends State<QueryPage> {
             builder: (context) => Scaffold(
               backgroundColor: AppColors.background,
               appBar: AppBar(
+                foregroundColor: AppColors.background,
                 title: Text(
                   'Vaš životopis',
                   style: GoogleFonts.inter(
@@ -84,7 +76,7 @@ class _QueryPageState extends State<QueryPage> {
                 ),
                 backgroundColor: AppColors.primary,
               ),
-              body: SfPdfViewer.file(file),
+              body: SfPdfViewer.network(_cvUrl!),
             ),
           ),
         );
@@ -98,11 +90,10 @@ class _QueryPageState extends State<QueryPage> {
     }
   }
 
-  //funkcija koja daje korisniku mogucnost spremanja CV u firebase
-  //funkcija enkodira pdf u base64 string i sprema ga tako u firebase
+  //funkcija koja šalje upit s CV URL-om umjesto base64 stringa
   Future<void> _handleSubmit() async {
     // Validate CV
-    if (_pdfBase64 == null) {
+    if (_cvUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Prvo prenesite životopis')),
       );
@@ -120,19 +111,16 @@ class _QueryPageState extends State<QueryPage> {
     try {
       setState(() => _isLoading = true);
 
-      final box = await Hive.openBox('User');
-      final userEmail = box.get('email');
-
       // Create a subcollection for this job's queries
       await FirebaseFirestore.instance
           .collection('Jobs')
           .doc(widget.jobId)
-          .collection('jobQueries_$userEmail')
+          .collection('jobQueries_$_userEmail')
           .add({
-        'cv': _pdfBase64,
+        'cvUrl': _cvUrl,
         'motivationLetter': motivationLetter.text,
         'questions': questions.text,
-        'userEmail': userEmail,
+        'userEmail': _userEmail,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
@@ -233,7 +221,7 @@ class _QueryPageState extends State<QueryPage> {
                     width: screenWidth,
                     height: screenHeight * 0.06,
                     decoration: BoxDecoration(
-                      color: _pdfBase64 != null
+                      color: _cvUrl != null
                           ? AppColors.primary
                           : AppColors.tertiary,
                       borderRadius: BorderRadius.circular(15),

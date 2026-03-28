@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages, use_key_in_widget_constructors, library_private_types_in_public_api
+// ignore_for_file: depend_on_referenced_packages, use_key_in_widget_constructors, library_private_types_in_public_api, unused_local_variable
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -212,8 +212,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
         ? dateFormat.format(notification.timestamp!)
         : '';
 
-    // Determine notification category and color based on the 'type' field
-    Color categoryColor = AppColors.primary; // Default to primary for grades
+    Color categoryColor = AppColors.primary;
     String categoryLabel = 'OCJENE';
 
     // Check notification data to determine if it's a grade or test notification
