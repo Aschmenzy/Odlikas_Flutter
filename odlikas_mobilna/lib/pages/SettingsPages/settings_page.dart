@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:odlikas_mobilna/database/api/auth_storage.dart';
+import 'package:odlikas_mobilna/database/api/dio_client.dart';
+import 'package:odlikas_mobilna/database/api/login_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
@@ -134,14 +137,23 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   //funkcija koja vraca korisnika na into page i brise sve podatke iz lokalnog storega
-  void _signOut() async {
+  Future<void> _signOut() async {
+    // Invalidate server session (best-effort)
+    final token = await AuthStorage.readToken();
+    if (token != null) await LoginService.logout(token);
+
+    // Wipe secure storage and reset Dio so no stale token is cached
+    await AuthStorage.clearAll();
+    DioClient.reset();
+
+    // Clear non-sensitive Hive display data
     final box = await Hive.openBox('User');
     await box.clear();
+
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (context) => IntroPage(),
-      ),
+      MaterialPageRoute(builder: (_) => IntroPage()),
     );
   }
 
@@ -208,17 +220,17 @@ class _SettingsPageState extends State<SettingsPage> {
                   Text(
                     "Postavke",
                     style: fontService.font(
-                      fontSize: screenWidth * 0.1,
-                      fontWeight: FontWeight.w500,
+                      fontSize: screenWidth * 0.08,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.secondary,
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.05),
+                  SizedBox(height: screenHeight * 0.03),
                   Text(
                     "Profil",
                     style: fontService.font(
-                        fontSize: screenWidth * 0.075,
-                        fontWeight: FontWeight.w500,
+                        fontSize: screenWidth * 0.055,
+                        fontWeight: FontWeight.w600,
                         color: AppColors.secondary,
                         height: 1.1),
                   ),
@@ -315,15 +327,17 @@ class _SettingsPageState extends State<SettingsPage> {
                           builder: (context) => NotificationsPage()),
                     ),
                   ),
-                  SettingsTile(
-                    label: "Prenesi datoteke - Odlikaš+",
-                    path: "assets/images/odlikas_plus_upload_90x90.png",
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => UploadFilesOdlikasPlus()),
-                    ),
-                  ),
+                  data['isConnected']
+                      ? SettingsTile(
+                          label: "Prenesi datoteke - Odlikaš+",
+                          path: "assets/images/odlikas_plus_upload_90x90.png",
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => UploadFilesOdlikasPlus()),
+                          ),
+                        )
+                      : Container(),
                   DislexycTile(
                     label: "Dislekcijski tekst",
                     path: "assets/images/dyslexia.png",

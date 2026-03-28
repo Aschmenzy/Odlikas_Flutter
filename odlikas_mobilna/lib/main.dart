@@ -7,30 +7,42 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/FontService.dart';
+import 'package:odlikas_mobilna/database/api/auth_storage.dart';
+import 'package:safe_device/safe_device.dart';
 import 'package:odlikas_mobilna/database/api/firebase_api.dart';
+import 'package:odlikas_mobilna/database/api/login_service.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/BannerPage/banner_page.dart';
-import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
-import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
-import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/pages/JobsPage/jobs_page.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/pomodoro_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/settings_page.dart';
+import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
+import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
+import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'database/firebase_options.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
+Future<void> _checkDeviceSecurity() async {
+  try {
+    final isJailbroken = await SafeDevice.isJailBroken;
+    if (isJailbroken) {
+      // Device is rooted/jailbroken — OS encryption guarantees may be bypassed.
+      // We warn but do not block, letting the user proceed at their own risk.
+      debugPrint('Warning: device is rooted or jailbroken.');
+    }
+  } catch (_) {
+    // Detection failed — proceed normally.
+  }
+}
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Ensure Firebase is initialized
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // Save the notification to Firestore
   final FirebaseApi firebaseApi = FirebaseApi();
   await firebaseApi.saveNotifications(message);
 }
@@ -39,34 +51,31 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Hive.initFlutter();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,
     overlays: [SystemUiOverlay.top],
   );
 
-  Timer.periodic(Duration(seconds: 3), (timer) {
+  Timer.periodic(const Duration(seconds: 3), (_) {
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: [SystemUiOverlay.top],
     );
   });
 
-  // Then make the status bar transparent
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    systemNavigationBarColor:
-        Colors.transparent, // Make bottom nav bar transparent too
-    statusBarIconBrightness: Brightness.light, // For Android (dark icons)
-    statusBarBrightness: Brightness.dark, // For iOS (dark icons)
+    systemNavigationBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
     systemNavigationBarContrastEnforced: false,
   ));
-  await FirebaseApi().initNotifications();
 
+  await FirebaseApi().initNotifications();
   await Hive.openBox('User');
+  await _checkDeviceSecurity();
 
   runApp(const MyApp());
 }
@@ -84,39 +93,87 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Initialize the font service
     _fontService.initialize();
   }
 
   @override
   Widget build(BuildContext context) {
-    final box = Hive.box('User');
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _fontService),
-        ChangeNotifierProvider(create: (_) => HomePageViewModel(ApiService())),
-        Provider<ApiService>(
-          create: (_) => ApiService(),
+        Provider<ApiService>(create: (_) => ApiService()),
+        ChangeNotifierProxyProvider<ApiService, HomePageViewModel>(
+          create: (context) => HomePageViewModel(context.read<ApiService>()),
+          update: (_, apiService, __) => HomePageViewModel(apiService),
         ),
         ChangeNotifierProxyProvider<ApiService, TestViewmodel>(
           create: (context) => TestViewmodel(context.read<ApiService>()),
-          update: (_, apiService, previous) => TestViewmodel(apiService),
+          update: (_, apiService, __) => TestViewmodel(apiService),
         ),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: box.isEmpty ? const BannerPage() : const HomePage(),
+        home: const StartupRouter(),
         navigatorKey: navigatorKey,
         routes: {
-          '/home': (context) => const HomePage(),
-          '/jobs': (context) => const JobsPage(),
-          '/pomodoro': (context) => const PomodoroPage(),
-          '/settings': (context) => const SettingsPage(),
-          '/grades': (context) => const SubjectsPage(),
-          '/newNotifications': (context) => NewNotificationsPage(),
+          '/home': (_) => const HomePage(),
+          '/jobs': (_) => const JobsPage(),
+          '/pomodoro': (_) => const PomodoroPage(),
+          '/settings': (_) => const SettingsPage(),
+          '/grades': (_) => const SubjectsPage(),
+          '/newNotifications': (_) => NewNotificationsPage(),
         },
       ),
+    );
+  }
+}
+
+/// Checks secure storage for a valid token and routes accordingly.
+/// Also runs a one-time migration of legacy plaintext Hive credentials.
+class StartupRouter extends StatelessWidget {
+  const StartupRouter({super.key});
+
+  Future<bool> _resolveDestination() async {
+    await _migrateLegacyCredentials();
+    final token = await AuthStorage.readToken();
+    return token != null;
+  }
+
+  /// One-time migration: if old plaintext credentials exist in Hive,
+  /// log in to get a token, move everything to secure storage, then
+  /// delete plaintext values from Hive regardless of outcome.
+  Future<void> _migrateLegacyCredentials() async {
+    final box = Hive.box('User');
+    final legacyEmail = box.get('email') as String?;
+    final legacyPassword = box.get('password') as String?;
+
+    if (legacyEmail == null || legacyPassword == null) return;
+
+    try {
+      final token = await LoginService.login(legacyEmail, legacyPassword);
+      await AuthStorage.saveToken(token);
+      await AuthStorage.saveCredentials(
+          email: legacyEmail, password: legacyPassword);
+    } catch (_) {
+      // Migration login failed — user will be prompted to log in manually.
+    } finally {
+      // Always remove plaintext credentials from Hive.
+      await box.delete('password');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _resolveDestination(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return snapshot.data == true ? const HomePage() : const BannerPage();
+      },
     );
   }
 }

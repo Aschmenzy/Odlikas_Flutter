@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
@@ -25,19 +24,10 @@ class _SubjectDetailsPageState extends State<SubjectDetailsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final box = await Hive.openBox('User');
-      final email = await box.get('email');
-      final password = await box.get('password');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       final viewModel = context.read<HomePageViewModel>();
-      //viewMode.fetch... koristi specifican subjectId koji se passdowna s drugog page-a
-      //na taj nacin API fetcha podatke za poseban page
-      viewModel.fetchSpecificSubjectGrades(
-        email,
-        password,
-        widget.subjectId,
-      );
-      viewModel.fetchGrades(email, password);
+      viewModel.fetchSpecificSubjectGrades(widget.subjectId);
+      viewModel.fetchGrades();
     });
   }
 

@@ -80,7 +80,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
 
     if (result != null && result.files.single.path != null) {
       // Ograniči veličinu datoteke na 15 MB.
-      const int maxFileSize = 15 * 1024 * 1024; // 10 MB u bajtovima.
+      const int maxFileSize = 15 * 1024 * 1024; // 15 MB u bajtovima.
       int fileSize = result.files.single.size;
       if (fileSize > maxFileSize) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -198,39 +198,83 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Upload Files"),
+        title: const Text("Prenesi datoteke"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : uploadedFiles.isEmpty
-              ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      "Molimo vas da prenesete datoteke koje želite koristiti u Znanstvenim Bilješkama Odlikaša+.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18),
+      body: Column(
+        children: [
+          // glavni dio koji prikazuje prenesene datoteke
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : uploadedFiles.isEmpty
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text(
+                            "Molimo vas da prenesete datoteke koje želite koristiti u Znanstvenim Bilješkama Odlikaša+.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(16),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.8,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                        ),
+                        itemCount: uploadedFiles.length,
+                        itemBuilder: (context, index) {
+                          return buildFilePreview(uploadedFiles[index]);
+                        },
+                      ),
+          ),
+
+          // Upload gumb
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Center(
+              child: SizedBox(
+                width: screenWidth * 0.6, // 60% sirine ekrana
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: uploadFile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 236, 146, 31),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
                     ),
+                    elevation: 4,
                   ),
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.8,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text(
+                        "Prenesi datoteku",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                  itemCount: uploadedFiles.length,
-                  itemBuilder: (context, index) {
-                    return buildFilePreview(uploadedFiles[index]);
-                  },
                 ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: uploadFile,
-        child: const Icon(Icons.upload_file),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

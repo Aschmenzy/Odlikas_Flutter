@@ -6,7 +6,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
 import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/Widgets/daySelector.dart';
@@ -22,7 +21,7 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> {
-  final _homeViewModel = HomePageViewModel(ApiService());
+  late final HomePageViewModel _homeViewModel;
   bool _isMorning = true;
   String _selectedDay = 'PON';
   bool _isEditMode = false;
@@ -30,14 +29,14 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() {
     super.initState();
+    _homeViewModel = context.read<HomePageViewModel>();
     _loadSchedule();
   }
 
   Future<void> _loadSchedule() async {
     try {
       final box = await Hive.openBox('User');
-      final email = box.get('email');
-      final password = box.get('password');
+      final email = box.get('email') as String?;
 
       // Get cached data from Firebase first
       final cachedSchedule = await FirebaseFirestore.instance
@@ -74,7 +73,7 @@ class _SchedulePageState extends State<SchedulePage> {
       }
 
       // Only fetch from API if we don't have data in Firebase
-      await _homeViewModel.fetchScheduleSubjects(email, password);
+      await _homeViewModel.fetchScheduleSubjects();
 
       // Ensure the schedule has 8 slots before saving to Firebase
       if (_homeViewModel.scheduleSubject != null) {

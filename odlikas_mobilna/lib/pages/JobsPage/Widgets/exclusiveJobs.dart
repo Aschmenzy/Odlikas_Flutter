@@ -47,7 +47,7 @@ class ExclusiveJobs extends StatelessWidget {
                   Colors.black.withOpacity(0.2),
                 ],
               )),
-          width: screenWidth * 0.8,
+          width: screenWidth * 0.9,
           height: screenHeight * 0.2,
           child: Container(
             decoration: BoxDecoration(
@@ -80,7 +80,7 @@ class ExclusiveJobs extends StatelessWidget {
                     "na lokaciji ${jobData['location']}",
                     style: fontService.font(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                         height: 0.6),
                   ),

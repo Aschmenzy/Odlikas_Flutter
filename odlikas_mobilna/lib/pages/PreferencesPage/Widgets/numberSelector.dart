@@ -41,7 +41,7 @@ Widget buildNumberSelector({
                 number.toString(),
                 style: fontService.font(
                   color: isSelected ? Colors.white : AppColors.secondary,
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),

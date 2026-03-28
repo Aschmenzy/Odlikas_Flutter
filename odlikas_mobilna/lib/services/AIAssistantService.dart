@@ -211,9 +211,7 @@ class AIAssistantService {
       return _cachedProfile!;
     }
 
-    final credentials = _getCredentials();
-    _cachedProfile = await _apiService.fetchStudentProfile(
-        credentials['email']!, credentials['password']!);
+    _cachedProfile = await _apiService.fetchStudentProfile();
     return _cachedProfile!;
   }
 
@@ -222,9 +220,7 @@ class AIAssistantService {
       return _cachedGrades!;
     }
 
-    final credentials = _getCredentials();
-    _cachedGrades = await _apiService.fetchGrades(
-        credentials['email']!, credentials['password']!);
+    _cachedGrades = await _apiService.fetchGrades();
     return _cachedGrades!;
   }
 
@@ -233,9 +229,7 @@ class AIAssistantService {
       return _cachedTests!;
     }
 
-    final credentials = _getCredentials();
-    _cachedTests = await _apiService.fetchTestsDetails(
-        credentials['email']!, credentials['password']!);
+    _cachedTests = await _apiService.fetchTestsDetails();
     return _cachedTests!;
   }
 
@@ -244,9 +238,7 @@ class AIAssistantService {
       return _cachedSchedule!;
     }
 
-    final credentials = _getCredentials();
-    _cachedSchedule = await _apiService.fetchScheduleSubjects(
-        credentials['email']!, credentials['password']!);
+    _cachedSchedule = await _apiService.fetchScheduleSubjects();
     return _cachedSchedule!;
   }
 
@@ -1151,8 +1143,9 @@ class AIAssistantService {
     // Build a more comprehensive prompt
     final promptBuilder = StringBuffer();
     promptBuilder.writeln(
-        "Ti si AI asistent za školsku aplikaciju koji pomaže učeniku s informacijama o školi. "
-        "Odgovori prijateljski i korisno na hrvatskom jeziku. Evo informacija o učeniku:");
+        '''"Ti si AI asistent za školsku aplikaciju koji pomaže učeniku s informacijama o školi. "
+        "Odgovori prijateljski i korisno na hrvatskom jeziku.VAŽNO: Nemoj koristiti dijakritička slova č, ć, đ, š, ž (niti velika inačica).
+Umjesto njih, koristi c, c, d, s, z (ili velika slova C, C, D, S, Z). Evo informacija o učeniku:''');
 
     contextData.forEach((key, value) {
       promptBuilder.writeln("$key: $value");

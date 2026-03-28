@@ -51,7 +51,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
 
     return Container(
       width: screenSize.width * 0.9,
-      height: screenSize.height * 0.32,
+      height: screenSize.height * 0.34,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
         color: _getPhaseColor(),
@@ -174,7 +174,7 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
         IconButton(
           onPressed: widget.forwardTimer,
           icon: Icon(
-            widget.isRunning ? Icons.skip_next : Icons.rotate_right_outlined,
+            widget.isRunning ? Icons.skip_next : null,
           ),
           iconSize: screenSize.width * 0.15,
           color: Colors.white,

@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field
-
 import 'package:flutter/material.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/tests.dart';
@@ -15,15 +13,14 @@ class TestViewmodel extends ChangeNotifier {
   Tests? get tests => _tests;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchTests(String email, String password) async {
+  Future<void> fetchTests() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final data = await _apiService.fetchTestsDetails(email, password);
-      _tests = data;
+      _tests = await _apiService.fetchTestsDetails();
     } catch (e) {
-      print("Error fetching grades: $e");
+      debugPrint('Error fetching tests: $e');
     } finally {
       _isLoading = false;
       notifyListeners();

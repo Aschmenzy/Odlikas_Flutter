@@ -86,7 +86,7 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
       child: Text(
         "${widget.date.day}.${widget.date.month}.",
         style: GoogleFonts.inter(
-          fontSize: 30,
+          fontSize: 25,
           fontWeight: FontWeight.w700,
           color: Colors.black,
         ),
@@ -122,7 +122,7 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
         Text(
           test['name']!,
           style: GoogleFonts.inter(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Colors.black,
           ),
@@ -130,12 +130,11 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
         Text(
           test['description']!,
           style: GoogleFonts.inter(
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w400,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 12),
       ],
     );
   }
@@ -147,7 +146,7 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
         Text(
           event['title']!,
           style: GoogleFonts.inter(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
             color: Colors.black,
           ),
@@ -155,12 +154,11 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
         Text(
           event['description']!,
           style: GoogleFonts.inter(
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.w400,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 12),
       ],
     );
   }
@@ -199,7 +197,7 @@ class _DayDetailsDialogState extends State<DayDetailsDialog> {
             Text(
               "Dodaj događaj u kalendar",
               style: GoogleFonts.inter(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.normal,
                 color: Colors.grey,
               ),
