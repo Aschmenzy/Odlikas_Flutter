@@ -1,7 +1,5 @@
-import 'dart:convert';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import 'package:odlikas_mobilna/database/api/dio_client.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
 import 'package:odlikas_mobilna/database/models/specific_subject.dart';
@@ -9,111 +7,45 @@ import 'package:odlikas_mobilna/database/models/student_profile.dart';
 import 'package:odlikas_mobilna/database/models/tests.dart';
 
 class ApiService {
-  static final String baseUrl =
-      dotenv.env['API_BASE_URL'] ?? 'https://default-url.com';
+  Dio get _dio => DioClient.instance;
 
-  Future<StudentProfile> fetchStudentProfile(
-      String email, String password) async {
-    var url = Uri.parse('$baseUrl/api/Scraper/ScrapeStudentProfile');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email, 'Password': password}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      print(data);
-      return StudentProfile.fromJson(data); // Convert to StudentProfile
-    } else {
-      throw Exception('Failed to fetch student profile');
-    }
+  Future<StudentProfile> fetchStudentProfile() async {
+    final response = await _dio.get('/api/Scraper/ScrapeStudentProfile');
+    return StudentProfile.fromJson(response.data);
   }
 
-  Future<Grades> fetchGrades(String email, String password) async {
-    var url = Uri.parse('$baseUrl/api/Scraper/ScrapeSubjectsAndProfessors');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email, 'Password': password}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return Grades.fromJson(data);
-    } else {
-      throw Exception('Failed to fetch grades');
-    }
+  Future<Grades> fetchGrades() async {
+    final response =
+        await _dio.get('/api/Scraper/ScrapeSubjectsAndProfessors');
+    return Grades.fromJson(response.data);
   }
 
   Future<List<MonthlyGrades>> fetchSpecificSubjectGrades(
-      String email, String password, String subjectId) async {
-    var url = Uri.parse(
-        '$baseUrl/api/Scraper/ScrapeSpecificSubjectGrades?subjectId=$subjectId');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email, 'Password': password}),
+      String subjectId) async {
+    final response = await _dio.get(
+      '/api/Scraper/ScrapeSpecificSubjectGrades',
+      queryParameters: {'subjectId': subjectId},
     );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return (data as List)
-          .map((month) => MonthlyGrades.fromJson(month))
-          .toList();
-    } else {
-      throw Exception('Failed to fetch specific subject grades');
-    }
+    return (response.data as List)
+        .map((m) => MonthlyGrades.fromJson(m))
+        .toList();
   }
 
-  Future<SubjectDetails> fetchSpecificSubjectDetails(
-      String email, String password, String subjectId) async {
-    var url = Uri.parse(
-        '$baseUrl/api/scraper/ScrapeSpecificSubjectGrades?subjectId=$subjectId');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email, 'Password': password}),
+  Future<SubjectDetails> fetchSpecificSubjectDetails(String subjectId) async {
+    final response = await _dio.get(
+      '/api/Scraper/ScrapeSpecificSubjectGrades',
+      queryParameters: {'subjectId': subjectId},
     );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return SubjectDetails.fromJson(data);
-    } else {
-      throw Exception('Failed to fetch specific subject details');
-    }
+    return SubjectDetails.fromJson(response.data);
   }
 
-  Future<Tests> fetchTestsDetails(String email, String password) async {
-    var url = Uri.parse('$baseUrl/api/scraper/ScrapeTests');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email, 'Password': password}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return Tests.fromJson(data);
-    } else {
-      throw Exception('Failed to fetch specific subject details');
-    }
+  Future<Tests> fetchTestsDetails() async {
+    final response = await _dio.get('/api/Scraper/ScrapeTests');
+    return Tests.fromJson(response.data);
   }
 
-  Future<ScheduleSubject> fetchScheduleSubjects(
-      String email, String password) async {
-    var url = Uri.parse('$baseUrl/api/Scraper/ScrapeScheduleTable');
-    final response = await http.post(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'Email': email, 'Password': password}),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return ScheduleSubject.fromJson(data);
-    } else {
-      throw Exception('Failed to fetch schedule subjects');
-    }
+  Future<ScheduleSubject> fetchScheduleSubjects() async {
+    final response = await _dio.get('/api/Scraper/ScrapeScheduleTable');
+    return ScheduleSubject.fromJson(response.data);
   }
 }

@@ -1,4 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/FontService.dart';
@@ -21,12 +20,9 @@ class _SubjectsPageState extends State<SubjectsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final box = await Hive.openBox('User');
-      final email = await box.get('email');
-      final password = await box.get('password');
       final viewModel = context.read<HomePageViewModel>();
-      await viewModel.fetchStudentProfile(email, password);
-      await viewModel.fetchGrades(email, password);
+      await viewModel.fetchStudentProfile();
+      await viewModel.fetchGrades();
     });
   }
 

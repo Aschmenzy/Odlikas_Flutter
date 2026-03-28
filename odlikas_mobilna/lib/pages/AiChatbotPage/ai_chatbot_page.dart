@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/services/AIAssistantService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
@@ -22,6 +23,8 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
   final _promptController = TextEditingController();
   final _aiAssistantService = AIAssistantService();
   final _scrollController = ScrollController();
+
+  final int currentIndex = 5; // Current index for the bottom navigation bar
 
   List<Message> _messages = [];
   bool _isLoading = false;
@@ -247,19 +250,19 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
   // Only navigation bar, separated from input field
   Widget _buildNavBar() {
     return Container(
-      height: 60,
+      height: 70,
       decoration: BoxDecoration(
         color: AppColors.primary,
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(context, 0, Icons.home, '/home'),
-            _buildNavItem(context, 1, Icons.work, '/jobs'),
-            _buildNavItem(context, 2, Icons.timer, '/pomodoro'),
-            _buildNavItem(context, 3, Icons.settings, '/settings'),
+            _buildNavItem(context, 0, "assets/icon/home.svg", '/home'),
+            _buildNavItem(context, 1, "assets/icon/work.svg", '/jobs'),
+            _buildNavItem(context, 2, "assets/icon/pomodoro.png", '/pomodoro'),
+            _buildNavItem(context, 3, "assets/icon/settings.png", '/settings'),
           ],
         ),
       ),
@@ -267,20 +270,50 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
   }
 
   Widget _buildNavItem(
-      BuildContext context, int index, IconData icon, String route) {
+      BuildContext context, int index, String assetPath, String route) {
+    final bool isActive = currentIndex == index;
+    final bool isSvg = assetPath.toLowerCase().endsWith('.svg');
+
     return InkWell(
       onTap: () {
-        if (index != 0) {
-          Navigator.popAndPushNamed(context, route);
+        if (!isActive) {
+          Navigator.of(context).pushReplacementNamed(
+            route,
+            result: PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  Container(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
         }
       },
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            size: 35,
-            icon,
-            color: index == 0 ? Colors.white : Colors.white70,
+          isSvg
+              ? SvgPicture.asset(
+                  assetPath,
+                  height: 30,
+                  colorFilter: ColorFilter.mode(
+                    isActive ? Colors.white : Colors.white70,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : Image.asset(
+                  assetPath,
+                  height: 37,
+                  color: isActive ? Colors.white : Colors.white70,
+                ),
+          const SizedBox(height: 6),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: isActive ? Colors.white : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
           ),
         ],
       ),

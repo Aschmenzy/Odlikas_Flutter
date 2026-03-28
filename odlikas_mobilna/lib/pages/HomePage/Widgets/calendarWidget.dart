@@ -35,7 +35,7 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
     _currentPage = _todayIndex;
     _pageController = PageController(
       initialPage: _currentPage,
-      viewportFraction: 0.33,
+      viewportFraction: 0.37,
     );
   }
 
@@ -156,11 +156,11 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
     return Card(
       elevation: 0.5,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(5),
       ),
       shadowColor: AppColors.tertiary,
       child: Container(
-        height: 153,
+        height: 140,
         width: size.width * 0.9,
         color: AppColors.background,
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -200,7 +200,7 @@ class _HorizontalCalendarWidgetState extends State<HorizontalCalendarWidget> {
 
             // Calendar cards with PageView
             SizedBox(
-              height: 90,
+              height: 75,
               width: double.infinity,
               child: PageView.builder(
                 controller: _pageController,

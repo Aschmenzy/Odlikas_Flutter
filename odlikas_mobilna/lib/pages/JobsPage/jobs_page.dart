@@ -33,7 +33,7 @@ class _JobsPageState extends State<JobsPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: StreamBuilder<QuerySnapshot>(
             //stream builder koji se update kada funkcija getJobs vrati da je snapshot promijenjen
             stream: getJobs(),
@@ -126,7 +126,7 @@ class _JobsPageState extends State<JobsPage> {
                                     borderRadius: BorderRadius.circular(15),
                                     color: AppColors.background,
                                   ),
-                                  width: screenWidth * 0.8,
+                                  width: screenWidth * 0.9,
                                   height: screenHeight * 0.15,
                                   child: Padding(
                                     padding: const EdgeInsets.only(

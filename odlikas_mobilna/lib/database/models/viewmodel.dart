@@ -28,32 +28,14 @@ class HomePageViewModel extends ChangeNotifier {
   String? get error => _error;
   ScheduleSubject? get scheduleSubject => _scheduleSubject;
 
-  Future fetchGrades(String email, String password) async {
+  Future fetchGrades() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final data = await _apiService.fetchGrades(email, password);
-      _grades = data;
+      _grades = await _apiService.fetchGrades();
       return _grades;
     } catch (e) {
-      print("Error fetching grades: $e");
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future fetchStudentProfile(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final data = await _apiService.fetchStudentProfile(email, password);
-      _studentProfile = data;
-      return _studentProfile;
-    } catch (e) {
-      print("Error fetching student profile: $e");
       _error = e.toString();
     } finally {
       _isLoading = false;
@@ -61,19 +43,31 @@ class HomePageViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchSpecificSubjectGrades(
-      String email, String password, String subjectId) async {
+  Future fetchStudentProfile() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final data = await _apiService.fetchSpecificSubjectDetails(
-          email, password, subjectId);
+      _studentProfile = await _apiService.fetchStudentProfile();
+      return _studentProfile;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchSpecificSubjectGrades(String subjectId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _apiService.fetchSpecificSubjectDetails(subjectId);
       _subjectGrades = data.monthlyGrades;
       _evaluationElements = data.evaluationElements;
       _finalGrade = data.finalGrade;
     } catch (e) {
-      print("Error fetching specific subject grades: $e");
       _error = e.toString();
       _subjectGrades = null;
       _evaluationElements = null;
@@ -88,15 +82,13 @@ class HomePageViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchScheduleSubjects(String email, String password) async {
+  Future<void> fetchScheduleSubjects() async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final data = await _apiService.fetchScheduleSubjects(email, password);
-      _scheduleSubject = data;
+      _scheduleSubject = await _apiService.fetchScheduleSubjects();
     } catch (e) {
-      print("Error fetching schedule subjects: $e");
       _error = e.toString();
       _scheduleSubject = null;
     } finally {
@@ -119,7 +111,6 @@ class HomePageViewModel extends ChangeNotifier {
   }
 
   bool isDayEmpty(String day) {
-    final subjects = getSubjectsForDay(day);
-    return subjects.isEmpty;
+    return getSubjectsForDay(day).isEmpty;
   }
 }

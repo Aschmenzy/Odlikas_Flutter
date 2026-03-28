@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/AiChatbotPage/ai_chatbot_page.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -18,22 +19,17 @@ class CustomBottomNavBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.elliptical(100, 20),
-          topRight: Radius.elliptical(100, 20),
+          topLeft: Radius.elliptical(500, 60),
+          topRight: Radius.elliptical(500, 60),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            blurRadius: 10,
-          ),
-        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Search Bar
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(
+                left: 16.0, right: 16, top: 20, bottom: 3),
             child: SizedBox(
               height: 35,
               child: TextField(
@@ -78,14 +74,16 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
           // Navigation Icons
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(context, 0, Icons.home, '/home'),
-                _buildNavItem(context, 1, Icons.work, '/jobs'),
-                _buildNavItem(context, 2, Icons.timer, '/pomodoro'),
-                _buildNavItem(context, 3, Icons.settings, '/settings'),
+                _buildNavItem(context, 0, 'assets/icon/home.svg', '/home'),
+                _buildNavItem(context, 1, 'assets/icon/work.svg', '/jobs'),
+                _buildNavItem(
+                    context, 2, 'assets/icon/pomodoro.png', '/pomodoro'),
+                _buildNavItem(
+                    context, 3, 'assets/icon/settings.png', '/settings'),
               ],
             ),
           ),
@@ -95,13 +93,15 @@ class CustomBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem(
-      BuildContext context, int index, IconData icon, String route) {
+      BuildContext context, int index, String assetPath, String route) {
+    final bool isActive = currentIndex == index;
+    final bool isSvg = assetPath.toLowerCase().endsWith('.svg');
+
     return InkWell(
       onTap: () {
-        if (currentIndex != index) {
+        if (!isActive) {
           Navigator.of(context).pushReplacementNamed(
             route,
-            // This is the key change for instant navigation
             result: PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) =>
                   Container(),
@@ -114,10 +114,29 @@ class CustomBottomNavBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            size: 35,
-            icon,
-            color: currentIndex == index ? Colors.white : Colors.white70,
+          isSvg
+              ? SvgPicture.asset(
+                  assetPath,
+                  height: 30,
+                  colorFilter: ColorFilter.mode(
+                    isActive ? Colors.white : Colors.white70,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : Image.asset(
+                  assetPath,
+                  height: 37,
+                  color: isActive ? Colors.white : Colors.white70,
+                ),
+          const SizedBox(height: 6),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: isActive ? Colors.white : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
           ),
         ],
       ),

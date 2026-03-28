@@ -44,7 +44,7 @@ class ShareScreenCard extends StatelessWidget {
                         Text(
                           'Povezani ste sa svojim ekranom',
                           style: fontService.font(
-                            fontSize: MediaQuery.of(context).size.width * 0.035,
+                            fontSize: MediaQuery.of(context).size.width * 0.03,
                             color: AppColors.tertiary,
                           ),
                         ),
@@ -89,11 +89,11 @@ class ShareScreenCard extends StatelessWidget {
                           ),
                         ),
                         SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.013),
+                            height: MediaQuery.of(context).size.height * 0.01),
                         Text(
                           'Povežite svoj ekran da \nzapočnete sa učenjem',
                           style: fontService.font(
-                            fontSize: MediaQuery.of(context).size.width * 0.035,
+                            fontSize: MediaQuery.of(context).size.width * 0.03,
                             color: AppColors.tertiary,
                             fontWeight: FontWeight.w400,
                           ),

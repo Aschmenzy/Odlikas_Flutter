@@ -28,27 +28,14 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-// Funkcija za dohvaćanje ocjena korisnika
 Future<Grades?> fetchGrades(BuildContext context) async {
-  // Dohvaćanje modela za podatke
-  final homeViewModel = context.read<HomePageViewModel>();
-  // Otvaranje lokalne baze podataka
-  final box = await Hive.openBox('User');
-
-  //dohvaćanje emaila i lozinke iz lokalne baze
-  //lozinka i email se koriste kako bi se pozvao API
-  final email = await box.get('email');
-  final password = await box.get('password');
-
-  var grades = await homeViewModel.fetchGrades(email, password);
-  return grades;
+  return (await context.read<HomePageViewModel>().fetchGrades()) as Grades?;
 }
 
 class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _holidays = [];
   String? studentName;
   String? studentEmail;
-  String? studentPassword;
   String? studentOib;
   String? studentAddress;
   String? studentPostalCode;
@@ -60,26 +47,17 @@ class _HomePageState extends State<HomePage> {
     // Inicijalizacija - dohvaćanje ocjena i podataka o korisniku
     fetchGrades(context).then((_) async {
       final box = await Hive.openBox('User');
-      var name = box.get('studentName');
-      var email = box.get('email');
-      var password = box.get('password');
       setState(() {
-        studentName = name;
-        studentPassword = password;
-        studentEmail = email;
+        studentName = box.get('studentName');
+        studentEmail = box.get('email');
       });
 
-      // Dohvaćanje podataka za iskaznicu
       await _getStudentIdCardData();
-
-      // Dohvaćanje podataka za kalendar
       await _fetchHolidaysData();
 
-      // Inicijalizacija podataka o testovima
       final testViewModel = context.read<TestViewmodel>();
       if (testViewModel.tests == null) {
-        await testViewModel.fetchTests(studentEmail!, studentPassword!);
-        // Možemo osvježiti stanje za ponovni render kalendara
+        await testViewModel.fetchTests();
         setState(() {});
       }
     });
@@ -510,10 +488,7 @@ class _HomePageState extends State<HomePage> {
                       onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => CalendarPage(
-                                      email: studentEmail ?? '',
-                                      password: studentPassword ?? '',
-                                    )),
+                                builder: (_) => const CalendarPage()),
                           ),
                       child: HorizontalCalendarWidget(
                         onDayTap: _showDayDetailsPopup,

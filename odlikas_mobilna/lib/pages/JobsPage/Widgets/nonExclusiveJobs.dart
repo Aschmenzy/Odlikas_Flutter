@@ -7,7 +7,6 @@ import 'package:odlikas_mobilna/pages/JobDetailsPage/job_details_page.dart';
 import 'package:provider/provider.dart';
 
 class NonExclusiveJob extends StatelessWidget {
-
   //varijavle koje widget zahtjeva
   const NonExclusiveJob({
     super.key,
@@ -41,19 +40,28 @@ class NonExclusiveJob extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (jobData['image'] != null)
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.memory(
-                      base64Decode(jobData['image']),
-                      fit: BoxFit.cover,
+                Row(
+                  children: [
+                    Container(
+                      width: 35,
+                      height: 35,
+                      child: ClipRRect(
+                        child: Image.memory(
+                          base64Decode(jobData['image']),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
+                    Container(
+                      height: 35,
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: VerticalDivider(
+                        color: Color.fromARGB(255, 192, 192, 192),
+                        thickness: 1,
+                        width: 10,
+                      ),
+                    ),
+                  ],
                 ),
               Text(jobData['recruter'],
                   style: fontService.font(
@@ -74,7 +82,6 @@ class NonExclusiveJob extends StatelessWidget {
             color: AppColors.tertiary,
             thickness: 0.5,
           ),
-          SizedBox(height: screenHeight * 0.005),
           Text(
             jobData['title'],
             style: fontService.font(

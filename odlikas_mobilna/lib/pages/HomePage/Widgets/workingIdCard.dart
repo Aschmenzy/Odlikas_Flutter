@@ -27,6 +27,7 @@ class Workingidcard extends StatelessWidget {
       elevation: 2,
       borderRadius: BorderRadius.circular(15),
       child: Container(
+        height: screenHeight * 0.235,
         decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: BorderRadius.circular(15)),
@@ -47,7 +48,7 @@ class Workingidcard extends StatelessWidget {
                         Text(
                           'Učenička iskaznica',
                           style: fontService.font(
-                            fontSize: screenWidth * 0.05,
+                            fontSize: screenWidth * 0.04,
                             fontWeight: FontWeight.normal,
                             color: AppColors.secondary,
                           ),
@@ -55,7 +56,7 @@ class Workingidcard extends StatelessWidget {
                         Text(
                           'posredovanje pri zapošljvanju učenika',
                           style: fontService.font(
-                            fontSize: screenWidth * 0.025,
+                            fontSize: screenWidth * 0.026,
                             fontWeight: FontWeight.normal,
                             color: AppColors.secondary,
                           ),
@@ -73,7 +74,7 @@ class Workingidcard extends StatelessWidget {
                 children: [
                   Container(
                     width: screenWidth * 0.3,
-                    height: screenHeight * 0.16,
+                    height: screenHeight * 0.14,
                     decoration: BoxDecoration(
                       color: AppColors.accent,
                       borderRadius: BorderRadius.circular(8),

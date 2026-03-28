@@ -1,6 +1,7 @@
 // Glavna datoteka koja sadrži definiciju CalendarPage klase
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
@@ -11,9 +12,7 @@ import 'package:provider/provider.dart';
 
 // CalendarPage je StatefulWidget koji prima email i lozinku kao parametre
 class CalendarPage extends StatefulWidget {
-  final String email;
-  final String password;
-  const CalendarPage({super.key, required this.email, required this.password});
+  const CalendarPage({super.key});
 
   @override
   _CalendarPageState createState() => _CalendarPageState();
@@ -121,9 +120,10 @@ class _CalendarPageState extends State<CalendarPage> {
     required DateTime date,
   }) async {
     try {
+      final email = Hive.box('User').get('email') as String?;
       await FirebaseFirestore.instance
           .collection('CalendarEvents')
-          .doc(widget.email)
+          .doc(email)
           .collection('events')
           .add({
         'title': title,
@@ -140,9 +140,10 @@ class _CalendarPageState extends State<CalendarPage> {
   // Funkcija za dohvaćanje događaja iz Firestore baze podataka za određeni datum
   Future<List<Map<String, String>>> _fetchEvents(DateTime date) async {
     try {
+      final email = Hive.box('User').get('email') as String?;
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('CalendarEvents')
-          .doc(widget.email)
+          .doc(email)
           .collection('events')
           .where('date', isEqualTo: date)
           .get();
@@ -246,7 +247,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
     if (viewModel.tests == null && !viewModel.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        viewModel.fetchTests(widget.email, widget.password);
+        viewModel.fetchTests();
       });
     }
 

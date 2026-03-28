@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -7,169 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/database/models/student_profile.dart';
+import 'package:odlikas_mobilna/database/api/auth_storage.dart';
+import 'package:odlikas_mobilna/database/api/login_service.dart';
+import 'package:odlikas_mobilna/database/api/api_services.dart';
+import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
 import 'package:odlikas_mobilna/pages/PreferencesPage/preferences_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 import 'package:odlikas_mobilna/pages/LoginPages/Widgets/text_field.dart';
-import 'package:odlikas_mobilna/database/api/api_services.dart';
-import 'package:odlikas_mobilna/database/models/viewmodel.dart';
-
-Future<StudentProfile?> handleLogin(
-    BuildContext context, String email, String password) async {
-  final _homeViewModel = HomePageViewModel(ApiService());
-
-  // Otvaranje Hive box-a za spremanje podataka korisnika na lokalnom uređaju
-  final box = await Hive.openBox('User');
-
-  try {
-    // Inicijalizacija Firestore-a i reference na dokument korisnika
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    final DocumentReference docRef =
-        firestore.collection('studentProfiles').doc(email);
-
-    // Dohvaćanje profila učenika preko API-ja
-    var profile = await _homeViewModel.fetchStudentProfile(email, password);
-
-    // Provjera "N/A" vrijednosti u podacima profila
-    // Ako postoji "N/A" vrijednost, to znači da su uneseni podaci nevažeći
-    Map<String, String> fields = {
-      'School': profile?.studentSchool ?? '',
-      'City': profile?.studentSchoolCity ?? '',
-      'School Year': profile?.studentSchoolYear ?? '',
-      'Grade': profile?.studentGrade ?? '',
-      'Name': profile?.studentName ?? '',
-      'Class Master': profile?.classMaster ?? '',
-      'Program': profile?.studentProgram ?? '',
-    };
-
-    // Prolazak kroz sve vrijednosti i provjera postoji li "N/A"
-    for (var entry in fields.entries) {
-      if (entry.value == 'N/A') {
-        // Prikaz dijaloga o pogrešnom unosu
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 0,
-              backgroundColor: Colors.transparent,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Lottie.asset(
-                        'assets/animations/error.json',
-                        height: MediaQuery.of(context).size.width * 0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Izgleda da ste unijeli krive podatke',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                          fontSize: MediaQuery.of(context).size.width * 0.05,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.background),
-                    ),
-                    const SizedBox(height: 16),
-                    MyButton(
-                        buttonText: "Pokušajte ponovno",
-                        ontap: () => Navigator.of(context).pop(),
-                        height: MediaQuery.of(context).size.height * 0.04,
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        decorationColor: AppColors.accent,
-                        borderColor: AppColors.accent,
-                        textColor: AppColors.background,
-                        fontWeight: FontWeight.w700,
-                        fontSize: MediaQuery.of(context).size.width * 0.035)
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-        // Postavljanje profila na null kako bi se spriječila daljnja obrada
-        profile = null;
-        break;
-      }
-    }
-
-    // Ako je profil uspješno dohvaćen i provjeren
-    if (profile != null) {
-      // Priprema podataka profila za pohranu u Firestore
-      // Podaci se pohranjuju u podkolekciju 'studentProfile' dokumenta korisnika
-      Map<String, dynamic> profileData = {
-        'studentProfile': {
-          'studentSchool': profile.studentSchool,
-          'studentSchoolCity': profile.studentSchoolCity,
-          'studentSchoolYear': profile.studentSchoolYear,
-          'studentGrade': profile.studentGrade,
-          'studentName': profile.studentName,
-          'studentProgram': profile.studentProgram,
-          'classMaster': profile.classMaster,
-          'studentPassword': password,
-          'studentEmail': email,
-        }
-      };
-
-      // Pohrana podataka za prijavu i osnovnih informacija o korisniku lokalno
-      // Podaci se pohranjuju u Hive box 'User'
-      // lozinka se sprema lokalno kako bi se koristila kasnije u aplikaciji za dohvaćanje podataka pomocu API-a
-      // i za prijavu korisnika na odlikas+ kada skeniraju QR kod
-      await box.put('email', email);
-      await box.put('password', password);
-      await box.put('studentName', profile?.studentName);
-      await box.put('studentSchool', profile?.studentSchool);
-      await box.put('studentProgram', profile?.studentProgram);
-
-      // Ažuriranje ili kreiranje dokumenta u Firestore bazi
-      await docRef.set(profileData, SetOptions(merge: true));
-
-      // Navigacija na stranicu postavki
-      Navigator.replace(
-        context,
-        oldRoute: ModalRoute.of(context)!,
-        newRoute: MaterialPageRoute(builder: (context) => PreferencesPage()),
-      );
-    } else {
-      print('Profile data is null');
-    }
-
-    return profile;
-  } catch (e) {
-    print("Error fetching student profile: $e");
-
-    // Prikaz dijaloga o grešci
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Error'),
-          content:
-              const Text('Failed to fetch student profile. Please try again.'),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-    return null;
-  }
-}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -179,56 +21,150 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final passwordController = TextEditingController();
-  final emailController = TextEditingController();
-  bool isLoading = false;
+  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController();
+  bool _isLoading = false;
 
-  // kod za inicijalizaciju notifikacija
-  Future<void> initNotifications(String email) async {
-    // dopustenje za notifikacije
+  Future<void> _initNotifications(String email) async {
     await FirebaseMessaging.instance.requestPermission();
-
-    // dobi token
-    String? token = await FirebaseMessaging.instance.getToken();
-
-    // spremi token u firebase
+    final token = await FirebaseMessaging.instance.getToken();
     if (token != null) {
       await FirebaseFirestore.instance
           .collection('studentProfiles')
           .doc(email)
           .update({'studentProfile.fcmToken': token});
     }
-
-    // kada se stisne notifikacija odi na grades page
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    FirebaseMessaging.onMessageOpenedApp.listen((_) {
       Navigator.pushNamed(context, '/grades');
     });
   }
 
   Future<void> _handleLogin() async {
-    // Sprječava višestruke prijave
-    if (isLoading) return;
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
 
-    setState(() {
-      // Postavlja indikator učitavanja
-      isLoading = true;
-    });
+    final email = _emailController.text.trim().toLowerCase();
+    final password = _passwordController.text;
 
     try {
-      // Poziv funkcije za prijavu s pretvorenim emailom u mala slova kako bi se izbjegli problemi s kreiranjem korisnika
-      await handleLogin(
-        context,
-        emailController.text.toLowerCase(),
-        passwordController.text,
-      );
-    } finally {
-      // Vraćanje stanja učitavanja na false nakon završetka
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
+      // 1 — Get Bearer token from the API
+      final token = await LoginService.login(email, password);
+
+      // 2 — Store token + credentials in secure storage
+      await AuthStorage.saveToken(token);
+      await AuthStorage.saveCredentials(email: email, password: password);
+
+      // 3 — Fetch profile using the token (interceptor attaches it automatically)
+      final profile = await ApiService().fetchStudentProfile();
+
+      // 4 — Validate profile (N/A means bad credentials slipped through)
+      final fields = {
+        'School': profile.studentSchool,
+        'City': profile.studentSchoolCity,
+        'Year': profile.studentSchoolYear,
+        'Grade': profile.studentGrade,
+        'Name': profile.studentName,
+        'Master': profile.classMaster,
+        'Program': profile.studentProgram,
+      };
+      if (fields.values.any((v) => v == 'N/A')) {
+        await AuthStorage.clearAll();
+        _showErrorDialog('Izgleda da ste unijeli krive podatke');
+        return;
       }
+
+      // 5 — Save non-sensitive display data to Hive (used throughout the app)
+      final box = await Hive.openBox('User');
+      await box.put('email', email);
+      await box.put('studentName', profile.studentName);
+      await box.put('studentSchool', profile.studentSchool);
+      await box.put('studentProgram', profile.studentProgram);
+
+      // 6 — Save profile to Firestore — no password field
+      await FirebaseFirestore.instance
+          .collection('studentProfiles')
+          .doc(email)
+          .set({
+        'studentProfile': {
+          'studentSchool': profile.studentSchool,
+          'studentSchoolCity': profile.studentSchoolCity,
+          'studentSchoolYear': profile.studentSchoolYear,
+          'studentGrade': profile.studentGrade,
+          'studentName': profile.studentName,
+          'studentProgram': profile.studentProgram,
+          'classMaster': profile.classMaster,
+          'studentEmail': email,
+        }
+      }, SetOptions(merge: true));
+
+      await _initNotifications(email);
+
+      if (!mounted) return;
+      Navigator.replace(
+        context,
+        oldRoute: ModalRoute.of(context)!,
+        newRoute: MaterialPageRoute(builder: (_) => PreferencesPage()),
+      );
+    } on RateLimitException catch (e) {
+      _showErrorDialog(e.message);
+    } on AuthException catch (e) {
+      _showErrorDialog(e.message);
+    } catch (e) {
+      _showErrorDialog('Prijava nije uspjela. Provjeri internet vezu.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showErrorDialog(String message) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Lottie.asset(
+                  'assets/animations/error.json',
+                  height: MediaQuery.of(context).size.width * 0.3,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.background,
+                ),
+              ),
+              const SizedBox(height: 16),
+              MyButton(
+                buttonText: 'Pokušajte ponovno',
+                ontap: () => Navigator.of(context).pop(),
+                height: MediaQuery.of(context).size.height * 0.04,
+                width: MediaQuery.of(context).size.width * 0.45,
+                decorationColor: AppColors.accent,
+                borderColor: AppColors.accent,
+                textColor: AppColors.background,
+                fontWeight: FontWeight.w700,
+                fontSize: MediaQuery.of(context).size.width * 0.035,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -250,7 +186,6 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Naslov aplikacije
                   Text(
                     "Prijavi se i postani \nODLIKAŠ",
                     style: GoogleFonts.inter(
@@ -261,7 +196,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.04),
-                  // Podnaslov
                   Text(
                     "Bez stresa i bez brige",
                     style: GoogleFonts.inter(
@@ -270,7 +204,6 @@ class _LoginPageState extends State<LoginPage> {
                       color: AppColors.tertiary,
                     ),
                   ),
-                  // Slika za prijavu
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -281,47 +214,40 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.01),
-                  // Polje za unos korisničkog imena
                   MyTextField(
-                    controller: emailController,
+                    controller: _emailController,
                     labelText: "Tvoje korisničko ime",
                     obscureText: false,
                     hintText: "ime.prezime@skole.hr",
-                    enabled: !isLoading,
+                    enabled: !_isLoading,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.12),
-                  // Polje za unos lozinke
                   MyTextField(
-                    controller: passwordController,
+                    controller: _passwordController,
                     labelText: "Tvoja lozinka",
                     obscureText: true,
-                    enabled: !isLoading,
+                    enabled: !_isLoading,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-                  // Gumb za prijavu
                   MyButton(
                     fontSize: 24,
                     buttonText: "PRIJAVI SE",
-                    ontap: isLoading ? null : _handleLogin,
+                    ontap: _isLoading ? null : _handleLogin,
                     height: MediaQuery.of(context).size.width * 0.175,
                     width: MediaQuery.of(context).size.width * 1,
                     decorationColor:
-                        isLoading ? AppColors.tertiary : AppColors.primary,
+                        _isLoading ? AppColors.tertiary : AppColors.primary,
                     borderColor:
-                        isLoading ? AppColors.tertiary : AppColors.primary,
+                        _isLoading ? AppColors.tertiary : AppColors.primary,
                     textColor: AppColors.background,
                     fontWeight: FontWeight.w800,
                   ),
                   SizedBox(height: MediaQuery.of(context).size.width * 0.08),
-                  // Tekst o uvjetima korištenja
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       RichText(
                         text: TextSpan(
-                          style: GoogleFonts.inter(
-                            fontSize: MediaQuery.of(context).size.width * 0.04,
-                          ),
                           children: [
                             TextSpan(
                               text:
@@ -335,7 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextSpan(
                               text: ' odredbama i uvjetima',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: AppColors.accent,
                                 fontWeight: FontWeight.w900,
                               ),
@@ -344,13 +270,12 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
           ),
-          // Overlay za prikaz animacije učitavanja
-          if (isLoading)
+          if (_isLoading)
             Container(
               color: Colors.black54,
               child: Center(
@@ -362,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width * 0.3,
                       height: MediaQuery.of(context).size.width * 0.3,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'Prijava u tijeku...',
                       style: GoogleFonts.inter(
