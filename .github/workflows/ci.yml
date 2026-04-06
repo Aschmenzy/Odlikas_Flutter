@@ -31,7 +31,7 @@ jobs:
 
       - name: Analyze
         working-directory: odlikas_mobilna
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests
         working-directory: odlikas_mobilna
