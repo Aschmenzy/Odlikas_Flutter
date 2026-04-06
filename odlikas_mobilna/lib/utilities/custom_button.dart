@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:odlikas_mobilna/FontService.dart';
+import 'package:odlikas_mobilna/font_service.dart';
 import 'package:provider/provider.dart';
 
 class MyButton extends StatelessWidget {
