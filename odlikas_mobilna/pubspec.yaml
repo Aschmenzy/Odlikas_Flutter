@@ -54,7 +54,6 @@ dependencies:
   firebase_messaging: ^15.2.4
   flutter_local_notifications: ^19.0.0
   firebase_storage: ^12.4.4
-  pdf_render: ^1.4.12
   flutter_svg: ^2.0.17
   dio: ^5.7.0
   flutter_secure_storage: ^9.2.2
