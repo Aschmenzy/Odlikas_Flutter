@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.29.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Create .env file
+        working-directory: odlikas_mobilna
+        run: echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Install dependencies
+        working-directory: odlikas_mobilna
+        run: flutter pub get
+
+      - name: Analyze
+        working-directory: odlikas_mobilna
+        run: flutter analyze
+
+      - name: Run tests
+        working-directory: odlikas_mobilna
+        run: flutter test
+
+      - name: Build APK
+        working-directory: odlikas_mobilna
+        run: flutter build apk --debug
