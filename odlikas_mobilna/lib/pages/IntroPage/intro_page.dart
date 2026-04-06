@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/pages/LoginPages/Login_Page.dart';
+import 'package:odlikas_mobilna/pages/LoginPages/login_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 
 class IntroPage extends StatefulWidget {

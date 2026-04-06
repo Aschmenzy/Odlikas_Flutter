@@ -1,7 +1,7 @@
 // ignore_for_file: unused_element
 
 import 'package:flutter/material.dart';
-import 'package:odlikas_mobilna/FontService.dart';
+import 'package:odlikas_mobilna/font_service.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:provider/provider.dart';
 

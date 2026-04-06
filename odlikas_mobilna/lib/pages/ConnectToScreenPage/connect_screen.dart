@@ -3,7 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
-import 'package:odlikas_mobilna/FontService.dart';
+import 'package:odlikas_mobilna/font_service.dart';
 import 'package:provider/provider.dart';
 
 class ConnectScreen extends StatefulWidget {
