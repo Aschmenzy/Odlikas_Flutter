@@ -13,10 +13,8 @@ import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
 import 'package:odlikas_mobilna/pages/ConnectToScreenPage/in_between_page.dart';
-import 'package:odlikas_mobilna/pages/CritiquePage/critique_page.dart';
 import 'package:odlikas_mobilna/pages/IntroPage/intro_page.dart';
 import 'package:odlikas_mobilna/pages/NotificationsPage/notifications_page.dart';
-import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/dislexycTile.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
@@ -367,15 +365,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => UpdatePreferencesPage()),
-                    ),
-                    label: "Mijenjane učenja",
-                    path: "assets/images/schedule.png",
-                  ),
-                  SettingsTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
                           builder: (context) => TermsAndConditionsPage()),
                     ),
                     isLast: true,
@@ -401,14 +390,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     path: "assets/icon/odlikasIconLogo.png",
                   ),
                   SettingsTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CritiquePage()),
-                    ),
-                    label: "Kritike",
-                    path: "assets/images/thumbs.png",
-                  ),
-                  SettingsTile(
                     isLast: true,
                     label: "Odjavite se",
                     path: "assets/images/logOut.png",
@@ -420,7 +401,7 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
-      bottomNavigationBar: CustomBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
     );
   }
 }

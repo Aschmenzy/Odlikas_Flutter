@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(find:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(flutter pub:*)",
+      "Bash(grep -E \"\\(page|Page\\)\\\\.dart$\")",
+      "Bash(rm:*)",
+      "Bash(sed -i 's/CustomBottomNavBar\\(currentIndex: 2\\)/CustomBottomNavBar\\(currentIndex: 1\\)/g' lib/pages/PomodoroPage/pomodoro_page.dart)",
+      "Bash(sed -i 's/CustomBottomNavBar\\(currentIndex: 3\\)/CustomBottomNavBar\\(currentIndex: 2\\)/g' lib/pages/SettingsPages/settings_page.dart)"
     ]
   }
 }

@@ -477,7 +477,7 @@ class _PomodoroPageState extends State<PomodoroPage> {
                 ],
               ),
             ),
-      bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 1),
     );
   }
 
