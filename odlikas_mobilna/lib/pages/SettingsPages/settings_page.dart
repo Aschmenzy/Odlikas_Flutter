@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
 
-    print('Loading user data for email: $userEmail');
+    debugPrint('Loading user data for email: $userEmail');
 
     if (userEmail != null) {
       // Try to load existing preferences
@@ -55,17 +55,17 @@ class _SettingsPageState extends State<SettingsPage> {
         if (doc.exists) {
           final data = doc.data();
           if (data != null) {
-            print('Loaded preferences data: $data');
+            debugPrint('Loaded preferences data: $data');
             setState(() {
               isDyslexic = data['dyslexic'] ?? false;
             });
           }
         }
       } catch (e) {
-        print('Error loading notification preferences: $e');
+        debugPrint('Error loading notification preferences: $e');
       }
     } else {
-      print('Cannot load preferences: User email is null');
+      debugPrint('Cannot load preferences: User email is null');
     }
 
     setState(() {
@@ -79,7 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
     required bool value,
   }) async {
     if (userEmail == null) {
-      print('Cannot save preferences: User email is null');
+      debugPrint('Cannot save preferences: User email is null');
       return;
     }
 
@@ -91,9 +91,9 @@ class _SettingsPageState extends State<SettingsPage> {
         field: value,
       }, SetOptions(merge: true));
 
-      print('Successfully updated $field to $value');
+      debugPrint('Successfully updated $field to $value');
     } catch (e) {
-      print('Error saving notification preference: $e');
+      debugPrint('Error saving notification preference: $e');
       // Show error message to user
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -129,7 +129,7 @@ class _SettingsPageState extends State<SettingsPage> {
             : null,
       };
     } catch (e) {
-      print(e);
+      debugPrint('$e');
       throw e;
     }
   }
