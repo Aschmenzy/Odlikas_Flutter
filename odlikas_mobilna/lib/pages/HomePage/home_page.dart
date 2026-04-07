@@ -20,6 +20,7 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdModal.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
 import 'package:odlikas_mobilna/services/calendar_service.dart';
 import 'package:odlikas_mobilna/services/notification_service.dart';
+import 'package:odlikas_mobilna/services/student_id_service.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -124,91 +125,45 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => StudentIdModal(
         // Obrada nakon predaje forme
         onSubmit: (formData) async {
-          final box = await Hive.openBox('User');
-          final email = box.get('email');
-
-          if (email == null) {
-            print('Error: No email found in local storage');
-            return;
-          }
-
           try {
-            // Spremanje podataka o iskaznici u Firestore
-            // Podaci se spremaju u kolekciju workingID
-            //kao podmapa workingId
-            await FirebaseFirestore.instance
-                .collection('workingID')
-                .doc(email)
-                .set({
-              'workingId': {
-                'oib': formData['oib'],
-                'address': formData['address'],
-                'postalCode': formData['postalCode'],
-                'city': formData['city'],
-                'createdAt': FieldValue.serverTimestamp(),
-              },
-            }, SetOptions(merge: true));
-
-            // Osvježavanje podataka nakon spremanja
+            await StudentIdService.saveStudentId(formData);
             await _getStudentIdCardData();
-
-            // Prikaz poruke o uspjehu
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Podaci su uspješno spremljeni'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Podaci su uspješno spremljeni'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
           } catch (e) {
-            print('Error saving student ID data: $e');
-            // Prikaz poruke o grešci
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Greška pri spremanju podataka'),
-                backgroundColor: Colors.red,
-              ),
-            );
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Greška pri spremanju podataka'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           }
         },
       ),
     );
   }
 
-  // Dohvaćanje podataka o studentskoj iskaznici iz Firebase-a
   Future<Map<String, dynamic>?> _getStudentIdCardData() async {
-    final box = await Hive.openBox('User');
-    final email = box.get('email');
-
-    if (email == null) {
-      print('Error: No email found in local storage');
-      return null;
-    }
-
     try {
-      // Dohvaćanje dokumenta iz Firestore-a
-      final doc = await FirebaseFirestore.instance
-          .collection('workingID')
-          .doc(email)
-          .get();
-
-      if (doc.exists && doc.data()?['workingId'] != null) {
-        final workingIdData = doc.data()!['workingId'] as Map<String, dynamic>;
-
-        // Ažuriranje stanja s podacima
+      final data = await StudentIdService.fetchStudentId();
+      if (data != null) {
         setState(() {
-          studentOib = workingIdData['oib'];
-          studentAddress = workingIdData['address'];
-          studentPostalCode = workingIdData['postalCode'];
-          studentCity = workingIdData['city'];
+          studentOib = data['oib'];
+          studentAddress = data['address'];
+          studentPostalCode = data['postalCode'];
+          studentCity = data['city'];
         });
-
-        return workingIdData;
-      } else {
-        print('No working ID data found for this user');
-        return null;
       }
+      return data;
     } catch (e) {
-      print('Error fetching student ID data: $e');
       return null;
     }
   }
