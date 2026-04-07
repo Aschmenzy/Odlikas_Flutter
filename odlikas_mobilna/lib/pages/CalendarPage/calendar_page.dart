@@ -1,8 +1,8 @@
 // Glavna datoteka koja sadrži definiciju CalendarPage klase
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:odlikas_mobilna/services/calendar_service.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/models/testviewmodel.dart';
@@ -113,52 +113,15 @@ class _CalendarPageState extends State<CalendarPage> {
     });
   }
 
-  // Funkcija za spremanje događaja u Firestore bazu podataka
   Future<void> saveEvent({
     required String title,
     required String description,
     required DateTime date,
-  }) async {
-    try {
-      final email = Hive.box('User').get('email') as String?;
-      await FirebaseFirestore.instance
-          .collection('CalendarEvents')
-          .doc(email)
-          .collection('events')
-          .add({
-        'title': title,
-        'description': description,
-        'date': date,
-      });
+  }) =>
+      CalendarService.saveEvent(title: title, description: description, date: date);
 
-      debugPrint('Event saved successfully');
-    } catch (e) {
-      debugPrint('Error saving event: $e');
-    }
-  }
-
-  // Funkcija za dohvaćanje događaja iz Firestore baze podataka za određeni datum
-  Future<List<Map<String, String>>> _fetchEvents(DateTime date) async {
-    try {
-      final email = Hive.box('User').get('email') as String?;
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('CalendarEvents')
-          .doc(email)
-          .collection('events')
-          .where('date', isEqualTo: date)
-          .get();
-
-      return snapshot.docs.map((doc) {
-        return {
-          'title': doc['title'] as String,
-          'description': doc['description'] as String,
-        };
-      }).toList();
-    } catch (e) {
-      debugPrint('Error fetching events: $e');
-      return [];
-    }
-  }
+  Future<List<Map<String, String>>> _fetchEvents(DateTime date) =>
+      CalendarService.fetchEvents(date);
 
   // Funkcija za provjeru je li datum unutar trenutnog mjeseca
   bool _isWithinCurrentMonth(DateTime date) {

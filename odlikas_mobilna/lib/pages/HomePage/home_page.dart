@@ -18,6 +18,7 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdModal.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
+import 'package:odlikas_mobilna/services/calendar_service.dart';
 import 'package:odlikas_mobilna/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
@@ -274,50 +275,15 @@ class _HomePageState extends State<HomePage> {
     return false;
   }
 
-  // Dohvaćanje događaja za određeni datum iz Firebase-a
-  Future<List<Map<String, String>>> _fetchEvents(DateTime date) async {
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('CalendarEvents')
-          .doc(studentEmail)
-          .collection('events')
-          .where('date', isEqualTo: date)
-          .get();
+  Future<List<Map<String, String>>> _fetchEvents(DateTime date) =>
+      CalendarService.fetchEvents(date);
 
-      return snapshot.docs.map((doc) {
-        return {
-          'title': doc['title'] as String,
-          'description': doc['description'] as String,
-        };
-      }).toList();
-    } catch (e) {
-      debugPrint('Error fetching events: $e');
-      return [];
-    }
-  }
-
-  // Spremanje novog događaja u Firebase
   Future<void> saveEvent({
     required String title,
     required String description,
     required DateTime date,
-  }) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('CalendarEvents')
-          .doc(studentEmail)
-          .collection('events')
-          .add({
-        'title': title,
-        'description': description,
-        'date': date,
-      });
-
-      debugPrint('Event saved successfully');
-    } catch (e) {
-      debugPrint('Error saving event: $e');
-    }
-  }
+  }) =>
+      CalendarService.saveEvent(title: title, description: description, date: date);
 
   // Prikaz pop-up dijaloga s detaljima odabranog dana
   void _showDayDetailsPopup(BuildContext context, DateTime date) {
