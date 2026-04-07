@@ -43,7 +43,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
         break;
     }
 
-    print("Today is: $day");
+    debugPrint("Today is: $day");
     return day;
   }
 
@@ -54,7 +54,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
 
     String today = getTodaySchedule();
 
-    print("start fetching first subject and classroom for $today");
+    debugPrint("start fetching first subject and classroom for $today");
 
     try {
       // Dohvaćanje dokumenta korisnika iz Firestore baze podataka
@@ -99,12 +99,12 @@ class _ScheduleCardState extends State<ScheduleCard> {
                   ? classrooms[0].toString()
                   : "Upišite učionicu";
             });
-            print("First subject set to: $currentSubject");
-            print("First classroom set to: $currentClassroom");
+            debugPrint("First subject set to: $currentSubject");
+            debugPrint("First classroom set to: $currentClassroom");
           }
         } else {
           // Poruka ako nema rasporeda za današnji dan
-          print("No schedule found for today");
+          debugPrint("No schedule found for today");
           // Postavljanje informacije da nema nastave
           setState(() {
             currentSubject = "Unesite raspored";
@@ -113,7 +113,7 @@ class _ScheduleCardState extends State<ScheduleCard> {
         }
       }
     } catch (e) {
-      print("Error fetching schedule: $e");
+      debugPrint("Error fetching schedule: $e");
       setState(() {
         currentSubject = "Error loading schedule";
         currentClassroom = "Error loading classroom";
