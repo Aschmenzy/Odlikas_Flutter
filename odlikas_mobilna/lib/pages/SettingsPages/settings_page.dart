@@ -94,9 +94,9 @@ class _SettingsPageState extends State<SettingsPage> {
       debugPrint('Successfully updated $field to $value');
     } catch (e) {
       debugPrint('Error saving notification preference: $e');
-      // Show error message to user
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Greška pri spremanju postavki obavijesti'),
           backgroundColor: Colors.red,
         ),

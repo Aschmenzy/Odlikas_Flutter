@@ -11,6 +11,7 @@ import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 import 'package:odlikas_mobilna/pages/LoginPages/Widgets/text_field.dart';
+import 'package:odlikas_mobilna/pages/OnboardingPage/subject_selection_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -34,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
           .update({'studentProfile.fcmToken': token});
     }
     FirebaseMessaging.onMessageOpenedApp.listen((_) {
-      Navigator.pushNamed(context, '/grades');
+      if (mounted) Navigator.pushNamed(context, '/grades');
     });
   }
 
@@ -99,7 +100,14 @@ class _LoginPageState extends State<LoginPage> {
       await _initNotifications(email);
 
       if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed('/home');
+      final onboardingDone = box.get('onboardingDone', defaultValue: false) as bool;
+      if (onboardingDone) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const SubjectSelectionPage()),
+        );
+      }
     } on RateLimitException catch (e) {
       _showErrorDialog(e.message);
     } on AuthException catch (e) {

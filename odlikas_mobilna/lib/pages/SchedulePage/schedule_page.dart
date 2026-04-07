@@ -196,6 +196,7 @@ class _SchedulePageState extends State<SchedulePage> {
       setState(() {});
     } catch (e) {
       debugPrint('Error updating subject: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update schedule: $e')),
       );
@@ -275,6 +276,7 @@ class _SchedulePageState extends State<SchedulePage> {
       setState(() {});
     } catch (e) {
       debugPrint('Error updating classroom: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update classroom: $e')),
       );

@@ -32,7 +32,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
         await loadFiles();
       } else {
         // Ako email nije pronađen, korisnik nije prijavljen.
-        print("Email nije pronađen. Korisnik nije prijavljen.");
+        debugPrint("Email nije pronađen. Korisnik nije prijavljen.");
       }
     });
   }
@@ -59,7 +59,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
         });
       }
     } catch (e) {
-      print("Greška pri učitavanju datoteka: $e");
+      debugPrint("Greška pri učitavanju datoteka: $e");
     }
   }
 
@@ -83,6 +83,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
       const int maxFileSize = 15 * 1024 * 1024; // 15 MB u bajtovima.
       int fileSize = result.files.single.size;
       if (fileSize > maxFileSize) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
@@ -149,7 +150,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
           isLoading = false;
         });
       } catch (e) {
-        print("Učitavanje nije uspjelo: $e");
+        debugPrint("Učitavanje nije uspjelo: $e");
         setState(() {
           isLoading = false;
         });
