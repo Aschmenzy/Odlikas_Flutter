@@ -15,8 +15,6 @@ class NewNotificationsPage extends StatefulWidget {
 }
 
 class _NewNotificationsPageState extends State<NewNotificationsPage> {
-  bool _isLoading = false;
-
   @override
   void dispose() {
     NotificationService.clearAllNotifications();
@@ -27,8 +25,9 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
     try {
       await NotificationService.markAsRead(notificationId);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nije moguće označiti obavijest kao pročitanu')),
+        const SnackBar(content: Text('Nije moguće označiti obavijest kao pročitanu')),
       );
     }
   }
@@ -114,15 +113,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
       body: Column(
         children: [
           Expanded(
-            child: _isLoading
-                ? Center(
-                    child: Lottie.asset(
-                      'assets/animations/loadingBird.json',
-                      width: MediaQuery.of(context).size.width * 0.80,
-                      height: 120,
-                    ),
-                  )
-                : StreamBuilder<QuerySnapshot>(
+            child: StreamBuilder<QuerySnapshot>(
                     stream: NotificationService.getNotificationsStream(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {

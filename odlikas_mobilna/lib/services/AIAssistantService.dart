@@ -369,7 +369,6 @@ class AIAssistantService {
 
   // Helper to get all tests sorted by date
   List<TestDetail> _getSortedTests(List<TestDetail> tests) {
-    final now = DateTime.now();
     final List<MapEntry<TestDetail, DateTime>> testsWithDates = [];
 
     for (final test in tests) {
@@ -528,12 +527,10 @@ class AIAssistantService {
 
       // Check if the query is about a specific subject
       String? specificSubject;
-      String? subjectId;
 
       for (final subject in grades.subjects) {
         if (query.contains(subject.subjectName.toLowerCase())) {
           specificSubject = subject.subjectName;
-          subjectId = subject.subjectId;
           break;
         }
       }

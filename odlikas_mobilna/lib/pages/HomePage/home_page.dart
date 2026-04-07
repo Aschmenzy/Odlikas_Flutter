@@ -51,6 +51,7 @@ class _HomePageState extends State<HomePage> {
     // Inicijalizacija - dohvaćanje ocjena i podataka o korisniku
     fetchGrades(context).then((_) async {
       final box = await Hive.openBox('User');
+      if (!mounted) return;
       setState(() {
         studentName = box.get('studentName');
         studentEmail = box.get('email');
@@ -59,10 +60,11 @@ class _HomePageState extends State<HomePage> {
       await _getStudentIdCardData();
       await _fetchHolidaysData();
 
+      if (!mounted) return;
       final testViewModel = context.read<TestViewmodel>();
       if (testViewModel.tests == null) {
         await testViewModel.fetchTests();
-        setState(() {});
+        if (mounted) setState(() {});
       }
     });
 
@@ -109,7 +111,7 @@ class _HomePageState extends State<HomePage> {
         _holidays = holidays;
       });
     } catch (e) {
-      print('Error fetching holidays: $e');
+      debugPrint('Error fetching holidays: $e');
     }
   }
 
@@ -166,16 +168,6 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       return null;
     }
-  }
-
-  // Odabrani datum
-  DateTime _selectedDate = DateTime.now();
-
-  // Funkcija koja se poziva kada korisnik odabere datum
-  void _onDateSelected(DateTime date) {
-    setState(() {
-      _selectedDate = date;
-    });
   }
 
   // Provjera je li određeni datum praznik
@@ -238,7 +230,8 @@ class _HomePageState extends State<HomePage> {
     required String description,
     required DateTime date,
   }) =>
-      CalendarService.saveEvent(title: title, description: description, date: date);
+      CalendarService.saveEvent(
+          title: title, description: description, date: date);
 
   // Prikaz pop-up dijaloga s detaljima odabranog dana
   void _showDayDetailsPopup(BuildContext context, DateTime date) {
