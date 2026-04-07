@@ -40,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   String? studentAddress;
   String? studentPostalCode;
   String? studentCity;
+  StreamSubscription? _notificationSub;
 
   @override
   void initState() {
@@ -62,14 +63,31 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    // Provjera ima li korisnik nepročitanih obavijesti
-    Timer.periodic(const Duration(seconds: 1), (timer) {
+    // Listen for unread notifications via Firestore stream
+    _setupNotificationStream();
+  }
+
+  void _setupNotificationStream() {
+    final email = Hive.box('User').get('email') as String?;
+    if (email == null) return;
+
+    _notificationSub = FirebaseFirestore.instance
+        .collection('newNotifications')
+        .doc(email)
+        .collection('notifications')
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .listen((snapshot) {
       if (mounted) {
-        _hasNotifications();
-      } else {
-        timer.cancel();
+        setState(() => _hasUnreadNotifications = snapshot.docs.isNotEmpty);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _notificationSub?.cancel();
+    super.dispose();
   }
 
   // Nova metoda za dohvaćanje podataka o praznicima
@@ -350,28 +368,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _hasUnreadNotifications = false;
-  Future<void> _hasNotifications() async {
-    try {
-      final email =
-          await Hive.openBox('User').then((value) => value.get('email'));
-
-      if (email == null) return;
-
-      final snapshot = await FirebaseFirestore.instance
-          .collection('newNotifications')
-          .doc(email)
-          .collection('notifications')
-          .where('isRead', isEqualTo: false)
-          .limit(1)
-          .get();
-
-      setState(() {
-        _hasUnreadNotifications = snapshot.docs.isNotEmpty;
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
 
   Widget _notificationIcon() {
     return IconButton(
@@ -380,8 +376,6 @@ class _HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(builder: (context) => NewNotificationsPage()),
         );
-
-        _hasNotifications();
       },
       icon: _hasUnreadNotifications
           ? Icon(
