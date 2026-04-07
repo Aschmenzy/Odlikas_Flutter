@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/main.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class FirebaseApi {
   // Instance of firebase messaging
@@ -43,11 +44,11 @@ class FirebaseApi {
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
         // Handle notification tap
-        print('Local notification tapped: ${notificationResponse.payload}');
+        debugPrint('Local notification tapped: ${notificationResponse.payload}');
       },
     );
 
-    print('Notification channels set up successfully');
+    debugPrint('Notification channels set up successfully');
   }
 
   // Method to initialize notifications - updated to set up channels first
@@ -57,8 +58,6 @@ class FirebaseApi {
 
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
-    final password =
-        await Hive.openBox('User').then((value) => value.get('password'));
     // Request permission
     await _firebaseMessaging.requestPermission(
       alert: true,
@@ -68,18 +67,17 @@ class FirebaseApi {
 
     // Get token
     final token = await _firebaseMessaging.getToken();
-    print('FCM Token: $token'); // Debug print to verify token is generated
+    debugPrint('FCM Token: $token'); // Debug print to verify token is generated
 
     if (email != null) {
       await _firestore.collection('newNotifications').doc(email).set({
         'fcmToken': token,
         'email': email,
-        'password': password,
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-      print('Saved token for user: $email'); // Debug print
+      debugPrint('Saved token for user: $email'); // Debug print
     } else {
-      print('No email found in Hive storage'); // Debug print
+      debugPrint('No email found in Hive storage'); // Debug print
     }
 
     // Initialize push notifications
@@ -111,21 +109,21 @@ class FirebaseApi {
         payload: message.data.toString(),
       );
 
-      print('Showed local notification: ${notification.title}');
+      debugPrint('Showed local notification: ${notification.title}');
     }
   }
 
   // The rest of your methods remain the same
   // Saving notification in the database
   Future<void> saveNotifications(RemoteMessage message) async {
-    print(
+    debugPrint(
         'Attempting to save notification: ${message.notification?.title}'); // Debug print
 
     // Open Hive box and get email
     final box = await Hive.openBox('User');
     final email = box.get('email');
 
-    print('User email from Hive: $email'); // Debug print
+    debugPrint('User email from Hive: $email'); // Debug print
 
     try {
       if (email != null) {
@@ -138,7 +136,7 @@ class FirebaseApi {
           'isRead': false,
         };
 
-        print('Notification data: $notificationData'); // Debug print
+        debugPrint('Notification data: $notificationData'); // Debug print
 
         // Save to Firestore
         await _firestore
@@ -147,12 +145,12 @@ class FirebaseApi {
             .collection('notifications')
             .add(notificationData);
 
-        print('Successfully saved notification to Firestore'); // Debug print
+        debugPrint('Successfully saved notification to Firestore'); // Debug print
       } else {
-        print('Cannot save notification: email is null'); // Debug print
+        debugPrint('Cannot save notification: email is null'); // Debug print
       }
     } catch (e) {
-      print('Error saving notification: $e'); // Debug print
+      debugPrint('Error saving notification: $e'); // Debug print
     }
   }
 
@@ -160,7 +158,7 @@ class FirebaseApi {
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
 
-    print(
+    debugPrint(
         'Handling message tap: ${message.notification?.title}'); // Debug print
 
     // Navigate to notifications page
@@ -172,11 +170,11 @@ class FirebaseApi {
 
   // Initialize push notifications - updated to show local notifications
   Future<void> initPushNotifications() async {
-    print('Initializing push notifications'); // Debug print
+    debugPrint('Initializing push notifications'); // Debug print
 
     // Handle notification when app is launched from terminated state
     FirebaseMessaging.instance.getInitialMessage().then((message) {
-      print('Initial message: ${message?.notification?.title}'); // Debug print
+      debugPrint('Initial message: ${message?.notification?.title}'); // Debug print
       if (message != null) {
         saveNotifications(message);
         handleMessage(message);
@@ -185,7 +183,7 @@ class FirebaseApi {
 
     // Handle notification tap when app is in background
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print(
+      debugPrint(
           'onMessageOpenedApp: ${message.notification?.title}'); // Debug print
       saveNotifications(message);
       handleMessage(message);
@@ -193,7 +191,7 @@ class FirebaseApi {
 
     // Handle foreground messages
     FirebaseMessaging.onMessage.listen((message) {
-      print(
+      debugPrint(
           'Foreground message received: ${message.notification?.title}'); // Debug print
       saveNotifications(message);
 
@@ -201,7 +199,7 @@ class FirebaseApi {
       showLocalNotification(message);
     });
 
-    print('Push notification listeners initialized'); // Debug print
+    debugPrint('Push notification listeners initialized'); // Debug print
   }
 
   // Rest of your methods remain unchanged
@@ -211,12 +209,12 @@ class FirebaseApi {
         await Hive.openBox('User').then((value) => value.get('email'));
 
     if (email == null) {
-      print('No email found, returning empty stream'); // Debug print
+      debugPrint('No email found, returning empty stream'); // Debug print
       yield* Stream.empty();
       return;
     }
 
-    print('Getting notifications stream for: $email'); // Debug print
+    debugPrint('Getting notifications stream for: $email'); // Debug print
 
     yield* _firestore
         .collection('newNotifications')
@@ -287,9 +285,9 @@ class FirebaseApi {
         .get();
 
     final batch = FirebaseFirestore.instance.batch();
-    snapshot.docs.forEach((doc) {
+    for (final doc in snapshot.docs) {
       batch.delete(doc.reference);
-    });
+    }
 
     await batch.commit();
   }

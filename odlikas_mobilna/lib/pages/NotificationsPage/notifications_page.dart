@@ -61,7 +61,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           }
         }
       } catch (e) {
-        print('Error loading notification preferences: $e');
+        debugPrint('Error loading notification preferences: $e');
       }
     }
 
@@ -76,7 +76,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     required bool value,
   }) async {
     if (userEmail == null) {
-      print('Cannot save preferences: User email is null');
+      debugPrint('Cannot save preferences: User email is null');
       return;
     }
 
@@ -88,12 +88,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         field: value,
       }, SetOptions(merge: true));
 
-      print('Successfully updated $field to $value');
+      debugPrint('Successfully updated $field to $value');
     } catch (e) {
-      print('Error saving notification preference: $e');
-      // Show error message to user
+      debugPrint('Error saving notification preference: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Greška pri spremanju postavki obavijesti'),
           backgroundColor: Colors.red,
         ),

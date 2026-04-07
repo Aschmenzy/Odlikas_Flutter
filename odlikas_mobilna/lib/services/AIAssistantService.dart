@@ -30,24 +30,14 @@ class AIAssistantService {
       : _apiService = ApiService(),
         _openAIService = OpenAIService();
 
-  // Get credentials from Hive box
-  Map<String, String> _getCredentials() {
+  // Get user email from Hive box
+  String _getEmail() {
     final userBox = Hive.box('User');
-    final email = userBox.get('email') as String?;
-    final password = userBox.get('password') as String?;
-
-    return {
-      'email': email ?? '',
-      'password': password ?? '',
-    };
+    return userBox.get('email') as String? ?? '';
   }
 
-  // Check if credentials are available
-  bool get hasCredentials {
-    final credentials = _getCredentials();
-    return credentials['email']!.isNotEmpty &&
-        credentials['password']!.isNotEmpty;
-  }
+  // Check if user is logged in (email present means active session)
+  bool get hasCredentials => _getEmail().isNotEmpty;
 
   // Clear all cached data (useful for logout)
   void clearCache() {
@@ -82,10 +72,10 @@ class AIAssistantService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error in processQuery: $e');
-        print(e.runtimeType);
+        debugPrint('Error in processQuery: $e');
+        debugPrint(e.runtimeType.toString());
         if (e is Error) {
-          print(e.stackTrace);
+          debugPrint(e.stackTrace.toString());
         }
       }
       return "Oprostite, dogodila se pogreška prilikom obrade vašeg zahtjeva: ${e.toString()}";
@@ -251,21 +241,21 @@ class AIAssistantService {
 
       // Debug output of test data
       if (kDebugMode) {
-        print('Retrieved ${tests.testsByMonth.length} months of test data');
-        print('Total months: ${tests.testsByMonth.keys.join(', ')}');
+        debugPrint('Retrieved ${tests.testsByMonth.length} months of test data');
+        debugPrint('Total months: ${tests.testsByMonth.keys.join(', ')}');
 
         int totalTests = 0;
         for (final entry in tests.testsByMonth.entries) {
           totalTests += entry.value.length;
-          print('Month ${entry.key}: ${entry.value.length} tests');
+          debugPrint('Month ${entry.key}: ${entry.value.length} tests');
 
           for (int i = 0; i < min(2, entry.value.length); i++) {
             final test = entry.value[i];
-            print(
+            debugPrint(
                 'Test example: Name="${test.testName}", Date="${test.testDate}", Desc="${test.testDescription}"');
           }
         }
-        print('Total tests found: $totalTests');
+        debugPrint('Total tests found: $totalTests');
       }
 
       // Get current date for comparison
@@ -327,7 +317,7 @@ class AIAssistantService {
             } catch (e) {
               // Skip tests with invalid dates
               if (kDebugMode) {
-                print(
+                debugPrint(
                     'Error parsing test date: "${sortedTests[i].testDate}", Error: $e');
               }
             }
@@ -368,9 +358,9 @@ class AIAssistantService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error in _getTestInfo: $e');
+        debugPrint('Error in _getTestInfo: $e');
         if (e is Error) {
-          print(e.stackTrace);
+          debugPrint(e.stackTrace.toString());
         }
       }
       return "Žao mi je, došlo je do pogreške pri dohvaćanju informacija o testovima. Molimo pokušajte ponovno kasnije. (${e.toString()})";
@@ -379,7 +369,6 @@ class AIAssistantService {
 
   // Helper to get all tests sorted by date
   List<TestDetail> _getSortedTests(List<TestDetail> tests) {
-    final now = DateTime.now();
     final List<MapEntry<TestDetail, DateTime>> testsWithDates = [];
 
     for (final test in tests) {
@@ -391,7 +380,7 @@ class AIAssistantService {
       } catch (e) {
         // Skip tests with invalid dates
         if (kDebugMode) {
-          print('Error parsing test date: "${test.testDate}", Error: $e');
+          debugPrint('Error parsing test date: "${test.testDate}", Error: $e');
         }
       }
     }
@@ -427,7 +416,7 @@ class AIAssistantService {
       } catch (e) {
         // Skip tests with invalid dates
         if (kDebugMode) {
-          print('Error categorizing test: "${test.testDate}", Error: $e');
+          debugPrint('Error categorizing test: "${test.testDate}", Error: $e');
         }
       }
     }
@@ -511,7 +500,7 @@ class AIAssistantService {
       return testDateOnly.difference(todayDate).inDays;
     } catch (e) {
       if (kDebugMode) {
-        print('Error calculating days until test: "$testDateStr", Error: $e');
+        debugPrint('Error calculating days until test: "$testDateStr", Error: $e');
       }
       return null;
     }
@@ -523,10 +512,10 @@ class AIAssistantService {
       final grades = await _getGrades();
 
       if (kDebugMode) {
-        print('Retrieved ${grades.subjects.length} subjects from grades data');
+        debugPrint('Retrieved ${grades.subjects.length} subjects from grades data');
         // Print all subjects for debugging
         for (final subject in grades.subjects) {
-          print(
+          debugPrint(
               'Subject: ${subject.subjectName}, Grade: ${subject.grade}, Professor: ${subject.professor}, ID: ${subject.subjectId}');
         }
       }
@@ -538,12 +527,10 @@ class AIAssistantService {
 
       // Check if the query is about a specific subject
       String? specificSubject;
-      String? subjectId;
 
       for (final subject in grades.subjects) {
         if (query.contains(subject.subjectName.toLowerCase())) {
           specificSubject = subject.subjectName;
-          subjectId = subject.subjectId;
           break;
         }
       }
@@ -559,7 +546,7 @@ class AIAssistantService {
               "Ovaj predmet predaje ${subject.professor}.";
         } catch (e) {
           if (kDebugMode) {
-            print('Error finding subject: $e');
+            debugPrint('Error finding subject: $e');
           }
           return "Nisam mogao pronaći detalje o predmetu $specificSubject.";
         }
@@ -581,7 +568,7 @@ class AIAssistantService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error in _getGradesInfo: $e');
+        debugPrint('Error in _getGradesInfo: $e');
       }
       return "Došlo je do pogreške prilikom dohvaćanja podataka o ocjenama: ${e.toString()}";
     }
@@ -751,7 +738,7 @@ class AIAssistantService {
   // Get grades summary with improved formatting and better handling of grade formats
   String _getGradesSummary(Grades grades) {
     if (kDebugMode) {
-      print('Generating grades summary for ${grades.subjects.length} subjects');
+      debugPrint('Generating grades summary for ${grades.subjects.length} subjects');
     }
 
     // Properly handle different grade formats
@@ -1091,7 +1078,7 @@ class AIAssistantService {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('Error fetching grades for AI context: $e');
+          debugPrint('Error fetching grades for AI context: $e');
         }
       }
 
@@ -1130,13 +1117,13 @@ class AIAssistantService {
         }
       } catch (e) {
         if (kDebugMode) {
-          print('Error fetching tests for AI context: $e');
+          debugPrint('Error fetching tests for AI context: $e');
         }
       }
     } catch (e) {
       // If we can't fetch profile, proceed with minimal context
       if (kDebugMode) {
-        print('Error fetching profile for AI context: $e');
+        debugPrint('Error fetching profile for AI context: $e');
       }
     }
 
@@ -1225,7 +1212,7 @@ Umjesto njih, koristi c, c, d, s, z (ili velika slova C, C, D, S, Z). Evo inform
 
       // Debug log
       if (kDebugMode) {
-        print('Attempting to parse date: "$cleaned"');
+        debugPrint('Attempting to parse date: "$cleaned"');
       }
 
       // Special case for partial dates like "26.9." (missing year)
@@ -1416,14 +1403,14 @@ Umjesto njih, koristi c, c, d, s, z (ili velika slova C, C, D, S, Z). Evo inform
         return DateTime.parse(cleaned);
       } catch (e) {
         if (kDebugMode) {
-          print('DateTime.parse failed: $e');
+          debugPrint('DateTime.parse failed: $e');
         }
         throw FormatException('Could not parse date: $cleaned');
       }
     } catch (e) {
       // Log the error for debugging
       if (kDebugMode) {
-        print('Error parsing date "$dateString": $e');
+        debugPrint('Error parsing date "$dateString": $e');
       }
 
       // Return a default future date to ensure this test doesn't get selected as the "next test"

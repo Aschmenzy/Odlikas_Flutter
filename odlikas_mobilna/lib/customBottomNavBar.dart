@@ -79,11 +79,10 @@ class CustomBottomNavBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildNavItem(context, 0, 'assets/icon/home.svg', '/home'),
-                _buildNavItem(context, 1, 'assets/icon/work.svg', '/jobs'),
                 _buildNavItem(
-                    context, 2, 'assets/icon/pomodoro.png', '/pomodoro'),
+                    context, 1, 'assets/icon/pomodoro.png', '/pomodoro'),
                 _buildNavItem(
-                    context, 3, 'assets/icon/settings.png', '/settings'),
+                    context, 2, 'assets/icon/settings.png', '/settings'),
               ],
             ),
           ),

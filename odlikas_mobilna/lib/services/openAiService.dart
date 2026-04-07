@@ -35,7 +35,7 @@ class OpenAIService {
   void _checkApiKey() {
     if (_apiKey.isEmpty) {
       if (kDebugMode) {
-        print(
+        debugPrint(
             'WARNING: OpenAI API key is missing. Please add OPEN_AI_API_KEY to your .env file.');
       }
     }
@@ -162,7 +162,7 @@ class OpenAIService {
             : 5; // Wait longer for rate limit errors
 
         if (kDebugMode) {
-          print(
+          debugPrint(
               'API request failed with status ${response.statusCode}. Retrying in $delay seconds...');
         }
 
@@ -258,7 +258,7 @@ class OpenAIService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error generating text: $e');
+        debugPrint('Error generating text: $e');
       }
 
       // Provide a graceful fallback response

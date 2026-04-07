@@ -13,10 +13,8 @@ import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/pages/AboutPage/about_page.dart';
 import 'package:odlikas_mobilna/pages/ConnectToScreenPage/in_between_page.dart';
-import 'package:odlikas_mobilna/pages/CritiquePage/critique_page.dart';
 import 'package:odlikas_mobilna/pages/IntroPage/intro_page.dart';
 import 'package:odlikas_mobilna/pages/NotificationsPage/notifications_page.dart';
-import 'package:odlikas_mobilna/pages/PreferencesPage/update_preferences_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/card.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/dislexycTile.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/Widgets/settingsTile.dart';
@@ -44,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final box = await Hive.openBox('User');
     userEmail = box.get('email');
 
-    print('Loading user data for email: $userEmail');
+    debugPrint('Loading user data for email: $userEmail');
 
     if (userEmail != null) {
       // Try to load existing preferences
@@ -57,17 +55,17 @@ class _SettingsPageState extends State<SettingsPage> {
         if (doc.exists) {
           final data = doc.data();
           if (data != null) {
-            print('Loaded preferences data: $data');
+            debugPrint('Loaded preferences data: $data');
             setState(() {
               isDyslexic = data['dyslexic'] ?? false;
             });
           }
         }
       } catch (e) {
-        print('Error loading notification preferences: $e');
+        debugPrint('Error loading notification preferences: $e');
       }
     } else {
-      print('Cannot load preferences: User email is null');
+      debugPrint('Cannot load preferences: User email is null');
     }
 
     setState(() {
@@ -81,7 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
     required bool value,
   }) async {
     if (userEmail == null) {
-      print('Cannot save preferences: User email is null');
+      debugPrint('Cannot save preferences: User email is null');
       return;
     }
 
@@ -93,12 +91,12 @@ class _SettingsPageState extends State<SettingsPage> {
         field: value,
       }, SetOptions(merge: true));
 
-      print('Successfully updated $field to $value');
+      debugPrint('Successfully updated $field to $value');
     } catch (e) {
-      print('Error saving notification preference: $e');
-      // Show error message to user
+      debugPrint('Error saving notification preference: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Greška pri spremanju postavki obavijesti'),
           backgroundColor: Colors.red,
         ),
@@ -131,7 +129,7 @@ class _SettingsPageState extends State<SettingsPage> {
             : null,
       };
     } catch (e) {
-      print(e);
+      debugPrint('$e');
       throw e;
     }
   }
@@ -367,15 +365,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => UpdatePreferencesPage()),
-                    ),
-                    label: "Mijenjane učenja",
-                    path: "assets/images/schedule.png",
-                  ),
-                  SettingsTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
                           builder: (context) => TermsAndConditionsPage()),
                     ),
                     isLast: true,
@@ -401,14 +390,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     path: "assets/icon/odlikasIconLogo.png",
                   ),
                   SettingsTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => CritiquePage()),
-                    ),
-                    label: "Kritike",
-                    path: "assets/images/thumbs.png",
-                  ),
-                  SettingsTile(
                     isLast: true,
                     label: "Odjavite se",
                     path: "assets/images/logOut.png",
@@ -420,7 +401,7 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
-      bottomNavigationBar: CustomBottomNavBar(currentIndex: 3),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
     );
   }
 }

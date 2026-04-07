@@ -6,8 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
-import 'package:odlikas_mobilna/database/api/firebase_api.dart';
 import 'package:odlikas_mobilna/database/models/notification_model.dart';
+import 'package:odlikas_mobilna/services/notification_service.dart';
 
 class NewNotificationsPage extends StatefulWidget {
   @override
@@ -15,25 +15,19 @@ class NewNotificationsPage extends StatefulWidget {
 }
 
 class _NewNotificationsPageState extends State<NewNotificationsPage> {
-  final FirebaseApi _firebaseApi = FirebaseApi();
-  bool _isLoading = false;
-
   @override
   void dispose() {
-    // Clear all notifications when leaving the page
-    _firebaseApi.clearAllNotifications();
-
+    NotificationService.clearAllNotifications();
     super.dispose();
   }
 
-  // Modified to allow silent clearing without confirmation dialog
-
   void _markAsRead(String notificationId) async {
     try {
-      await _firebaseApi.markNotificationAsRead(notificationId);
+      await NotificationService.markAsRead(notificationId);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Nije moguće označiti obavijest kao pročitanu')),
+        const SnackBar(content: Text('Nije moguće označiti obavijest kao pročitanu')),
       );
     }
   }
@@ -119,16 +113,8 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
       body: Column(
         children: [
           Expanded(
-            child: _isLoading
-                ? Center(
-                    child: Lottie.asset(
-                      'assets/animations/loadingBird.json',
-                      width: MediaQuery.of(context).size.width * 0.80,
-                      height: 120,
-                    ),
-                  )
-                : StreamBuilder<QuerySnapshot>(
-                    stream: _firebaseApi.getNotificationsStream(),
+            child: StreamBuilder<QuerySnapshot>(
+                    stream: NotificationService.getNotificationsStream(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(
@@ -278,7 +264,7 @@ class _NewNotificationsPageState extends State<NewNotificationsPage> {
       ),
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
-        _firebaseApi.deleteNotification(notification.id);
+        NotificationService.deleteNotification(notification.id);
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Obavijest izbrisana')));
       },
