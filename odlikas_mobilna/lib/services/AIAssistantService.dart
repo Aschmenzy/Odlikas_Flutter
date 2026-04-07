@@ -30,24 +30,14 @@ class AIAssistantService {
       : _apiService = ApiService(),
         _openAIService = OpenAIService();
 
-  // Get credentials from Hive box
-  Map<String, String> _getCredentials() {
+  // Get user email from Hive box
+  String _getEmail() {
     final userBox = Hive.box('User');
-    final email = userBox.get('email') as String?;
-    final password = userBox.get('password') as String?;
-
-    return {
-      'email': email ?? '',
-      'password': password ?? '',
-    };
+    return userBox.get('email') as String? ?? '';
   }
 
-  // Check if credentials are available
-  bool get hasCredentials {
-    final credentials = _getCredentials();
-    return credentials['email']!.isNotEmpty &&
-        credentials['password']!.isNotEmpty;
-  }
+  // Check if user is logged in (email present means active session)
+  bool get hasCredentials => _getEmail().isNotEmpty;
 
   // Clear all cached data (useful for logout)
   void clearCache() {
