@@ -28,7 +28,6 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _cvUrl;
   String? _pfpUrl;
   bool _isUploadingPDF = false;
-  bool _isUploadingPFP = false;
 
   bool _isLoading = true;
   String? _userEmail;
@@ -60,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     } catch (e) {
-      print('Error fetching profile: $e');
+      debugPrint('Error fetching profile: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -71,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
   //funkcija koje sprema opis korisnika iz modala u studentProfiles collection
   Future<void> _saveDescription(String description) async {
     if (_userEmail == null) {
-      print('Error: No email found in local storage');
+      debugPrint('Error: No email found in local storage');
       return;
     }
 
@@ -83,7 +82,7 @@ class _ProfilePageState extends State<ProfilePage> {
         'description': description,
       }, SetOptions(merge: true));
     } catch (e) {
-      print('Error saving description: $e');
+      debugPrint('Error saving description: $e');
     }
   }
 
@@ -191,8 +190,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _uploadPFP() async {
     try {
-      setState(() => _isUploadingPFP = true);
-
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
       );
@@ -243,8 +240,6 @@ class _ProfilePageState extends State<ProfilePage> {
           SnackBar(content: Text('Greška: $e')),
         );
       }
-    } finally {
-      setState(() => _isUploadingPFP = false);
     }
   }
 

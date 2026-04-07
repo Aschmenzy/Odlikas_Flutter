@@ -34,7 +34,6 @@ class _PomodoroPageState extends State<PomodoroPage> {
   late ValueNotifier<int> _secondsNotifier;
   int _daysLearning = 0;
   int _hoursLearning = 0;
-  int _streakCount = 0;
   int _weeklySessions = 0;
   int _weeklyStreak = 0;
 
@@ -148,7 +147,6 @@ class _PomodoroPageState extends State<PomodoroPage> {
           _initialDuration = mapData['currentDuration'] ?? 25 * 60;
           _startTimestamp = mapData['startTimestamp'] as Timestamp?;
           _clientStartTime = mapData['clientStartTime'] as int?;
-          _streakCount = mapData['streakCount'] ?? 0;
           _weeklySessions = mapData['weeklySessions'] ?? 0;
           _weeklyStreak = mapData['weeklyStreak'] ?? 0;
         });

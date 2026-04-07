@@ -20,32 +20,11 @@ class CalendarPage extends StatefulWidget {
 
 class _CalendarPageState extends State<CalendarPage> {
   DateTime _focusedDate = DateTime.now();
-  late DateTime _firstDayOfMonth;
-  late DateTime _lastDayOfMonth;
   List<Map<String, dynamic>> _holidays = [];
-
-  // Definiranje naziva mjeseci
-  final List<String> _monthNames = [
-    'SIJEČANJ',
-    'VELJAČA',
-    'OŽUJAK',
-    'TRAVANJ',
-    'SVIBANJ',
-    'LIPANJ',
-    'SRPANJ',
-    'KOLOVOZ',
-    'RUJAN',
-    'LISTOPAD',
-    'STUDENI',
-    'PROSINAC'
-  ];
 
   @override
   void initState() {
-    // Inicijalno postavljanje prvog i zadnjeg dana mjeseca
-    _updateMonth(_focusedDate);
     super.initState();
-    // Dohvaćanje praznika iz Firestore baze podataka
     _fetchHolidays();
   }
 
@@ -91,34 +70,13 @@ class _CalendarPageState extends State<CalendarPage> {
     return false;
   }
 
-  // Funkcija za ažuriranje mjeseca
-  void _updateMonth(DateTime date) {
-    _firstDayOfMonth = DateTime(date.year, date.month, 1);
-    _lastDayOfMonth = DateTime(date.year, date.month + 1, 0);
-  }
-
-  // Funkcija za prelazak na sljedeći mjesec
-  void _goToNextMonth() {
-    setState(() {
-      _focusedDate = DateTime(_focusedDate.year, _focusedDate.month + 1);
-      _updateMonth(_focusedDate);
-    });
-  }
-
-  // Funkcija za prelazak na prethodni mjesec
-  void _goToPreviousMonth() {
-    setState(() {
-      _focusedDate = DateTime(_focusedDate.year, _focusedDate.month - 1);
-      _updateMonth(_focusedDate);
-    });
-  }
-
   Future<void> saveEvent({
     required String title,
     required String description,
     required DateTime date,
   }) =>
-      CalendarService.saveEvent(title: title, description: description, date: date);
+      CalendarService.saveEvent(
+          title: title, description: description, date: date);
 
   Future<List<Map<String, String>>> _fetchEvents(DateTime date) =>
       CalendarService.fetchEvents(date);
@@ -126,14 +84,6 @@ class _CalendarPageState extends State<CalendarPage> {
   // Funkcija za provjeru je li datum unutar trenutnog mjeseca
   bool _isWithinCurrentMonth(DateTime date) {
     return date.month == _focusedDate.month;
-  }
-
-  // Funkcija za izračunavanje dana za određenu ćeliju u kalendaru
-  DateTime _calculateDayForCell(int index) {
-    int leadingDays = _firstDayOfMonth.weekday - 1;
-    return _firstDayOfMonth
-        .subtract(Duration(days: leadingDays))
-        .add(Duration(days: index));
   }
 
   // Funkcija za provjeru je li datum ispit
@@ -235,7 +185,7 @@ class _CalendarPageState extends State<CalendarPage> {
             color: AppColors.secondary,
           ),
         ),
-                actions: [
+        actions: [
           Padding(
             padding: EdgeInsets.only(right: screenWidth * 0.08),
             child: Column(
@@ -311,4 +261,3 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
-
