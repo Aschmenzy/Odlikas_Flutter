@@ -9,7 +9,6 @@ import 'package:odlikas_mobilna/database/api/auth_storage.dart';
 import 'package:odlikas_mobilna/database/api/login_service.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
-import 'package:odlikas_mobilna/pages/PreferencesPage/preferences_page.dart';
 import 'package:odlikas_mobilna/utilities/custom_button.dart';
 import 'package:odlikas_mobilna/pages/LoginPages/Widgets/text_field.dart';
 
@@ -100,11 +99,7 @@ class _LoginPageState extends State<LoginPage> {
       await _initNotifications(email);
 
       if (!mounted) return;
-      Navigator.replace(
-        context,
-        oldRoute: ModalRoute.of(context)!,
-        newRoute: MaterialPageRoute(builder: (_) => PreferencesPage()),
-      );
+      Navigator.of(context).pushReplacementNamed('/home');
     } on RateLimitException catch (e) {
       _showErrorDialog(e.message);
     } on AuthException catch (e) {
