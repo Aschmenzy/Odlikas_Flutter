@@ -18,6 +18,7 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdModal.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
+import 'package:odlikas_mobilna/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -71,17 +72,11 @@ class _HomePageState extends State<HomePage> {
     final email = Hive.box('User').get('email') as String?;
     if (email == null) return;
 
-    _notificationSub = FirebaseFirestore.instance
-        .collection('newNotifications')
-        .doc(email)
-        .collection('notifications')
-        .where('isRead', isEqualTo: false)
-        .snapshots()
-        .listen((snapshot) {
-      if (mounted) {
-        setState(() => _hasUnreadNotifications = snapshot.docs.isNotEmpty);
-      }
-    });
+    _notificationSub = NotificationService.hasUnreadNotifications().listen(
+      (hasUnread) {
+        if (mounted) setState(() => _hasUnreadNotifications = hasUnread);
+      },
+    );
   }
 
   @override
