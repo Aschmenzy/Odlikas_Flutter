@@ -97,7 +97,12 @@ class _LoginPageState extends State<LoginPage> {
         }
       }, SetOptions(merge: true));
 
-      await _initNotifications(email);
+      // Best-effort — Firestore/FCM failure must not block login
+      try {
+        await _initNotifications(email);
+      } catch (e) {
+        debugPrint('initNotifications failed (non-fatal): $e');
+      }
 
       if (!mounted) return;
       final onboardingDone = box.get('onboardingDone', defaultValue: false) as bool;

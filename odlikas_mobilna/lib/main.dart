@@ -72,8 +72,13 @@ Future<void> main() async {
     systemNavigationBarContrastEnforced: false,
   ));
 
-  await FirebaseApi().initNotifications();
   await Hive.openBox('User');
+  // Best-effort — notification setup must not block app startup
+  try {
+    await FirebaseApi().initNotifications();
+  } catch (e) {
+    debugPrint('initNotifications failed (non-fatal): $e');
+  }
   await _checkDeviceSecurity();
 
   runApp(const MyApp());
