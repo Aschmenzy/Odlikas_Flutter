@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/font_service.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
@@ -15,12 +14,9 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/calendarWidget.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradesCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/gradivoCard.dart';
 import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
-import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdCard.dart';
-import 'package:odlikas_mobilna/pages/HomePage/Widgets/workingIdModal.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
 import 'package:odlikas_mobilna/services/calendar_service.dart';
 import 'package:odlikas_mobilna/services/notification_service.dart';
-import 'package:odlikas_mobilna/services/student_id_service.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -38,11 +34,6 @@ Future<Grades?> fetchGrades(BuildContext context) async {
 class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _holidays = [];
   String? studentName;
-  String? studentEmail;
-  String? studentOib;
-  String? studentAddress;
-  String? studentPostalCode;
-  String? studentCity;
   StreamSubscription? _notificationSub;
 
   @override
@@ -54,10 +45,8 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) return;
       setState(() {
         studentName = box.get('studentName');
-        studentEmail = box.get('email');
       });
 
-      await _getStudentIdCardData();
       await _fetchHolidaysData();
 
       if (!mounted) return;
@@ -112,61 +101,6 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       debugPrint('Error fetching holidays: $e');
-    }
-  }
-
-  // Prikaz modalnog prozora za unos podataka o studentskoj iskaznici
-  void _showStudentIdModal(BuildContext context) {
-    showModalBottomSheet(
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
-      context: context,
-      builder: (context) => StudentIdModal(
-        // Obrada nakon predaje forme
-        onSubmit: (formData) async {
-          try {
-            await StudentIdService.saveStudentId(formData);
-            await _getStudentIdCardData();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Podaci su uspješno spremljeni'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
-          } catch (e) {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Greška pri spremanju podataka'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        },
-      ),
-    );
-  }
-
-  Future<Map<String, dynamic>?> _getStudentIdCardData() async {
-    try {
-      final data = await StudentIdService.fetchStudentId();
-      if (data != null) {
-        setState(() {
-          studentOib = data['oib'];
-          studentAddress = data['address'];
-          studentPostalCode = data['postalCode'];
-          studentCity = data['city'];
-        });
-      }
-      return data;
-    } catch (e) {
-      return null;
     }
   }
 
@@ -340,44 +274,9 @@ class _HomePageState extends State<HomePage> {
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                  // Horizontalna lista kartica (ocjene i studentska iskaznica)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SizedBox(
-                        width: constraints.maxWidth,
-                        height: size.height * 0.235,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 2,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(width: 16),
-                          itemBuilder: (context, index) {
-                            return index == 0
-                                ? SizedBox(
-                                    // Kartica s ocjenama
-                                    width: size.width * 0.835,
-                                    child: GradesCard(
-                                        subjects:
-                                            viewModel.grades?.subjects ?? []),
-                                  )
-                                : GestureDetector(
-                                    // Kartica s podacima studentske iskaznice
-                                    onTap: () => _showStudentIdModal(context),
-                                    child: SizedBox(
-                                      width: size.width * 0.8,
-                                      child: Workingidcard(
-                                        name: studentName,
-                                        oib: studentOib,
-                                        address: studentAddress,
-                                        postalCode: studentPostalCode,
-                                        city: studentCity,
-                                      ),
-                                    ),
-                                  );
-                          },
-                        ),
-                      );
-                    },
+                  SizedBox(
+                    height: size.height * 0.235,
+                    child: GradesCard(subjects: viewModel.grades?.subjects ?? []),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.025),
                   // Red s karticama za raspored i gradivo
