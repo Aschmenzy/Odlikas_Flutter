@@ -401,7 +401,7 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
-      bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 3),
     );
   }
 }

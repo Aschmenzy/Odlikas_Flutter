@@ -30,43 +30,61 @@ class CustomBottomNavBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(
                 left: 16.0, right: 16, top: 20, bottom: 3),
-            child: SizedBox(
-              height: 35,
-              child: TextField(
-                readOnly: true,
-                onTap: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        AiChatbotPage(),
-                    transitionDuration: Duration.zero,
-                    reverseTransitionDuration: Duration.zero,
-                  ),
-                ),
-                style: GoogleFonts.inter(height: 1, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
-                  hintStyle:
-                      GoogleFonts.inter(color: Colors.grey, fontSize: 14),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding:
-                      EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Icon(
-                      Icons.search,
-                      size: 20,
-                      color: AppColors.accent,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                showModalBottomSheet<String>(
+                  context: context,
+                  isScrollControlled: true,
+                  isDismissible: true,
+                  enableDrag: false,
+                  backgroundColor: Colors.transparent,
+                  barrierColor: Colors.transparent,
+                  builder: (ctx) => ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                    child: SizedBox(
+                      height: MediaQuery.of(ctx).size.height,
+                      child: const AiChatbotPage(),
                     ),
                   ),
-                  prefixIconConstraints: BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
+                ).then((route) {
+                  if (route != null && context.mounted) {
+                    Navigator.of(context).pushReplacementNamed(route);
+                  }
+                });
+              },
+              child: SizedBox(
+                height: 35,
+                child: IgnorePointer(
+                  child: TextField(
+                    style: GoogleFonts.inter(height: 1, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
+                      hintStyle:
+                          GoogleFonts.inter(color: Colors.grey, fontSize: 14),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Icon(
+                          Icons.search,
+                          size: 20,
+                          color: AppColors.accent,
+                        ),
+                      ),
+                      prefixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 40,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -82,7 +100,9 @@ class CustomBottomNavBar extends StatelessWidget {
                 _buildNavItem(
                     context, 1, 'assets/icon/pomodoro.png', '/pomodoro'),
                 _buildNavItem(
-                    context, 2, 'assets/icon/settings.png', '/settings'),
+                    context, 2, 'assets/icon/leaderboard.png', '/leaderboard'),
+                _buildNavItem(
+                    context, 3, 'assets/icon/settings.png', '/settings'),
               ],
             ),
           ),

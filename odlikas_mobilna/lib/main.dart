@@ -16,6 +16,7 @@ import 'package:odlikas_mobilna/database/models/viewmodel.dart';
 import 'package:odlikas_mobilna/pages/BannerPage/banner_page.dart';
 import 'package:odlikas_mobilna/pages/HomePage/home_page.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/pomodoro_page.dart';
+import 'package:odlikas_mobilna/pages/LeaderboardPage/leaderboard_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/settings_page.dart';
 import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
@@ -122,6 +123,7 @@ class _MyAppState extends State<MyApp> {
         routes: {
           '/home': (_) => const HomePage(),
           '/pomodoro': (_) => const PomodoroPage(),
+          '/leaderboard': (_) => const LeaderboardPage(),
           '/settings': (_) => const SettingsPage(),
           '/grades': (_) => const SubjectsPage(),
           '/newNotifications': (_) => NewNotificationsPage(),

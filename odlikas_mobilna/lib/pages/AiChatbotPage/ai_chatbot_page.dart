@@ -157,13 +157,10 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
               ),
             ),
 
-            // Add the text input field directly to the body instead of bottomNavigationBar
-            _buildInputField(),
           ],
         ),
       ),
-      // Move the nav bar to the bottom
-      bottomNavigationBar: _buildNavBar(),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -191,80 +188,59 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
     );
   }
 
-  // Separated input field from nav bar
-  Widget _buildInputField() {
+  Widget _buildBottomBar() {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      height: 130,
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.elliptical(100, 20),
-          topRight: Radius.elliptical(100, 20),
+          topLeft: Radius.elliptical(500, 60),
+          topRight: Radius.elliptical(500, 60),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            blurRadius: 10,
-          ),
-        ],
       ),
-      child: SizedBox(
-        height: 35,
-        child: TextField(
-          controller: _promptController,
-          style: GoogleFonts.inter(
-            height: 1,
-            fontSize: 14,
-            color: AppColors.secondary,
-          ),
-          decoration: InputDecoration(
-            hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
-            hintStyle:
-                GoogleFonts.inter(color: AppColors.tertiary, fontSize: 14),
-            filled: true,
-            fillColor: AppColors.background,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Icon(
-                Icons.search,
-                size: 20,
-                color: AppColors.accent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 20, bottom: 3),
+            child: SizedBox(
+              height: 35,
+              child: TextField(
+                controller: _promptController,
+                style: GoogleFonts.inter(height: 1, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
+                  hintStyle: GoogleFonts.inter(color: Colors.grey, fontSize: 14),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Icon(Icons.search, size: 20, color: AppColors.accent),
+                  ),
+                  prefixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 40),
+                ),
+                onSubmitted: (_) => _sendMessage(),
               ),
             ),
-            prefixIconConstraints: BoxConstraints(
-              minWidth: 40,
-              minHeight: 40,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(context, 0, "assets/icon/home.svg", '/home'),
+                _buildNavItem(context, 1, "assets/icon/pomodoro.png", '/pomodoro'),
+                _buildNavItem(context, 2, "assets/icon/leaderboard.png", '/leaderboard'),
+                _buildNavItem(context, 3, "assets/icon/settings.png", '/settings'),
+              ],
             ),
           ),
-          onSubmitted: (_) => _sendMessage(),
-        ),
-      ),
-    );
-  }
-
-  // Only navigation bar, separated from input field
-  Widget _buildNavBar() {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(context, 0, "assets/icon/home.svg", '/home'),
-            _buildNavItem(context, 1, "assets/icon/work.svg", '/jobs'),
-            _buildNavItem(context, 2, "assets/icon/pomodoro.png", '/pomodoro'),
-            _buildNavItem(context, 3, "assets/icon/settings.png", '/settings'),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -277,15 +253,9 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
     return InkWell(
       onTap: () {
         if (!isActive) {
-          Navigator.of(context).pushReplacementNamed(
-            route,
-            result: PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  Container(),
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          );
+          // passing null for the current underlying page's route avoids
+          // replacing it with itself (no flash); pass route for other tabs
+          Navigator.of(context).pop(route == '/home' ? null : route);
         }
       },
       child: Column(
