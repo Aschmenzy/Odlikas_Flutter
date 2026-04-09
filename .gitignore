@@ -70,3 +70,12 @@ node_modules/
 
 odlikas_mobilna/docs/superpowers/plans/2026-04-07-phase1-cleanup.md
 odlikas_mobilna/docs/superpowers/plans/2026-04-07-master-roadmap.md
+
+# Claude Code local config
+.claude/
+
+# Python scripts and generated reports
+__pycache__/
+*.py
+*.docx
+~$*.docx
