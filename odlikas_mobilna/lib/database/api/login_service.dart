@@ -2,6 +2,20 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
 
+class LoginResult {
+  final String token;
+  final String firebaseToken;
+  final String uid;
+  final bool isOdlikasPlus;
+
+  const LoginResult({
+    required this.token,
+    required this.firebaseToken,
+    required this.uid,
+    required this.isOdlikasPlus,
+  });
+}
+
 /// Handles only POST /api/Login and DELETE /api/Login.
 /// Uses a plain Dio instance — no AuthInterceptor — to avoid circular dependency.
 class LoginService {
@@ -12,13 +26,18 @@ class LoginService {
     contentType: 'application/json',
   ));
 
-  static Future<String> login(String email, String password) async {
+  static Future<LoginResult> login(String email, String password) async {
     try {
       final response = await _dio.post('/api/Login', data: {
         'email': email,
         'password': password,
       });
-      return response.data['token'] as String;
+      return LoginResult(
+        token: response.data['token'] as String,
+        firebaseToken: response.data['firebaseToken'] as String,
+        uid: response.data['uid'] as String,
+        isOdlikasPlus: response.data['isOdlikasPlus'] as bool,
+      );
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       if (status == 429) throw const RateLimitException();

@@ -11,13 +11,13 @@ class ApiService {
 
   Future<StudentProfile> fetchStudentProfile() async {
     final response = await _dio.get('/api/Scraper/ScrapeStudentProfile');
-    return StudentProfile.fromJson(response.data);
+    return StudentProfile.fromJson(response.data['data']);
   }
 
   Future<Grades> fetchGrades() async {
     final response =
         await _dio.get('/api/Scraper/ScrapeSubjectsAndProfessors');
-    return Grades.fromJson(response.data);
+    return Grades.fromJson(response.data['data']);
   }
 
   Future<List<MonthlyGrades>> fetchSpecificSubjectGrades(
@@ -26,7 +26,7 @@ class ApiService {
       '/api/Scraper/ScrapeSpecificSubjectGrades',
       queryParameters: {'subjectId': subjectId},
     );
-    return (response.data as List)
+    return (response.data['data'] as List)
         .map((m) => MonthlyGrades.fromJson(m))
         .toList();
   }
@@ -36,16 +36,16 @@ class ApiService {
       '/api/Scraper/ScrapeSpecificSubjectGrades',
       queryParameters: {'subjectId': subjectId},
     );
-    return SubjectDetails.fromJson(response.data);
+    return SubjectDetails.fromJson(response.data['data']);
   }
 
   Future<Tests> fetchTestsDetails() async {
     final response = await _dio.get('/api/Scraper/ScrapeTests');
-    return Tests.fromJson(response.data);
+    return Tests.fromJson(response.data['data']);
   }
 
   Future<ScheduleSubject> fetchScheduleSubjects() async {
     final response = await _dio.get('/api/Scraper/ScrapeScheduleTable');
-    return ScheduleSubject.fromJson(response.data);
+    return ScheduleSubject.fromJson(response.data['data']);
   }
 }
