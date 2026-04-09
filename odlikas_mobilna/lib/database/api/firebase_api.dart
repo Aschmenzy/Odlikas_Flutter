@@ -3,9 +3,18 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:odlikas_mobilna/database/api/dio_client.dart';
 import 'package:odlikas_mobilna/main.dart';
 
 class FirebaseApi {
+  static Future<void> registerFcmToken(String fcmToken) async {
+    try {
+      await DioClient.instance.post('/api/Device/RegisterToken', data: {'fcmToken': fcmToken});
+    } catch (e) {
+      debugPrint('FCM token registration failed (non-fatal): $e');
+    }
+  }
+
   // Instance of firebase messaging
   final _firebaseMessaging = FirebaseMessaging.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -56,29 +65,12 @@ class FirebaseApi {
     // Set up notification channels first
     await setupNotificationChannels();
 
-    final email =
-        await Hive.openBox('User').then((value) => value.get('email'));
     // Request permission
     await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-
-    // Get token
-    final token = await _firebaseMessaging.getToken();
-    debugPrint('FCM Token: $token'); // Debug print to verify token is generated
-
-    if (email != null) {
-      await _firestore.collection('newNotifications').doc(email).set({
-        'fcmToken': token,
-        'email': email,
-        'lastUpdated': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      debugPrint('Saved token for user: $email'); // Debug print
-    } else {
-      debugPrint('No email found in Hive storage'); // Debug print
-    }
 
     // Initialize push notifications
     await initPushNotifications();
@@ -158,19 +150,19 @@ class FirebaseApi {
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
 
-    debugPrint(
-        'Handling message tap: ${message.notification?.title}'); // Debug print
-
-    // Navigate to notifications page
-    navigatorKey.currentState?.pushNamed(
-      '/newNotifications',
-      arguments: message,
-    );
+    if (message.data['type'] == 'grade_drop') {
+      navigatorKey.currentState?.pushNamed('/pendingTasks');
+    } else {
+      navigatorKey.currentState?.pushNamed('/newNotifications', arguments: message);
+    }
   }
 
   // Initialize push notifications - updated to show local notifications
   Future<void> initPushNotifications() async {
     debugPrint('Initializing push notifications'); // Debug print
+
+    // Re-register FCM token whenever it rotates
+    FirebaseMessaging.instance.onTokenRefresh.listen(registerFcmToken);
 
     // Handle notification when app is launched from terminated state
     FirebaseMessaging.instance.getInitialMessage().then((message) {
