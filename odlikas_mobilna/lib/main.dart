@@ -20,6 +20,7 @@ import 'package:odlikas_mobilna/pages/LeaderboardPage/leaderboard_page.dart';
 import 'package:odlikas_mobilna/pages/SettingsPages/settings_page.dart';
 import 'package:odlikas_mobilna/pages/SubjectsPage/subjects_page.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
+import 'package:odlikas_mobilna/pages/PendingTasksPage/pending_tasks_page.dart';
 import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'database/firebase_options.dart';
@@ -127,6 +128,7 @@ class _MyAppState extends State<MyApp> {
           '/settings': (_) => const SettingsPage(),
           '/grades': (_) => const SubjectsPage(),
           '/newNotifications': (_) => NewNotificationsPage(),
+          '/pendingTasks': (_) => const PendingTasksPage(),
         },
       ),
     );
