@@ -8,13 +8,18 @@ class NotificationService {
 
   // Stream of whether there are any unread notifications — used by home page
   static Stream<bool> hasUnreadNotifications() {
+    return unreadCount().map((n) => n > 0);
+  }
+
+  // Stream of unread notification count — used for badge on home page bell icon
+  static Stream<int> unreadCount() {
     return _firestore
         .collection('newNotifications')
         .doc(_email)
         .collection('notifications')
         .where('isRead', isEqualTo: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs.isNotEmpty);
+        .map((snapshot) => snapshot.docs.length);
   }
 
   // Stream of all notifications ordered by timestamp — used by notifications list page

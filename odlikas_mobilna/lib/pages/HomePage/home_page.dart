@@ -17,6 +17,7 @@ import 'package:odlikas_mobilna/pages/HomePage/Widgets/scheduleCard.dart';
 import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.dart';
 import 'package:odlikas_mobilna/services/calendar_service.dart';
 import 'package:odlikas_mobilna/services/notification_service.dart';
+import 'package:odlikas_mobilna/services/study_notifications_service.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 
@@ -35,6 +36,8 @@ class _HomePageState extends State<HomePage> {
   List<Map<String, dynamic>> _holidays = [];
   String? studentName;
   StreamSubscription? _notificationSub;
+  int _unreadCount = 0;
+  int _pendingTasksCount = 0;
 
   @override
   void initState() {
@@ -57,19 +60,28 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
-    // Listen for unread notifications via Firestore stream
     _setupNotificationStream();
+    _fetchPendingTasksCount();
   }
 
   void _setupNotificationStream() {
     final email = Hive.box('User').get('email') as String?;
     if (email == null) return;
 
-    _notificationSub = NotificationService.hasUnreadNotifications().listen(
-      (hasUnread) {
-        if (mounted) setState(() => _hasUnreadNotifications = hasUnread);
+    _notificationSub = NotificationService.unreadCount().listen(
+      (n) {
+        if (mounted) setState(() => _unreadCount = n);
       },
     );
+  }
+
+  Future<void> _fetchPendingTasksCount() async {
+    try {
+      final tasks = await StudyNotificationsService().getPendingTasks();
+      if (mounted) setState(() => _pendingTasksCount = tasks.length);
+    } catch (_) {
+      // non-fatal — badge just won't include pending tasks
+    }
   }
 
   @override
@@ -210,27 +222,48 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  bool _hasUnreadNotifications = false;
-
   Widget _notificationIcon() {
-    return IconButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => NewNotificationsPage()),
-        );
-      },
-      icon: _hasUnreadNotifications
-          ? Icon(
-              Icons.notifications_active,
-              color: AppColors.accent,
-              size: 40,
-            )
-          : Icon(
-              Icons.notifications_none,
-              color: AppColors.primary,
-              size: 40,
+    final totalCount = _unreadCount + _pendingTasksCount;
+
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => NewNotificationsPage()),
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(
+            totalCount > 0
+                ? Icons.notifications_active
+                : Icons.notifications_none,
+            color: totalCount > 0 ? AppColors.accent : AppColors.primary,
+            size: 40,
+          ),
+          if (totalCount > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding: const EdgeInsets.all(3),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                child: Text(
+                  totalCount > 99 ? '99+' : '$totalCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
+        ],
+      ),
     );
   }
 
