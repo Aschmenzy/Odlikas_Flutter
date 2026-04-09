@@ -48,10 +48,10 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // 1 — Get Bearer token from the API
-      final token = await LoginService.login(email, password);
+      final loginResult = await LoginService.login(email, password);
 
       // 2 — Store token + credentials in secure storage
-      await AuthStorage.saveToken(token);
+      await AuthStorage.saveToken(loginResult.token);
       await AuthStorage.saveCredentials(email: email, password: password);
 
       // 3 — Fetch profile using the token (interceptor attaches it automatically)

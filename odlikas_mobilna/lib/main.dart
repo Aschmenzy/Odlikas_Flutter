@@ -155,8 +155,8 @@ class StartupRouter extends StatelessWidget {
     if (legacyEmail == null || legacyPassword == null) return;
 
     try {
-      final token = await LoginService.login(legacyEmail, legacyPassword);
-      await AuthStorage.saveToken(token);
+      final result = await LoginService.login(legacyEmail, legacyPassword);
+      await AuthStorage.saveToken(result.token);
       await AuthStorage.saveCredentials(
           email: legacyEmail, password: legacyPassword);
     } catch (_) {
