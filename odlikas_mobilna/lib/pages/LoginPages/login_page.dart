@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/api/auth_storage.dart';
+import 'package:odlikas_mobilna/database/api/firebase_api.dart';
 import 'package:odlikas_mobilna/database/api/login_service.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
@@ -25,18 +27,12 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _initNotifications(String email) async {
-    await FirebaseMessaging.instance.requestPermission();
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      await FirebaseFirestore.instance
-          .collection('studentProfiles')
-          .doc(email)
-          .update({'studentProfile.fcmToken': token});
+  Future<void> _initNotifications(String firebaseToken) async {
+    await FirebaseAuth.instance.signInWithCustomToken(firebaseToken);
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken != null) {
+      await FirebaseApi.registerFcmToken(fcmToken);
     }
-    FirebaseMessaging.onMessageOpenedApp.listen((_) {
-      if (mounted) Navigator.pushNamed(context, '/grades');
-    });
   }
 
   Future<void> _handleLogin() async {
@@ -79,6 +75,10 @@ class _LoginPageState extends State<LoginPage> {
       await box.put('studentName', profile.studentName);
       await box.put('studentSchool', profile.studentSchool);
       await box.put('studentProgram', profile.studentProgram);
+      await box.put('uid', loginResult.uid);
+      await box.put('isOdlikasPlus', loginResult.isOdlikasPlus);
+      await box.put('studentGrade', profile.studentGrade);
+      await box.put('studentSchoolCity', profile.studentSchoolCity);
 
       // 6 — Save profile to Firestore — no password field
       await FirebaseFirestore.instance
@@ -97,9 +97,9 @@ class _LoginPageState extends State<LoginPage> {
         }
       }, SetOptions(merge: true));
 
-      // Best-effort — Firestore/FCM failure must not block login
+      // Best-effort — Firebase Auth + FCM token registration must not block login
       try {
-        await _initNotifications(email);
+        await _initNotifications(loginResult.firebaseToken);
       } catch (e) {
         debugPrint('initNotifications failed (non-fatal): $e');
       }
