@@ -67,7 +67,8 @@ class AuthInterceptor extends Interceptor {
         final loginResult =
             await LoginService.login(credentials.email, credentials.password);
         await AuthStorage.saveToken(loginResult.token);
-        err.requestOptions.headers['Authorization'] = 'Bearer ${loginResult.token}';
+        err.requestOptions.headers['Authorization'] =
+            'Bearer ${loginResult.token}';
         final retried = await _dio.fetch(err.requestOptions);
         handler.resolve(retried);
       } catch (_) {
