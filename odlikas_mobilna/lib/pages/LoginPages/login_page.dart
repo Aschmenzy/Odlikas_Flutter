@@ -27,8 +27,10 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _initNotifications(String firebaseToken) async {
-    await FirebaseAuth.instance.signInWithCustomToken(firebaseToken);
+  Future<void> _initNotifications(String? firebaseToken) async {
+    if (firebaseToken != null) {
+      await FirebaseAuth.instance.signInWithCustomToken(firebaseToken);
+    }
     final fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken != null) {
       await FirebaseApi.registerFcmToken(fcmToken);
@@ -75,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       await box.put('studentName', profile.studentName);
       await box.put('studentSchool', profile.studentSchool);
       await box.put('studentProgram', profile.studentProgram);
-      await box.put('uid', loginResult.uid);
+      if (loginResult.uid != null) await box.put('uid', loginResult.uid);
       await box.put('isOdlikasPlus', loginResult.isOdlikasPlus);
       await box.put('studentGrade', profile.studentGrade);
       await box.put('studentSchoolCity', profile.studentSchoolCity);
