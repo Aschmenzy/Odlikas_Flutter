@@ -4,15 +4,15 @@ import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
 
 class LoginResult {
   final String token;
-  final String firebaseToken;
-  final String uid;
+  final String? firebaseToken;
+  final String? uid;
   final bool isOdlikasPlus;
 
   const LoginResult({
     required this.token,
-    required this.firebaseToken,
-    required this.uid,
-    required this.isOdlikasPlus,
+    this.firebaseToken,
+    this.uid,
+    this.isOdlikasPlus = false,
   });
 }
 
@@ -34,9 +34,9 @@ class LoginService {
       });
       return LoginResult(
         token: response.data['token'] as String,
-        firebaseToken: response.data['firebaseToken'] as String,
-        uid: response.data['uid'] as String,
-        isOdlikasPlus: response.data['isOdlikasPlus'] as bool,
+        firebaseToken: response.data['firebaseToken'] as String?,
+        uid: response.data['uid'] as String?,
+        isOdlikasPlus: response.data['isOdlikasPlus'] as bool? ?? false,
       );
     } on DioException catch (e) {
       final status = e.response?.statusCode;
