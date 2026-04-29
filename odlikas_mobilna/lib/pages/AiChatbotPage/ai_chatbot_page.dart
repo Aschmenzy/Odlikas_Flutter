@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:odlikas_mobilna/pages/PaywallPage/paywall_modal.dart';
 import 'package:odlikas_mobilna/services/AIAssistantService.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 
@@ -26,25 +28,40 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
 
   final int currentIndex = 5; // Current index for the bottom navigation bar
 
+  static const int _freeMessageLimit = 5;
+  bool _isOdlikasPlus = false;
+
   List<Message> _messages = [];
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    //pocetna poruka
     _messages.add(
       Message(
-        text:
-            'Što mogu učiniti za tebe danas? Pitaj me o ocjenama, rasporedu, testovima ili profilu.',
+        text: 'Što mogu učiniti za tebe danas? Pitaj me o ocjenama, rasporedu, testovima ili profilu.',
         isUser: false,
         timestamp: DateTime.now().subtract(const Duration(minutes: 2)),
       ),
     );
+    _loadOdlikasPlus();
+  }
+
+  Future<void> _loadOdlikasPlus() async {
+    final box = await Hive.openBox('User');
+    setState(() {
+      _isOdlikasPlus = box.get('isOdlikasPlus') as bool? ?? false;
+    });
   }
 
   //funkcija koja dodaje poruke u listu
   Future<void> _sendMessage() async {
+    final userMessageCount = _messages.where((m) => m.isUser).length;
+    if (!_isOdlikasPlus && userMessageCount >= _freeMessageLimit) {
+      final upgraded = await PaywallModal.show(context);
+      if (upgraded && mounted) setState(() => _isOdlikasPlus = true);
+      return;
+    }
     if (_promptController.text.isEmpty) return;
 
     final userMessage = _promptController.text;
