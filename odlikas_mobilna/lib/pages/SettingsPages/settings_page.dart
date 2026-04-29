@@ -22,6 +22,8 @@ import 'package:odlikas_mobilna/pages/ProfilePage/profile_page.dart';
 import 'package:odlikas_mobilna/pages/SchedulePage/schedule_page.dart';
 import 'package:odlikas_mobilna/pages/TermsAndConditionsPage/terms_and_conditions_page.dart';
 import 'package:odlikas_mobilna/pages/UploadFilesOdlikasPlus/upload_files_odlikas_plus.dart';
+import 'package:odlikas_mobilna/pages/PaywallPage/paywall_page.dart';
+import 'package:odlikas_mobilna/pages/PaywallPage/subscription_page.dart';
 import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -33,6 +35,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool isDyslexic = false;
+  bool _isOdlikasPlus = false;
   String? userEmail;
   bool isLoading = true;
 
@@ -69,6 +72,7 @@ class _SettingsPageState extends State<SettingsPage> {
     }
 
     setState(() {
+      _isOdlikasPlus = box.get('isOdlikasPlus') as bool? ?? false;
       isLoading = false;
     });
   }
@@ -316,6 +320,77 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.01),
+                  if (_isOdlikasPlus)
+                    GestureDetector(
+                      onTap: () async {
+                        final canceled = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SubscriptionPage()),
+                        );
+                        if (!mounted) return;
+                        if (canceled == true) {
+                          setState(() => _isOdlikasPlus = false);
+                        }
+                      },
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Image.asset(
+                                'assets/icon/odlikasPlusLogo.png',
+                                height: screenWidth * 0.09,
+                              ),
+                              SizedBox(width: screenWidth * 0.03),
+                              Text(
+                                'Odlikaš+',
+                                style: fontService.font(
+                                  color: AppColors.accent,
+                                  fontSize: screenWidth * 0.05,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(width: screenWidth * 0.02),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.025,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1A9C59).withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  'AKTIVNO',
+                                  style: GoogleFonts.inter(
+                                    fontSize: screenWidth * 0.028,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF1A9C59),
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Divider(color: AppColors.tertiary, thickness: 0.5),
+                          SizedBox(height: screenHeight * 0.01),
+                        ],
+                      ),
+                    )
+                  else
+                    SettingsTile(
+                      label: 'Nadogradi na Odlikaš+',
+                      path: 'assets/icon/odlikasPlusLogo.png',
+                      onTap: () async {
+                        final upgraded = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(builder: (_) => const PaywallPage()),
+                        );
+                        if (!mounted) return;
+                        if (upgraded == true) {
+                          setState(() => _isOdlikasPlus = true);
+                        }
+                      },
+                    ),
                   SettingsTile(
                     label: "Obavijesti",
                     path: "assets/images/notification.png",
@@ -328,7 +403,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   data['isConnected']
                       ? SettingsTile(
                           label: "Prenesi datoteke - Odlikaš+",
-                          path: "assets/images/odlikas_plus_upload_90x90.png",
+                          path: "assets/icon/odlikasPlusLogo.png",
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
