@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
+import 'package:odlikas_mobilna/pages/PaywallPage/paywall_modal.dart';
 
 class SubjectSelectionPage extends StatefulWidget {
   const SubjectSelectionPage({super.key});
@@ -19,11 +20,20 @@ class _SubjectSelectionPageState extends State<SubjectSelectionPage> {
   String? _selectedSubjectId;
   String? _selectedSubjectName;
   bool _isSaving = false;
+  bool _isOdlikasPlus = false;
 
   @override
   void initState() {
     super.initState();
     _gradesFuture = ApiService().fetchGrades();
+    _loadOdlikasPlus();
+  }
+
+  Future<void> _loadOdlikasPlus() async {
+    final box = await Hive.openBox('User');
+    setState(() {
+      _isOdlikasPlus = box.get('isOdlikasPlus') as bool? ?? false;
+    });
   }
 
   Future<void> _saveAndContinue() async {
@@ -132,7 +142,16 @@ class _SubjectSelectionPageState extends State<SubjectSelectionPage> {
                             _selectedSubjectId == subject.subjectId;
 
                         return GestureDetector(
-                          onTap: () {
+                          onTap: () async {
+                            final isAlreadySelected = _selectedSubjectId != null &&
+                                _selectedSubjectId != subject.subjectId;
+
+                            if (isAlreadySelected && !_isOdlikasPlus) {
+                              final upgraded = await PaywallModal.show(context);
+                              if (upgraded && mounted) setState(() => _isOdlikasPlus = true);
+                              return;
+                            }
+
                             setState(() {
                               _selectedSubjectId = subject.subjectId;
                               _selectedSubjectName = subject.subjectName;
