@@ -3,12 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/font_service.dart';
 import 'package:provider/provider.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/pages/ProfilePage/Widgets/descriptionModal.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -25,15 +23,11 @@ class _ProfilePageState extends State<ProfilePage> {
   String? studentSchool;
   String? studentProgram;
   String? _description;
-  String? _cvUrl;
   String? _pfpUrl;
-  bool _isUploadingPDF = false;
 
   bool _isLoading = true;
   String? _userEmail;
 
-  //funkcija koja horvaca podatke o korisniku
-  //koristi email kako bi nasla dokument u collecitonu
   Future<void> _fetchProfile() async {
     final box = await Hive.openBox('User');
     final email = box.get('email');
@@ -54,7 +48,6 @@ class _ProfilePageState extends State<ProfilePage> {
       if (docSnapshot.exists) {
         setState(() {
           _description = docSnapshot.data()?['description'];
-          _cvUrl = docSnapshot.data()?['cvUrl'];
           _pfpUrl = docSnapshot.data()?['pfpUrl'];
         });
       }
@@ -67,7 +60,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  //funkcija koje sprema opis korisnika iz modala u studentProfiles collection
   Future<void> _saveDescription(String description) async {
     if (_userEmail == null) {
       debugPrint('Error: No email found in local storage');
@@ -86,108 +78,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Funkcija koja uploada PDF na Firebase Storage i sprema URL u Firestore
-  Future<void> _uploadPDF() async {
-    try {
-      setState(() => _isUploadingPDF = true);
-
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-      );
-
-      if (result != null && _userEmail != null) {
-        final file = File(result.files.single.path!);
-
-        // Check file size (max 1MB)
-        final bytes = await file.readAsBytes();
-        if (bytes.length > 1024 * 1024) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('PDF mora biti manji od 1MB')),
-            );
-          }
-          return;
-        }
-
-        // Upload to Firebase Storage
-        final storageRef = FirebaseStorage.instance
-            .ref()
-            .child('odlikasFiles')
-            .child(_userEmail!)
-            .child('cv.pdf');
-
-        await storageRef.putFile(file);
-        final downloadUrl = await storageRef.getDownloadURL();
-
-        // Save URL to Firestore
-        await FirebaseFirestore.instance
-            .collection('studentProfiles')
-            .doc(_userEmail)
-            .set({
-          'cvUrl': downloadUrl,
-        }, SetOptions(merge: true));
-
-        setState(() => _cvUrl = downloadUrl);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Životopis uspješno prenesen')),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Greška: $e')),
-        );
-      }
-    } finally {
-      setState(() => _isUploadingPDF = false);
-    }
-  }
-
-  void _viewPDF() async {
-    if (_cvUrl == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Prvo prenesite životopis')),
-      );
-      return;
-    }
-
-    try {
-      // Show PDF viewer directly from URL
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Scaffold(
-              backgroundColor: AppColors.background,
-              appBar: AppBar(
-                foregroundColor: AppColors.background,
-                title: Text(
-                  'Vaš životopis',
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.background,
-                  ),
-                ),
-                backgroundColor: AppColors.primary,
-              ),
-              body: SfPdfViewer.network(_cvUrl!),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Greška pri otvaranju PDF-a: $e')),
-        );
-      }
-    }
-  }
-
   Future<void> _uploadPFP() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -197,7 +87,6 @@ class _ProfilePageState extends State<ProfilePage> {
       if (result != null && _userEmail != null) {
         final file = File(result.files.single.path!);
 
-        // Check file size (max 1MB)
         final bytes = await file.readAsBytes();
         if (bytes.length > 1024 * 1024) {
           if (mounted) {
@@ -208,7 +97,6 @@ class _ProfilePageState extends State<ProfilePage> {
           return;
         }
 
-        // Upload to Firebase Storage
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('odlikasFiles')
@@ -218,7 +106,6 @@ class _ProfilePageState extends State<ProfilePage> {
         await storageRef.putFile(file);
         final downloadUrl = await storageRef.getDownloadURL();
 
-        // Save URL to Firestore
         await FirebaseFirestore.instance
             .collection('studentProfiles')
             .doc(_userEmail)
@@ -322,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               SizedBox(height: screenHeight * 0.01),
 
-              // Profile Picture upload
+              // Profile picture
               GestureDetector(
                 onTap: _uploadPFP,
                 child: Container(
@@ -375,7 +262,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               SizedBox(height: screenHeight * 0.005),
 
-              // Student School
+              // Student school
               if (studentSchool != null)
                 Text(
                   studentSchool!,
@@ -388,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
               SizedBox(height: screenHeight * 0.005),
 
-              // Student Program
+              // Student program (smjer)
               if (studentProgram != null)
                 Text(
                   studentProgram!,
@@ -398,83 +285,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
+
               SizedBox(height: screenHeight * 0.03),
 
-              // PDF Upload Container
-              GestureDetector(
-                onTap: _isUploadingPDF ? null : _uploadPDF,
-                child: Container(
-                  width: screenWidth * 0.6,
-                  height: screenHeight * 0.28,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (_isUploadingPDF)
-                        CircularProgressIndicator(color: AppColors.background)
-                      else ...[
-                        Image.asset("assets/images/upload.png",
-                            width: screenWidth * 0.3),
-                        SizedBox(height: screenHeight * 0.02),
-                        _cvUrl != null
-                            ? Text(
-                                "Promijente životopis",
-                                style: fontService.font(
-                                  fontSize: screenWidth * 0.04,
-                                  color: AppColors.background,
-                                ),
-                              )
-                            : Text(
-                                "Prenesi svoj životopis",
-                                style: fontService.font(
-                                  fontSize: screenWidth * 0.04,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.background,
-                                ),
-                              ),
-                        SizedBox(height: screenHeight * 0.002),
-                        Text(
-                          "Podržava samo pdf",
-                          style: fontService.font(
-                            fontSize: screenWidth * 0.03,
-                            color: AppColors.background,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.03),
-
-              // View PDF Container
-              GestureDetector(
-                onTap: _viewPDF,
-                child: Container(
-                  width: screenWidth * 0.85,
-                  height: screenHeight * 0.06,
-                  decoration: BoxDecoration(
-                    color:
-                        _cvUrl != null ? AppColors.primary : AppColors.tertiary,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Pogledaj životopis",
-                      style: fontService.font(
-                        fontSize: screenWidth * 0.04,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.background,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.04),
+              // Opis profila
               Row(
                 children: [
                   Text(
@@ -515,7 +329,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
