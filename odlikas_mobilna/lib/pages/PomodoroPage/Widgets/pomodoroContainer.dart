@@ -10,6 +10,7 @@ class PomodoroContainer extends StatefulWidget {
   final ValueNotifier<int> secondsNotifier;
   final VoidCallback stopTimer;
   final VoidCallback forwardTimer;
+  final bool isDisabled;
 
   const PomodoroContainer({
     Key? key,
@@ -20,6 +21,7 @@ class PomodoroContainer extends StatefulWidget {
     required this.startTimer,
     required this.stopTimer,
     required this.forwardTimer,
+    this.isDisabled = false,
   }) : super(key: key);
 
   @override
@@ -148,10 +150,16 @@ class _PomodoroContainerState extends State<PomodoroContainer> {
         // Start/Stop Button
         Expanded(
           child: ElevatedButton(
-            onPressed: widget.isRunning ? widget.stopTimer : widget.startTimer,
+            onPressed: widget.isDisabled
+                ? null
+                : widget.isRunning
+                    ? widget.stopTimer
+                    : widget.startTimer,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: _getPhaseColor(),
+              disabledBackgroundColor: Colors.white54,
+              disabledForegroundColor: _getPhaseColor().withOpacity(0.4),
               padding: EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 12,

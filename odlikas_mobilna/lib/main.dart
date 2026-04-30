@@ -24,6 +24,7 @@ import 'package:odlikas_mobilna/pages/newNotifications/new_notifications_page.da
 import 'package:odlikas_mobilna/pages/PendingTasksPage/pending_tasks_page.dart';
 import 'package:provider/provider.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
+import 'package:odlikas_mobilna/services/pomodoro_notifier.dart';
 import 'database/firebase_options.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -117,6 +118,10 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProxyProvider<ApiService, TestViewmodel>(
           create: (context) => TestViewmodel(context.read<ApiService>()),
           update: (_, apiService, __) => TestViewmodel(apiService),
+        ),
+        ChangeNotifierProxyProvider<ApiService, PomodoroNotifier>(
+          create: (context) => PomodoroNotifier(context.read<ApiService>()),
+          update: (_, apiService, prev) => prev ?? PomodoroNotifier(apiService),
         ),
       ],
       child: MaterialApp(

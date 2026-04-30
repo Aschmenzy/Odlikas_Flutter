@@ -48,4 +48,14 @@ class ApiService {
     final response = await _dio.get('/api/Scraper/ScrapeScheduleTable');
     return ScheduleSubject.fromJson(response.data['data']);
   }
+
+  Future<Map<String, dynamic>> getPomodoroStreak() async {
+    final response = await _dio.get('/api/Pomodoro/GetStreak');
+    return response.data['data'] as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> completePomodoroSession() async {
+    final response = await _dio.post('/api/Pomodoro/CompleteSession');
+    return response.data['data'] as Map<String, dynamic>;
+  }
 }
