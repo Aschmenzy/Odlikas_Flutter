@@ -316,7 +316,7 @@ class QueryIntent {
     if (value == null || value == 'null' || (value as String).isEmpty) {
       return null;
     }
-    return value as String;
+    return value;
   }
 }
 
