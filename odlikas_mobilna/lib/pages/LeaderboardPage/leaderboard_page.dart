@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:odlikas_mobilna/constants/constants.dart';
 import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/services/leaderboard_service.dart';
+import 'package:odlikas_mobilna/utilities/scoring_info_sheet.dart';
 
 class LeaderboardPage extends StatefulWidget {
   const LeaderboardPage({super.key});
@@ -111,6 +112,10 @@ class _LeaderboardPageState extends State<LeaderboardPage>
     if (mounted) setState(() => _nickname = null);
   }
 
+  void _showScoringInfo(BuildContext context) {
+    showScoringInfoSheet(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
@@ -130,8 +135,18 @@ class _LeaderboardPageState extends State<LeaderboardPage>
             color: AppColors.secondary,
           ),
         ),
-        actions: _nickname != null
-            ? [
+        actions: [
+                IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () => _showScoringInfo(context),
+                  color: AppColors.secondary,
+                ),
+                if (_nickname != null) ...[
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: () => setState(() {}),
+                  color: AppColors.secondary,
+                ),
                 PopupMenuButton<String>(
                   onSelected: (value) {
                     if (value == 'optout') _optOut();
@@ -143,8 +158,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
                     ),
                   ],
                 ),
-              ]
-            : null,
+                ]],
       ),
       body: _nickname == null ? _buildOptInForm(sw) : _buildLeaderboard(sw),
       bottomNavigationBar: const CustomBottomNavBar(currentIndex: 2),
@@ -321,7 +335,7 @@ class _LeaderboardPageState extends State<LeaderboardPage>
   }
 }
 
-class _LeaderboardTab extends StatelessWidget {
+class _LeaderboardTab extends StatefulWidget {
   final Future<List<LeaderboardEntry>> future;
   final bool showClassId;
   final bool showCity;
@@ -335,11 +349,30 @@ class _LeaderboardTab extends StatelessWidget {
   });
 
   @override
+  State<_LeaderboardTab> createState() => _LeaderboardTabState();
+}
+
+class _LeaderboardTabState extends State<_LeaderboardTab> {
+  late Future<List<LeaderboardEntry>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = widget.future;
+  }
+
+  @override
+  void didUpdateWidget(_LeaderboardTab old) {
+    super.didUpdateWidget(old);
+    if (old.future != widget.future) _future = widget.future;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
 
     return FutureBuilder<List<LeaderboardEntry>>(
-      future: future,
+      future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return Center(
@@ -374,13 +407,17 @@ class _LeaderboardTab extends StatelessWidget {
           );
         }
 
-        return ListView.builder(
+        return RefreshIndicator(
+          onRefresh: () async =>
+              setState(() { _future = widget.future; }),
+          child: ListView.builder(
           padding: EdgeInsets.symmetric(
               horizontal: sw * 0.04, vertical: sw * 0.02),
           itemCount: entries.length,
           itemBuilder: (context, index) {
             final entry = entries[index];
-            final isMe = entry.nickname == nickname;
+            final isMe = entry.nickname == widget.nickname;
+
             final rank = index + 1;
 
             return Container(
@@ -432,7 +469,7 @@ class _LeaderboardTab extends StatelessWidget {
                             color: AppColors.secondary,
                           ),
                         ),
-                        if (showClassId && entry.classId != null)
+                        if (widget.showClassId && entry.classId != null)
                           Text(
                             entry.classId!,
                             style: GoogleFonts.inter(
@@ -440,7 +477,7 @@ class _LeaderboardTab extends StatelessWidget {
                               color: AppColors.tertiary,
                             ),
                           ),
-                        if (showCity && entry.city != null)
+                        if (widget.showCity && entry.city != null)
                           Text(
                             entry.city!,
                             style: GoogleFonts.inter(
@@ -480,7 +517,7 @@ class _LeaderboardTab extends StatelessWidget {
               ),
             );
           },
-        );
+        ));
       },
     );
   }

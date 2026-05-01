@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Block all plain HTTP traffic in production -->
-    <base-config cleartextTrafficPermitted="false" />
+    <!-- Production always uses HTTPS (Fly.io enforces it).
+         Cleartext allowed so local HTTP backend works for dev/demo. -->
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

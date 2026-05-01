@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
+import 'package:odlikas_mobilna/database/api/auth_storage.dart';
 import 'package:odlikas_mobilna/font_service.dart';
 import 'package:provider/provider.dart';
 
@@ -16,18 +17,6 @@ class ConnectScreen extends StatefulWidget {
 class _ConnectScreenState extends State<ConnectScreen> {
   MobileScannerController cameraController = MobileScannerController();
   bool isScanning = true;
-
-  late Box box;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeBox();
-  }
-
-  Future<void> _initializeBox() async {
-    box = await Hive.openBox('User');
-  }
 
   @override
   void dispose() {
@@ -67,17 +56,15 @@ class _ConnectScreenState extends State<ConnectScreen> {
 
       if (doc.exists) {
         final box = await Hive.openBox('User');
-        final email = await box.get('email');
-        final password = await box.get('password');
+        final email = box.get('email') as String?;
+        final token = await AuthStorage.readToken();
 
         box.put('screenConnected', true);
 
-        // updejt screen collection sa email sifrom i promjenom connected na true
         await FirebaseFirestore.instance
             .collection('CreatedScreens')
             .doc(uid)
-            .update(
-                {'linkedUser': email, 'password': password, 'connected': true});
+            .update({'linkedUser': email, 'token': token, 'connected': true});
 
         navigator.pop();
         navigator.pop();

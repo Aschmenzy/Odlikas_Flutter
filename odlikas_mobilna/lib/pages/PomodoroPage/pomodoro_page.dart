@@ -4,6 +4,7 @@ import 'package:odlikas_mobilna/customBottomNavBar.dart';
 import 'package:odlikas_mobilna/font_service.dart';
 import 'package:odlikas_mobilna/services/pomodoro_notifier.dart';
 import 'package:odlikas_mobilna/pages/PomodoroPage/Widgets/pomodoroContainer.dart';
+import 'package:odlikas_mobilna/utilities/scoring_info_sheet.dart';
 import 'package:provider/provider.dart';
 
 class PomodoroPage extends StatefulWidget {
@@ -67,15 +68,30 @@ class _PomodoroPageState extends State<PomodoroPage> {
                   child: Column(
                     children: [
                       SizedBox(height: screenSize.height * 0.05),
-                      Center(
-                        child: Text(
-                          'Pomodoro mjerač vremena',
-                          style: fontService.font(
-                            fontSize: screenSize.width * 0.06,
-                            fontWeight: FontWeight.w800,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(width: 40),
+                          Expanded(
+                            child: Text(
+                              'Pomodoro mjerač vremena',
+                              style: fontService.font(
+                                fontSize: screenSize.width * 0.06,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                          textAlign: TextAlign.center,
-                        ),
+                          SizedBox(
+                            width: 40,
+                            child: IconButton(
+                              icon: const Icon(Icons.info_outline),
+                              onPressed: () => showScoringInfoSheet(context),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: screenSize.height * 0.02),
                     ],

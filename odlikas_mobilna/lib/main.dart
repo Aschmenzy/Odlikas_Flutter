@@ -119,10 +119,7 @@ class _MyAppState extends State<MyApp> {
           create: (context) => TestViewmodel(context.read<ApiService>()),
           update: (_, apiService, __) => TestViewmodel(apiService),
         ),
-        ChangeNotifierProxyProvider<ApiService, PomodoroNotifier>(
-          create: (context) => PomodoroNotifier(context.read<ApiService>()),
-          update: (_, apiService, prev) => prev ?? PomodoroNotifier(apiService),
-        ),
+        ChangeNotifierProvider(create: (_) => PomodoroNotifier()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

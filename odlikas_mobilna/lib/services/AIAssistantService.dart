@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:odlikas_mobilna/database/api/api_services.dart';
 import 'package:odlikas_mobilna/database/models/grades.dart';
 import 'package:odlikas_mobilna/database/models/schenule_subject.dart';
@@ -59,7 +59,8 @@ class AIAssistantService {
       switch (intent.intent) {
         case 'grades':
           try {
-            contextData = _buildGradesContext(await _getGrades(), intent.subject);
+            contextData =
+                _buildGradesContext(await _getGrades(), intent.subject);
           } catch (e) {
             contextData = 'Podaci o ocjenama trenutno nisu dostupni.';
           }
@@ -75,7 +76,8 @@ class AIAssistantService {
 
         case 'schedule':
           try {
-            contextData = _buildScheduleContext(await _getSchedule(), intent.dayOfWeek);
+            contextData =
+                _buildScheduleContext(await _getSchedule(), intent.dayOfWeek);
           } catch (e) {
             contextData = 'Podaci o rasporedu trenutno nisu dostupni.';
           }
@@ -162,10 +164,13 @@ class AIAssistantService {
     }).toList();
 
     if (graded.isNotEmpty) {
-      final avg = graded.fold(0.0,
-              (sum, s) => sum + (double.tryParse(s.grade.replaceAll(',', '.')) ?? 0)) /
+      final avg = graded.fold(
+              0.0,
+              (sum, s) =>
+                  sum + (double.tryParse(s.grade.replaceAll(',', '.')) ?? 0)) /
           graded.length;
-      buffer.writeln('Prosjek: ${avg.toStringAsFixed(2)} (${graded.length} predmeta ocijenjeno)');
+      buffer.writeln(
+          'Prosjek: ${avg.toStringAsFixed(2)} (${graded.length} predmeta ocijenjeno)');
       buffer.writeln();
     }
 
@@ -193,10 +198,18 @@ class AIAssistantService {
 
     final sorted = _getSortedTests(allTests);
     final upcoming = sorted.where((t) {
-      try { return _parseTestDate(t.testDate).isAfter(now); } catch (_) { return false; }
+      try {
+        return _parseTestDate(t.testDate).isAfter(now);
+      } catch (_) {
+        return false;
+      }
     }).toList();
     final past = sorted.where((t) {
-      try { return _parseTestDate(t.testDate).isBefore(now); } catch (_) { return false; }
+      try {
+        return _parseTestDate(t.testDate).isBefore(now);
+      } catch (_) {
+        return false;
+      }
     }).toList();
 
     final buffer = StringBuffer();
@@ -206,7 +219,11 @@ class AIAssistantService {
       for (final t in upcoming.take(8)) {
         final days = _getDaysUntilTest(t.testDate, now);
         final daysStr = days != null
-            ? days == 0 ? ' (danas)' : days == 1 ? ' (sutra)' : ' (za $days dana)'
+            ? days == 0
+                ? ' (danas)'
+                : days == 1
+                    ? ' (sutra)'
+                    : ' (za $days dana)'
             : '';
         buffer.writeln('- ${t.testName}: ${t.testDate}$daysStr');
         if (t.testDescription.isNotEmpty) {
@@ -257,13 +274,20 @@ class AIAssistantService {
       // Full week — compact one-liner per day
       buffer.writeln('Tjedni raspored:');
       const order = [
-        'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
       ];
       final dayMap = {for (final d in schedule.schedule) d.day: d};
       for (final name in order) {
         final day = dayMap[name];
         if (day == null || day.subjects.isEmpty) continue;
-        buffer.writeln('${dayTranslations[name] ?? name}: ${day.subjects.join(', ')}');
+        buffer.writeln(
+            '${dayTranslations[name] ?? name}: ${day.subjects.join(', ')}');
       }
     }
 
@@ -315,7 +339,9 @@ class AIAssistantService {
       final full = RegExp(r'(\d{1,2})\.(\d{1,2})\.(\d{4})');
       if (full.hasMatch(s)) {
         final m = full.firstMatch(s)!;
-        final d = int.parse(m.group(1)!), mo = int.parse(m.group(2)!), y = int.parse(m.group(3)!);
+        final d = int.parse(m.group(1)!),
+            mo = int.parse(m.group(2)!),
+            y = int.parse(m.group(3)!);
         if (d >= 1 && d <= 31 && mo >= 1 && mo <= 12) return DateTime(y, mo, d);
       }
 
@@ -336,7 +362,9 @@ class AIAssistantService {
       final dash = RegExp(r'(\d{1,2})-(\d{1,2})-(\d{4})');
       if (dash.hasMatch(s)) {
         final m = dash.firstMatch(s)!;
-        final d = int.parse(m.group(1)!), mo = int.parse(m.group(2)!), y = int.parse(m.group(3)!);
+        final d = int.parse(m.group(1)!),
+            mo = int.parse(m.group(2)!),
+            y = int.parse(m.group(3)!);
         if (d >= 1 && d <= 31 && mo >= 1 && mo <= 12) return DateTime(y, mo, d);
       }
 
@@ -344,18 +372,38 @@ class AIAssistantService {
       final iso = RegExp(r'(\d{4})-(\d{1,2})-(\d{1,2})');
       if (iso.hasMatch(s)) {
         final m = iso.firstMatch(s)!;
-        final y = int.parse(m.group(1)!), mo = int.parse(m.group(2)!), d = int.parse(m.group(3)!);
+        final y = int.parse(m.group(1)!),
+            mo = int.parse(m.group(2)!),
+            d = int.parse(m.group(3)!);
         if (d >= 1 && d <= 31 && mo >= 1 && mo <= 12) return DateTime(y, mo, d);
       }
 
       // Croatian written date: "26. rujan 2023."
       final months = {
-        'sijecanj': 1, 'veljaca': 2, 'ozujak': 3, 'travanj': 4,
-        'svibanj': 5, 'lipanj': 6, 'srpanj': 7, 'kolovoz': 8,
-        'rujan': 9, 'listopad': 10, 'studeni': 11, 'prosinac': 12,
-        'sijecnja': 1, 'veljace': 2, 'ozujka': 3, 'travnja': 4,
-        'svibnja': 5, 'lipnja': 6, 'srpnja': 7, 'kolovoza': 8,
-        'rujna': 9, 'listopada': 10, 'studenoga': 11, 'prosinca': 12,
+        'sijecanj': 1,
+        'veljaca': 2,
+        'ozujak': 3,
+        'travanj': 4,
+        'svibanj': 5,
+        'lipanj': 6,
+        'srpanj': 7,
+        'kolovoz': 8,
+        'rujan': 9,
+        'listopad': 10,
+        'studeni': 11,
+        'prosinac': 12,
+        'sijecnja': 1,
+        'veljace': 2,
+        'ozujka': 3,
+        'travnja': 4,
+        'svibnja': 5,
+        'lipnja': 6,
+        'srpnja': 7,
+        'kolovoza': 8,
+        'rujna': 9,
+        'listopada': 10,
+        'studenoga': 11,
+        'prosinca': 12,
       };
       final written = RegExp(r'(\d{1,2})\.\s+([^\s]+)\s+(\d{4})');
       if (written.hasMatch(s)) {

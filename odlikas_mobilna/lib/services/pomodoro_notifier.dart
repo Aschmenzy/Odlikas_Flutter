@@ -1,17 +1,15 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:odlikas_mobilna/database/api/api_services.dart';
+import 'package:odlikas_mobilna/services/pomodoro_api_service.dart';
 
 enum PomodoroTimerState { idle, running, paused }
 
 class PomodoroNotifier extends ChangeNotifier {
-  final ApiService _api;
-
-  PomodoroNotifier(this._api);
+  final _api = PomodoroApiService();
 
   // Drives only the countdown display — avoids rebuilding the whole page each tick
-  final ValueNotifier<int> secondsNotifier = ValueNotifier(25 * 60);
+  final ValueNotifier<int> secondsNotifier = ValueNotifier(5); // TEST — revert to 25 * 60 before release
 
   PomodoroTimerState timerState = PomodoroTimerState.idle;
   String currentPhase = 'Pomodoro';
@@ -40,26 +38,19 @@ class PomodoroNotifier extends ChangeNotifier {
     sessionError = null;
     notifyListeners();
 
-    // TODO: remove mock once backend endpoints are live
-    await Future.delayed(const Duration(milliseconds: 300));
-    todaySessions = 2;
-    currentStreak = 5;
-    isCapped = false;
-    isLoadingStreak = false;
-    notifyListeners();
-
-    // try {
-    //   final data = await _api.getPomodoroStreak();
-    //   todaySessions = (data['todaySessions'] as num?)?.toInt() ?? 0;
-    //   currentStreak = (data['currentStreak'] as num?)?.toInt() ?? 0;
-    //   isCapped = data['isCapped'] as bool? ?? false;
-    // } catch (e) {
-    //   if (kDebugMode) debugPrint('PomodoroNotifier.init error: $e');
-    //   sessionError = 'Nije moguće dohvatiti statistiku. Provjeri internetsku vezu.';
-    // } finally {
-    //   isLoadingStreak = false;
-    //   notifyListeners();
-    // }
+    try {
+      final data = await _api.getStreak();
+      todaySessions = data.todaySessions;
+      currentStreak = data.currentStreak;
+      isCapped = data.capped ?? false;
+    } catch (e) {
+      if (kDebugMode) debugPrint('PomodoroNotifier.init error: $e');
+      sessionError =
+          'Nije moguće dohvatiti statistiku. Provjeri internetsku vezu.';
+    } finally {
+      isLoadingStreak = false;
+      notifyListeners();
+    }
   }
 
   // ──────────────────────────────────────────────
@@ -113,28 +104,33 @@ class PomodoroNotifier extends ChangeNotifier {
   }
 
   Future<void> _onTimerFinished() async {
-    // Fire notification immediately — works even when app is backgrounded
-    await _showCompletionNotification();
-
     if (currentPhase == 'Pomodoro') {
-      // TODO: remove mock once backend endpoints are live
+      // Optimistically fill circle so UI feels instant
       todaySessions = (todaySessions + 1).clamp(0, dailyCap);
-      isCapped = todaySessions >= dailyCap;
-      sessionError = null;
+      notifyListeners();
 
-      // try {
-      //   final data = await _api.completePomodoroSession();
-      //   todaySessions = (data['todaySessions'] as num?)?.toInt() ?? todaySessions;
-      //   currentStreak = (data['currentStreak'] as num?)?.toInt() ?? currentStreak;
-      //   isCapped = data['isCapped'] as bool? ?? isCapped;
-      //   sessionError = null;
-      // } catch (e) {
-      //   if (kDebugMode) debugPrint('CompleteSession error: $e');
-      //   sessionError = 'Sesija nije snimljena. Provjeri internetsku vezu.';
-      //   timerState = PomodoroTimerState.idle;
-      //   notifyListeners();
-      //   return;
-      // }
+      try {
+        final data = await _api.completeSession();
+        todaySessions = data.todaySessions;
+        currentStreak = data.currentStreak;
+        isCapped = data.capped ?? false;
+        sessionError = null;
+        await _showNotification(
+          'Sesija zabilježena!',
+          isCapped
+              ? 'Dostignut dnevni maksimum. Odlično!'
+              : 'Sad pauza — dobro si radio!',
+        );
+      } catch (e) {
+        if (kDebugMode) debugPrint('CompleteSession error: $e');
+        todaySessions = (todaySessions - 1).clamp(0, dailyCap);
+        sessionError = 'Sesija nije snimljena. Provjeri internetsku vezu.';
+        timerState = PomodoroTimerState.idle;
+        notifyListeners();
+        return;
+      }
+    } else {
+      await _showNotification('Pauza završena!', 'Vrijeme je za učenje.');
     }
 
     _advancePhase();
@@ -165,7 +161,7 @@ class PomodoroNotifier extends ChangeNotifier {
       case 'Duga pauza':
         return 15 * 60;
       default:
-        return 10; // TEST — revert to 25 * 60 before release
+        return 5;
     }
   }
 
@@ -183,7 +179,7 @@ class PomodoroNotifier extends ChangeNotifier {
     _notificationsInitialised = true;
   }
 
-  Future<void> _showCompletionNotification() async {
+  Future<void> _showNotification(String title, String body) async {
     try {
       const android = AndroidNotificationDetails(
         'pomodoro_timer',
@@ -195,8 +191,8 @@ class PomodoroNotifier extends ChangeNotifier {
       const ios = DarwinNotificationDetails();
       await _plugin.show(
         42,
-        'Sesija završena!',
-        'Zabilježi svoju Pomodoro sesiju.',
+        title,
+        body,
         const NotificationDetails(android: android, iOS: ios),
       );
     } catch (e) {

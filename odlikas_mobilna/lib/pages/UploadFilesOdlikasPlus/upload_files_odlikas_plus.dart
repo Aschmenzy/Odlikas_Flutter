@@ -37,6 +37,13 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
     });
   }
 
+  // Strips the revocable download token — works fine with public Storage rules.
+  String _cleanUrl(String url) {
+    final uri = Uri.parse(url);
+    final params = Map<String, String>.from(uri.queryParameters)..remove('token');
+    return uri.replace(queryParameters: params).toString();
+  }
+
   /// Učitava postojeće podatke o datotekama iz Firestore-a.
   Future<void> loadFiles() async {
     if (userEmail == null) return;
@@ -50,7 +57,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
         List<UploadedFile> filesList = filesData.map((file) {
           return UploadedFile(
             name: file["name"],
-            url: file["url"],
+            url: _cleanUrl(file["url"] as String),
             extension: file["extension"],
           );
         }).toList();
@@ -60,6 +67,10 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
       }
     } catch (e) {
       debugPrint("Greška pri učitavanju datoteka: $e");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Greška pri učitavanju datoteka: $e")),
+      );
     }
   }
 
@@ -95,6 +106,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
       setState(() {
         isLoading = true;
       });
+
       String filePath = result.files.single.path!;
       String fileName = result.files.single.name;
       String fileExtension = fileName.split('.').last;
@@ -108,7 +120,7 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
         // Učitaj datoteku.
         UploadTask uploadTask = storageRef.putFile(File(filePath));
         TaskSnapshot snapshot = await uploadTask;
-        String downloadUrl = await snapshot.ref.getDownloadURL();
+        String downloadUrl = _cleanUrl(await snapshot.ref.getDownloadURL());
 
         // Pripremi metapodatke o datoteci.
         UploadedFile newFile = UploadedFile(
@@ -154,6 +166,10 @@ class _UploadFilesOdlikasPlusState extends State<UploadFilesOdlikasPlus> {
         setState(() {
           isLoading = false;
         });
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Prijenos nije uspio: $e")),
+        );
       }
     }
   }

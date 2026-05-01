@@ -293,15 +293,13 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   SizedBox(height: screenHeight * 0.012),
                   GestureDetector(
-                    onTap: data['isConnected']
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => InBetweenPage()),
-                            );
-                          },
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => InBetweenPage()),
+                      );
+                    },
                     child: SizedBox(
                       width: screenWidth * 1,
                       height: screenHeight * 0.17,
