@@ -6,10 +6,12 @@ import 'package:odlikas_mobilna/services/pomodoro_api_service.dart';
 enum PomodoroTimerState { idle, running, paused }
 
 class PomodoroNotifier extends ChangeNotifier {
-  final _api = PomodoroApiService();
+  final PomodoroApiService _api;
+
+  PomodoroNotifier({PomodoroApiService? api}) : _api = api ?? PomodoroApiService();
 
   // Drives only the countdown display — avoids rebuilding the whole page each tick
-  final ValueNotifier<int> secondsNotifier = ValueNotifier(5); // TEST — revert to 25 * 60 before release
+  final ValueNotifier<int> secondsNotifier = ValueNotifier(25 * 60);
 
   PomodoroTimerState timerState = PomodoroTimerState.idle;
   String currentPhase = 'Pomodoro';
@@ -161,7 +163,7 @@ class PomodoroNotifier extends ChangeNotifier {
       case 'Duga pauza':
         return 15 * 60;
       default:
-        return 5;
+        return 25 * 60;
     }
   }
 
