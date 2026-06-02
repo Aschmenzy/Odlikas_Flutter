@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:odlikas_mobilna/exceptions/app_exceptions.dart';
 
@@ -19,12 +20,20 @@ class LoginResult {
 /// Handles only POST /api/Login and DELETE /api/Login.
 /// Uses a plain Dio instance — no AuthInterceptor — to avoid circular dependency.
 class LoginService {
-  static final Dio _dio = Dio(BaseOptions(
-    baseUrl: dotenv.env['API_BASE_URL'] ?? 'https://default-url.com',
-    connectTimeout: const Duration(seconds: 15),
-    receiveTimeout: const Duration(seconds: 30),
-    contentType: 'application/json',
-  ));
+  static Dio? _instance;
+
+  static Dio get _dio => _instance ??= Dio(BaseOptions(
+        baseUrl: dotenv.env['API_BASE_URL'] ?? 'https://default-url.com',
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 30),
+        contentType: 'application/json',
+      ));
+
+  @visibleForTesting
+  static void overrideDio(Dio dio) => _instance = dio;
+
+  @visibleForTesting
+  static void resetDio() => _instance = null;
 
   static Future<LoginResult> login(String email, String password) async {
     try {
