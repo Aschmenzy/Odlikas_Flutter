@@ -47,8 +47,14 @@ app.*.map.json
 *.env
 
 
+# AI agent artifacts
 .superpowers/
-.claude/settings.local.json
+docs/superpowers/
+.claude/
+.agents/
+
+# Binary archives (use GitHub Releases instead)
+*.zip
 
 # Generated Windows plugin files
 windows/flutter/generated_plugin_registrant.cc
