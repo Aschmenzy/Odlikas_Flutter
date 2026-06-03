@@ -165,15 +165,15 @@ class _LeaderboardPageState extends State<LeaderboardPage>
             controller: _tabController,
             children: [
               _LeaderboardTab(
-                future: _service.getClassLeaderboard(_schoolId, _classId),
+                fetchData: () => _service.getClassLeaderboard(_schoolId, _classId),
                 nickname: _nickname!,
               ),
               _LeaderboardTab(
-                future: _service.getSchoolLeaderboard(_schoolId),
+                fetchData: () => _service.getSchoolLeaderboard(_schoolId),
                 nickname: _nickname!,
               ),
               _LeaderboardTab(
-                future: _service.getProgramLeaderboard(_program),
+                fetchData: () => _service.getProgramLeaderboard(_program),
                 nickname: _nickname!,
               ),
             ],
@@ -359,10 +359,10 @@ class _LeaderboardPageState extends State<LeaderboardPage>
 // ─── Tab widget ────────────────────────────────────────────────────────────────
 
 class _LeaderboardTab extends StatefulWidget {
-  final Future<List<LeaderboardEntry>> future;
+  final Future<List<LeaderboardEntry>> Function() fetchData;
   final String nickname;
 
-  const _LeaderboardTab({required this.future, required this.nickname});
+  const _LeaderboardTab({required this.fetchData, required this.nickname});
 
   @override
   State<_LeaderboardTab> createState() => _LeaderboardTabState();
@@ -374,13 +374,13 @@ class _LeaderboardTabState extends State<_LeaderboardTab> {
   @override
   void initState() {
     super.initState();
-    _future = widget.future;
+    _future = widget.fetchData();
   }
 
   @override
   void didUpdateWidget(_LeaderboardTab old) {
     super.didUpdateWidget(old);
-    if (old.future != widget.future) _future = widget.future;
+    if (old.fetchData != widget.fetchData) _future = widget.fetchData();
   }
 
   @override
@@ -435,7 +435,7 @@ class _LeaderboardTabState extends State<_LeaderboardTab> {
         return RefreshIndicator(
           color: AppColors.primary,
           onRefresh: () async => setState(() {
-            _future = widget.future;
+            _future = widget.fetchData();
           }),
           child: ListView(
             padding:

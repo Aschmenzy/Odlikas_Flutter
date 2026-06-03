@@ -58,13 +58,20 @@ class _ConnectScreenState extends State<ConnectScreen> {
         final box = await Hive.openBox('User');
         final email = box.get('email') as String?;
         final token = await AuthStorage.readToken();
+        final leaderboardNickname = box.get('leaderboard_nickname') as String?;
 
         box.put('screenConnected', true);
 
         await FirebaseFirestore.instance
             .collection('CreatedScreens')
             .doc(uid)
-            .update({'linkedUser': email, 'token': token, 'connected': true});
+            .update({
+          'linkedUser': email,
+          'token': token,
+          'connected': true,
+          if (leaderboardNickname != null)
+            'leaderboardNickname': leaderboardNickname,
+        });
 
         navigator.pop();
         navigator.pop();
