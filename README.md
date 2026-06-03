@@ -162,6 +162,24 @@ Subscription management (view status, cancel) is in **Settings → Odlikaš+**.
 
 ---
 
+## Tests
+
+Unit tests live in `odlikas_mobilna/test/`. Run them with:
+
+```bash
+flutter test
+```
+
+| Suite | Coverage |
+|---|---|
+| `exceptions/` | All custom exception types (`AppException`, `AuthException`, `ApiException`, `RateLimitException`, `NetworkException`) |
+| `models/` | JSON parsing for `Grades`, `Schedule`, `StudentProfile`, `Tests`, `PomodoroSessionResult` — including missing-field fallbacks |
+| `services/login_service_test` | HTTP response mapping: 200 success, 401 auth failure, 429 rate limit, generic API error |
+| `services/pomodoro_notifier_test` | Full state machine — idle/running/paused transitions, phase cycling (Pomodoro → short break → long break), daily cap |
+| `services/payment_service_test` | Smoke test for `createSubscription` and `confirm` surface |
+
+---
+
 ## Security
 
 - Credentials are never stored — only a session token is kept, in encrypted secure storage
