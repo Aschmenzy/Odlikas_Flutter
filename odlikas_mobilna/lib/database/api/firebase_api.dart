@@ -15,31 +15,26 @@ class FirebaseApi {
     }
   }
 
-  // Instance of firebase messaging
   final _firebaseMessaging = FirebaseMessaging.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Add this for local notifications
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  // New method to set up notification channels
   Future<void> setupNotificationChannels() async {
     // Only needed for Android 8.0 or higher
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'high_importance_channel', // Same ID as in AndroidManifest.xml
-      'High Importance Notifications', // Title visible in app settings
+      'high_importance_channel',
+      'High Importance Notifications',
       description: 'This channel is used for important notifications.',
       importance: Importance.high,
     );
 
-    // Create the Android notification channel
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // Initialize local notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
 
@@ -52,7 +47,6 @@ class FirebaseApi {
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
-        // Handle notification tap
         debugPrint('Local notification tapped: ${notificationResponse.payload}');
       },
     );
@@ -60,23 +54,18 @@ class FirebaseApi {
     debugPrint('Notification channels set up successfully');
   }
 
-  // Method to initialize notifications - updated to set up channels first
   Future<void> initNotifications() async {
-    // Set up notification channels first
     await setupNotificationChannels();
 
-    // Request permission
     await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    // Initialize push notifications
     await initPushNotifications();
   }
 
-  // Show a local notification when app is in foreground
   void showLocalNotification(RemoteMessage message) {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
@@ -95,7 +84,6 @@ class FirebaseApi {
             channelDescription:
                 'This channel is used for important notifications.',
             icon: '@mipmap/launcher_icon',
-            // other properties...
           ),
         ),
         payload: message.data.toString(),
@@ -105,21 +93,16 @@ class FirebaseApi {
     }
   }
 
-  // The rest of your methods remain the same
-  // Saving notification in the database
   Future<void> saveNotifications(RemoteMessage message) async {
-    debugPrint(
-        'Attempting to save notification: ${message.notification?.title}'); // Debug print
+    debugPrint('Attempting to save notification: ${message.notification?.title}');
 
-    // Open Hive box and get email
     final box = await Hive.openBox('User');
     final email = box.get('email');
 
-    debugPrint('User email from Hive: $email'); // Debug print
+    debugPrint('User email from Hive: $email');
 
     try {
       if (email != null) {
-        // Create notification data
         final notificationData = {
           'title': message.notification?.title ?? 'No Title',
           'body': message.notification?.body ?? 'No Body',
@@ -128,25 +111,23 @@ class FirebaseApi {
           'isRead': false,
         };
 
-        debugPrint('Notification data: $notificationData'); // Debug print
+        debugPrint('Notification data: $notificationData');
 
-        // Save to Firestore
         await _firestore
             .collection('newNotifications')
             .doc(email)
             .collection('notifications')
             .add(notificationData);
 
-        debugPrint('Successfully saved notification to Firestore'); // Debug print
+        debugPrint('Successfully saved notification to Firestore');
       } else {
-        debugPrint('Cannot save notification: email is null'); // Debug print
+        debugPrint('Cannot save notification: email is null');
       }
     } catch (e) {
-      debugPrint('Error saving notification: $e'); // Debug print
+      debugPrint('Error saving notification: $e');
     }
   }
 
-  // Handle navigation when notification is tapped
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
 
@@ -157,16 +138,15 @@ class FirebaseApi {
     }
   }
 
-  // Initialize push notifications - updated to show local notifications
   Future<void> initPushNotifications() async {
-    debugPrint('Initializing push notifications'); // Debug print
+    debugPrint('Initializing push notifications');
 
     // Re-register FCM token whenever it rotates
     FirebaseMessaging.instance.onTokenRefresh.listen(registerFcmToken);
 
     // Handle notification when app is launched from terminated state
     FirebaseMessaging.instance.getInitialMessage().then((message) {
-      debugPrint('Initial message: ${message?.notification?.title}'); // Debug print
+      debugPrint('Initial message: ${message?.notification?.title}');
       if (message != null) {
         saveNotifications(message);
         handleMessage(message);
@@ -175,38 +155,31 @@ class FirebaseApi {
 
     // Handle notification tap when app is in background
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      debugPrint(
-          'onMessageOpenedApp: ${message.notification?.title}'); // Debug print
+      debugPrint('onMessageOpenedApp: ${message.notification?.title}');
       saveNotifications(message);
       handleMessage(message);
     });
 
-    // Handle foreground messages
     FirebaseMessaging.onMessage.listen((message) {
-      debugPrint(
-          'Foreground message received: ${message.notification?.title}'); // Debug print
+      debugPrint('Foreground message received: ${message.notification?.title}');
       saveNotifications(message);
-
-      // Show a local notification when app is in foreground
       showLocalNotification(message);
     });
 
-    debugPrint('Push notification listeners initialized'); // Debug print
+    debugPrint('Push notification listeners initialized');
   }
 
-  // Rest of your methods remain unchanged
-  // Fetch all notifications for current user
   Stream<QuerySnapshot> getNotificationsStream() async* {
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
 
     if (email == null) {
-      debugPrint('No email found, returning empty stream'); // Debug print
+      debugPrint('No email found, returning empty stream');
       yield* Stream.empty();
       return;
     }
 
-    debugPrint('Getting notifications stream for: $email'); // Debug print
+    debugPrint('Getting notifications stream for: $email');
 
     yield* _firestore
         .collection('newNotifications')
@@ -216,7 +189,6 @@ class FirebaseApi {
         .snapshots();
   }
 
-  // Mark notification as read
   Future<void> markNotificationAsRead(String notificationId) async {
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
@@ -231,7 +203,6 @@ class FirebaseApi {
         .update({'isRead': true});
   }
 
-  // Delete notification
   Future<void> deleteNotification(String notificationId) async {
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
@@ -246,7 +217,6 @@ class FirebaseApi {
         .delete();
   }
 
-  // Get unread notifications count
   Future<int> getUnreadNotificationsCount() async {
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
@@ -263,7 +233,6 @@ class FirebaseApi {
     return snapshot.docs.length;
   }
 
-  // Clear all notifications
   Future<void> clearAllNotifications() async {
     final email =
         await Hive.openBox('User').then((value) => value.get('email'));
