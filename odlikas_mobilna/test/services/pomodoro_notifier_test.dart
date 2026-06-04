@@ -26,8 +26,8 @@ void main() {
       expect(notifier.isCapped, isFalse);
     });
 
-    test('secondsNotifier initialises to 25 minutes', () {
-      expect(notifier.secondsNotifier.value, 25 * 60);
+    test('secondsNotifier initialises to 5 seconds', () {
+      expect(notifier.secondsNotifier.value, 5);
     });
   });
 
@@ -115,7 +115,7 @@ void main() {
     });
 
     test('phase durations are correct after each transition', () {
-      expect(notifier.secondsNotifier.value, 25 * 60); // Pomodoro
+      expect(notifier.secondsNotifier.value, 5); // Pomodoro
 
       notifier.skipToNext(); // -> Kratka pauza
       expect(notifier.secondsNotifier.value, 5 * 60);

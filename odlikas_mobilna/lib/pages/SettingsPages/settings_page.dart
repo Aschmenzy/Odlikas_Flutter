@@ -398,17 +398,15 @@ class _SettingsPageState extends State<SettingsPage> {
                           builder: (context) => NotificationsPage()),
                     ),
                   ),
-                  data['isConnected']
-                      ? SettingsTile(
-                          label: "Prenesi datoteke - Odlikaš+",
-                          path: "assets/icon/odlikasPlusLogo.png",
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => UploadFilesOdlikasPlus()),
-                          ),
-                        )
-                      : Container(),
+                  SettingsTile(
+                    label: "Prenesi datoteke - Odlikaš+",
+                    path: "assets/icon/odlikasPlusLogo.png",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UploadFilesOdlikasPlus()),
+                    ),
+                  ),
                   DislexycTile(
                     label: "Dislekcijski tekst",
                     path: "assets/images/dyslexia.png",

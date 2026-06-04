@@ -137,7 +137,6 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
           children: [
             SizedBox(height: size.height * 0.02),
 
-            // loading indicator
             if (_isLoading)
               Padding(
                 padding: EdgeInsets.all(8.0),
@@ -160,7 +159,6 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
 
             SizedBox(height: size.height * 0.02),
 
-            // Chat messages
             Expanded(
               child: ListView.builder(
                 controller: _scrollController,
@@ -174,10 +172,10 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
               ),
             ),
 
+            _buildBottomBar(),
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
@@ -235,11 +233,18 @@ class _AiChatbotPageState extends State<AiChatbotPage> {
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                  prefixIcon: const Padding(
+                  prefixIcon: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Icon(Icons.search, size: 20, color: AppColors.accent),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: SvgPicture.asset(
+                        'assets/icon/ai.svg',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                  prefixIconConstraints: BoxConstraints(minWidth: 40, minHeight: 40),
+                  prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
                 ),
                 onSubmitted: (_) => _sendMessage(),
               ),

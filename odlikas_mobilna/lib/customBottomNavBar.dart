@@ -61,7 +61,8 @@ class CustomBottomNavBar extends StatelessWidget {
                   child: TextField(
                     style: GoogleFonts.inter(height: 1, fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: 'Pitajte naš AI ako imate pitanja oko nečega...',
+                      hintText:
+                          'Pitajte naš AI ako imate pitanja oko nečega...',
                       hintStyle:
                           GoogleFonts.inter(color: Colors.grey, fontSize: 14),
                       filled: true,
@@ -72,17 +73,20 @@ class CustomBottomNavBar extends StatelessWidget {
                       ),
                       contentPadding:
                           EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                      prefixIcon: const Padding(
+                      prefixIcon: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Icon(
-                          Icons.search,
-                          size: 20,
-                          color: AppColors.accent,
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: SvgPicture.asset(
+                            'assets/icon/ai.svg',
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                       prefixIconConstraints: BoxConstraints(
-                        minWidth: 40,
-                        minHeight: 40,
+                        minWidth: 0,
+                        minHeight: 0,
                       ),
                     ),
                   ),

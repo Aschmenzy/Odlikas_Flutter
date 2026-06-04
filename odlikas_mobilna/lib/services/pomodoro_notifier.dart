@@ -8,10 +8,11 @@ enum PomodoroTimerState { idle, running, paused }
 class PomodoroNotifier extends ChangeNotifier {
   final PomodoroApiService _api;
 
-  PomodoroNotifier({PomodoroApiService? api}) : _api = api ?? PomodoroApiService();
+  PomodoroNotifier({PomodoroApiService? api})
+      : _api = api ?? PomodoroApiService();
 
   // Drives only the countdown display — avoids rebuilding the whole page each tick
-  final ValueNotifier<int> secondsNotifier = ValueNotifier(25 * 60);
+  final ValueNotifier<int> secondsNotifier = ValueNotifier(5);
 
   PomodoroTimerState timerState = PomodoroTimerState.idle;
   String currentPhase = 'Pomodoro';
@@ -163,7 +164,7 @@ class PomodoroNotifier extends ChangeNotifier {
       case 'Duga pauza':
         return 15 * 60;
       default:
-        return 25 * 60;
+        return 5;
     }
   }
 
